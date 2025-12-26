@@ -47,7 +47,8 @@ end
 
 function meta:GetMaxDifficultyXPGainMul()
 	-- return math.huge
-	return self:HasEternityUnlocked() and 250 or self:HasPrestigeUnlocked() and 75 or 15
+	return self:HasCelestialityUnlocked() and 1000*(self.Celestiality^0.5) or
+	self:HasEternityUnlocked() and math.min(1e3, 250*infmath.ConvertInfNumberToNormalNumber(self.Eternities)^0.5) or self:HasPrestigeUnlocked() and 75 or 15
 end
 
 function meta:GetMaxDifficultyMoneyGainMul()

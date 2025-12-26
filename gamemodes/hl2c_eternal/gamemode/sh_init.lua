@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf-9" -- what version?
-GM.DateVer = "23-12-2025"
+GM.Version = "0.inf^2" -- also known as 0.inf.inf
+GM.DateVer = "26-12-2025"
 
 
 -- Constants
@@ -242,14 +242,24 @@ end
 -- break infinity update: NOW UP TO 10^(1.79e308)!!!!!
 
 function GM:SetDifficulty(val, noncvar)
+	if CLIENT then return end
 	local diffcvarvalue = tonumber(hl2ce_server_force_difficulty:GetString()) or 0
 
 	if noncvar or diffcvarvalue <= 0 then
-		SetGlobalString("hl2c_difficulty", isinfnumber(val) and val:DefaultFormat() or ConvertStringToInfNumber(val):DefaultFormat())
+		local new = isinfnumber(val) and val:DefaultFormat() or ConvertStringToInfNumber(val):DefaultFormat()
+		local new_infnumber = isinfnumber(val) and val or ConvertStringToInfNumber(val)
+
+		SetGlobalString("hl2c_difficulty", new)
+		gamemode.Call("OnDifficultyChanged", self.PreviousDifficulty, new_infnumber)
+		self.PreviousDifficulty = new_infnumber
+		self.PreviousDifficultyStr = GetGlobalString("hl2c_difficulty")
 	end
 end
 
 -- Why 1e150 max difficulty? -- It might seem possible to go further.. But damage is only limited to 3.40e38. After that value it overflows to infinity. honestly, fuck it
+
+GM.PreviousDifficulty = (GAMEMODE or GM).PreviousDifficulty or InfNumber(1)
+GM.PreviousDifficultyStr = (GAMEMODE or GM).PreviousDifficultyStr or "1"
 
 function GM:GetDifficulty(noncvar, noadditionalmul)
 	local diffcvarvalue = tonumber(hl2ce_server_force_difficulty:GetString()) or 1
@@ -258,13 +268,26 @@ function GM:GetDifficulty(noncvar, noadditionalmul)
 		return InfNumber(diffcvarvalue)
 	end
 
-	local value = ConvertStringToInfNumber(GetGlobalString("hl2c_difficulty", 1))
+	local global_diff_str = GetGlobalString("hl2c_difficulty", 1)
+	if self.PreviousDifficultyStr == global_diff_str then
+		return self.PreviousDifficulty
+	end
+
+	local value = ConvertStringToInfNumber(global_diff_str)
+	self.PreviousDifficultyStr = global_diff_str
 	if not noadditionalmul and FORCE_DIFFICULTY then
 		value = value * FORCE_DIFFICULTY
 	end
 
+	if CLIENT then
+		gamemode.Call("OnDifficultyChanged", self.PreviousDifficulty, value)
+	end
+	self.PreviousDifficulty = value
 
 	return value
+end
+
+function GM:OnDifficultyChanged(old, new)
 end
 
 function GM:GetEffectiveDifficulty(ply)

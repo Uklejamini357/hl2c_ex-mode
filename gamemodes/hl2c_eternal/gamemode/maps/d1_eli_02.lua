@@ -102,6 +102,19 @@ function hl2cAcceptInput(ent, input, activator)
 			end
 		end
 
+		if entname == "logic_alyx_failsafe_letout" and inputlower == "trigger" then
+			gamemode.Call("FailMap", nil, "ZOMBIES ARE RELEASED\nYOU TOOK TOO LONG!")
+			for _,ply in ipairs(player.GetLiving()) do
+				for i=1,4 do
+					local zm = ents.Create("npc_zombie")
+					zm:SetPos(ply:GetPos() + Angle(0,90*i):Forward()*60)
+					zm:SetAngles(Angle(0,(90*i)+180,0))
+					zm:SetModelScale(1.4)
+					zm:Spawn()
+				end
+			end
+		end
+
 		if entname == "logic_skip_training" and inputlower == "trigger" then
 			local e = ents.FindByName("door_scrapyard_gate")[1]
 			local eff = EffectData()

@@ -58,6 +58,11 @@ function GM:CMenu()
 		y = y + y_add
 		draw.DrawText("Max Damage Resistance Mul: "..FormatNumber(pl:GetMaxDamageResistanceMul()).."x", "TargetIDSmall", x, y, Color(155,205,155,alpha), TEXT_ALIGN_LEFT)
 		y = y + y_add
+
+		draw.DrawText("Max XP gain from difficulty: "..FormatNumber(pl:GetMaxDifficultyXPGainMul()).."x", "TargetIDSmall", x, y, Color(205,155,155,alpha), TEXT_ALIGN_LEFT)
+		y = y + y_add
+		draw.DrawText("Max Money gain from difficulty: "..FormatNumber(pl:GetMaxDifficultyMoneyGainMul()).."x", "TargetIDSmall", x, y, Color(155,205,155,alpha), TEXT_ALIGN_LEFT)
+		y = y + y_add
 	end
 	ContextMenu.Think = function()
 	end

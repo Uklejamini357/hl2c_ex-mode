@@ -81,29 +81,24 @@ function EasyButton(parent, text, xpadding, ypadding)
 end
 
 
+GM.DifficultyDifference = GM.DifficultyDifference or 0
+GM.DifficultyDifferenceTotal = GM.DifficultyDifferenceTotal or 0
+GM.DifficultyDifferenceTimeChange = GM.DifficultyDifferenceTimeChange or 0
 function GM:Think()
-	local difficulty = self:GetDifficulty()
-
-	if not self.PreviousDifficulty then
-		self.PreviousDifficulty = difficulty
-	end
-
-	if not self.DifficultyDifferenceTimeChange or self.DifficultyDifferenceTimeChange + 3 < CurTime() then
-		self.DifficultyDifference = 0
-		self.DifficultyDifferenceTotal = 0
-		self.DifficultyDifferenceTimeChange = 0
-	end
-
-	if difficulty ~= self.PreviousDifficulty then
-		self.DifficultyDifference = difficulty - self.PreviousDifficulty
-		if infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifference) ~= 0 then
-			self.DifficultyDifferenceTotal = self.DifficultyDifferenceTotal + self.DifficultyDifference
-			self.DifficultyDifferenceTimeChange = CurTime()
-		end
-		self.PreviousDifficulty = difficulty
-	end
-
 end
+
+hook.Add("OnDifficultyChanged", "InfNumber.blah", function(old, new)
+	local gm = GAMEMODE
+
+	gm.DifficultyDifference = new - old
+	if infmath.ConvertInfNumberToNormalNumber(gm.DifficultyDifference) ~= 0 then
+		gm.DifficultyDifferenceTotal = gm.DifficultyDifferenceTotal + gm.DifficultyDifference
+		gm.DifficultyDifferenceTimeChange = CurTime()
+	end
+	timer.Create("InfNumber.DifficultyTotal.Reset", 3, 1, function()
+		gm.DifficultyDifferenceTotal = 0
+	end)
+end)
 
 local bosshp = 0
 -- Called every frame to draw the hud
@@ -174,10 +169,12 @@ function GM:HUDPaint()
 		c.a = colordifference.a
 		if d >= InfNumber(math.huge) then
 			-- I know it's unoptimal, but frick it
+			local max = d.exponent == math.huge and 1e4 or math.log10(d:log10()+100)
+			local max2 = d.exponent == math.huge and 1e4 or math.log10(d:log10())-2
 			for i=1,#s do
 				local r = math.Rand(0.5, 1)
-				c = HSVToColor((SysTime()*(60+math.log10(d:log10()*100)*10) + (
-					d:log10() > 6969 and -math.sin(l/5)*10*(math.log10(d:log10())-2) or l/(3/math.max(1, (d:log10()-308)^0.8/100))
+				c = HSVToColor((SysTime()*(60+max*10) + (
+					d:log10() > 6969 and -math.sin(l/5)*10*max2 or l/(3/math.max(1, (d:log10()-308)^0.8/100))
 			))%360, d:log10() > 1e6 and 0.8+math.sin(SysTime()*0.6+l/5)/5 or 1,
 			d:log10() > 1e9 and 0.8+math.sin(SysTime()+l/5)/5 or 1)
 

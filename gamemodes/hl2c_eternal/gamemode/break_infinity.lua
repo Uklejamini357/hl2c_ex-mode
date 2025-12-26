@@ -133,10 +133,13 @@ local function FixExponent(self) -- Just in case.
     if not isinfnumber(self) then return end
 
     if self.mantissa == 0 then self.exponent = -math.huge return self end
+    if math.abs(self.exponent) == math.huge then return self end
 
     if self.exponent ~= math_floor(self.exponent) then
         self.mantissa = self.mantissa * 10^(self.exponent - math_floor(self.exponent))
         self.exponent = self.exponent - (self.exponent - math_floor(self.exponent))
+    elseif self.exponent == -0 then
+        self.exponent = 0
     end
 
     return self
@@ -189,7 +192,7 @@ t.DefaultFormat = function(self, roundto) -- Best use for data saving as string!
 
     return self.mantissa.."e"..(
     --(e_negative and "-" or "")..
-    (math_abs(e) >= 1e9 and e * 10^-math_floor(math_log10(math_abs(e))).."e"..math_floor(math_log10(math_abs(e))) or e))
+    (math_abs(e) == math.huge and "inf" or math_abs(e) >= 1e9 and e * 10^-math_floor(math_log10(math_abs(e))).."e"..math_floor(math_log10(math_abs(e))) or e))
 end
 meta.DefaultFormat = t.DefaultFormat
 
@@ -262,6 +265,8 @@ meta.__div = t.div
 t.pow = function(self, tbl) -- Power (normal numbers only, very complicated to code)
     self = ConvertNumberToInfNumber(self)
     tbl = ConvertNumberToInfNumber(tbl)
+
+    if ConvertInfNumberToNormalNumber(tbl) == 0 then self.mantissa = 1 self.exponent = 0 return self end
 
     local n = ConvertInfNumberToNormalNumber(tbl)
     local m, e = self.mantissa, self.exponent
@@ -358,6 +363,10 @@ function InfNumber(mantissa, exponent)
 end
 
 function ConvertStringToInfNumber(str)
+    if str == "0" then return InfNumber(0) end
+    str = string.Replace(str, "nan", "0")
+    str = string.Replace(str, "inf", "1e1000")
+
     local t = string.Explode("e", str)
     local mantissa = tonumber(t[1]) or 1
     local exponent = tonumber(t[2] == "" and 10^t[3] or 10^(t[3] or 0) * (t[2] or 0))
