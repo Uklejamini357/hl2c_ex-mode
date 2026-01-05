@@ -53,23 +53,26 @@ function hl2cAcceptInput(ent, input, activator)
 	if ent:GetName() == "overwatch_freeman_spotted" and input:lower() == "playsound" then
 		times = times + 1
 
-		if times == 6 then
-			timer.Simple(math.Rand(1, 1.7), function()
+		print(times)
+		if times >= 6 then
+			local time = math.Rand(1, 1.7)
+
+			for _,door in ipairs(ents.FindByName("double_doors")) do
+				for i=1,5 do
+					local explo = ents.Create("env_explosion")
+					explo:SetPos(door:GetPos())
+					explo:SetKeyValue("iMagnitude", 2000)
+					explo:SetKeyValue("iRadiusOverride", 300)
+					explo:Spawn()
+					explo:Activate()
+					explo:Fire("explode", 0, time)
+				end
+			end
+					
+			timer.Simple(time, function()
 				if !IsValid(ent) then return end
 
-				for _,door in ipairs(ents.FindByName("double_doors")) do
-					for i=1,5 do
-						local explo = ents.Create("env_explosion")
-						explo:SetPos(door:GetPos())
-						explo:SetKeyValue("iMagnitude", 5000)
-						explo:SetKeyValue("iRadiusOverride", 300)
-						explo:Spawn()
-						explo:Activate()
-						explo:Fire("explode")
-					end
-					
-					ent:Remove()
-				end
+				ent:Remove()
 			end)
 		end
 	end

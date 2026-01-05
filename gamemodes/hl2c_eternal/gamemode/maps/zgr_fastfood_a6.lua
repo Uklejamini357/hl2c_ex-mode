@@ -1,24 +1,44 @@
+-- map lua file for that oven map because why not
+-- thought to have fun with it more than just that
 if CLIENT then return end
 local enabled = false	
+local losing = false	
 local moneys = 0
 local timerhandler = "InfDifficulty.blah"
 
 hook.Add("MapEdit", "InfDifficulty", function(ent, input)
 	timer.Remove(timerhandler)
 	enabled = false
+	losing = false
 	moneys = 0
 end)
 
 hook.Add("EntityTakeDamage", "InfDifficulty", function(ent, dmginfo)
 	if ent:GetName() == "pepperonipizza" then
+		local atk = dmginfo:GetAttacker()
 		timer.Create("break_pepperoni_pizza_"..ent:EntIndex(), 0, 1, function()
 			if IsValid(ent) then return end
-			moneys = moneys - 15
-			local s = "YOU RUINED THE PIZZA!! -15 MONEYS"
+			moneys = moneys - 25
+			local s = "YOU RUINED THE PIZZA!! -25 MONEYS"
 			if moneys < 0 then
 				s = s.." (at debt of "..moneys.." moneys)"
 			end
 			PrintMessage(3, s)
+
+			if moneys < -100 then
+				if !losing then
+					PrintMessage(3, "...")
+					local e = ents.FindByName("pizzaspawner2")[1]
+					timer.Simple(math.Rand(3,5), function()
+						if !IsValid(e) then return end
+						if changingLevel then return end
+						gamemode.Call("FailMap", atk, "You lost because you got yourself in crippling debt of "..moneys.." moneys!"..(moneys < -200 and "\nSeems like someone can't even manage their pizzas properly!" or "").."\nYou have been fired for general incompetence!"..(moneys < -500 and "\nAnd you ended up getting sued for causing catastrophic economic damages to the restaurant!" or ""))
+					end)
+					losing = true
+				end
+			elseif moneys < -50 then
+				PrintMessage(3, "STOP GETTING YOURSELF IN MORE DEBT!!")
+			end
 		end)
 	end
 end)
@@ -70,7 +90,7 @@ hook.Add("AcceptInput", "InfDifficulty", function(ent, input)
 
 	if entname == "pizzaoven_relay1" then
 		if inputlower == "trigger" and enabled then
-			BroadcastLua([[chat.AddText(Color(255,0,0), "AUTHORIZED BULLSHIT DETECTED!")]])
+			BroadcastLua([[chat.AddText(Color(255,0,0), "AUTHORIZED BULLSHIT DETECTED!!")]])
 			GAMEMODE:SetDifficulty(1)
 		elseif inputlower == "enable" then
 			enabled = true
@@ -84,6 +104,6 @@ hook.Add("AcceptInput", "InfDifficulty", function(ent, input)
 		end)
 	elseif entname == "pizzaoven_relay3" and inputlower == "trigger" then
 		timer.Remove(timerhandler)
-		gamemode.Call("FailMap", nil, "You let the oven blow up!\nYou're fired!")
+		gamemode.Call("FailMap", nil, "You let the oven get blown up!\nYou got fired and arrested, for causing catastrophic damages to the restaurant!")
 	end
 end)

@@ -71,7 +71,7 @@ if CLIENT then
 				cam.End2D()
 			end)
 
-			timer.Simple(1, function() CreateText("YOU DIED.", Color(255,0,0), nil, 2, 7) end)
+			timer.Simple(0, function() CreateText("YOU DIED.", Color(255,0,0), nil, 0, 6) end)
 			timer.Simple(8, function() CreateText("What the fuck?! So there's no ep1?!?", Color(255,0,0), 0.6, 4, 6) end)
 			timer.Simple(13, function() CreateText("I can't believe it! They should be alive!!", Color(255,0,0), 0.7, 4, 6) end)
 			timer.Simple(18, function() CreateText("We have alraedy reached the conclusion. This game is over.", Color(191,63,63), 0.3, 4, 7, function(self)

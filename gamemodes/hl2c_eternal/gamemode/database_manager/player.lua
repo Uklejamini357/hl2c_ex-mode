@@ -26,7 +26,7 @@ function GM:LoadPlayer(ply)
             ply[variable] = tonumber(val) or val  -- dump all their stats into their player table
             
             if istable(ply[variable]) and ply[variable].isinfnumber then
-                ply[variable] = InfNumber(ply[variable].mantissa or 1, ply[variable].exponent)
+                ply[variable] = InfNumber(ply[variable].mantissa or 1, ply[variable].exponent == "inf" and math.huge or ply[variable].exponent == "-inf" and -math.huge or ply[variable].exponent)
             elseif infnumber then
                 ply[variable] = InfNumber(ply[variable])
             end
@@ -61,7 +61,11 @@ function GM:SavePlayer(ply)
 
     local function insertdata(key, value)
         if isinfnumber(value) then
-            Data[key] = {isinfnumber = true, mantissa = value.mantissa, exponent = value.exponent}
+            Data[key] = {
+                isinfnumber = true,
+                mantissa = value.mantissa,
+                exponent = value.exponent == math.huge and "inf" or value.exponent == math.huge and "-inf" or value.exponent
+            }
             return
         end
 

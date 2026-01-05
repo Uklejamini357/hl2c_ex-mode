@@ -13,7 +13,7 @@ function GM:LoadServerData()
             local val = v
 
             if variable == "Difficulty" then
-                GAMEMODE:SetDifficulty(InfNumber(val.mantissa, val.exponent))
+                GAMEMODE:SetDifficulty(InfNumber(val.mantissa, v.exponent == "inf" and math.huge or val.exponent == "-inf" and -math.huge or val.exponent))
             end
         end
    end
@@ -25,7 +25,11 @@ function GM:SaveServerData()
     local Data = {}
     local function insertdata(key, value)
         if isinfnumber(value) then
-            Data[key] = {isinfnumber = true, mantissa = value.mantissa, exponent = value.exponent}
+            Data[key] = {
+                isinfnumber = true,
+                mantissa = value.mantissa,
+                exponent = value.exponent == math.huge and "inf" or value.exponent == math.huge and "-inf" or value.exponent
+            }
             return
         end
 

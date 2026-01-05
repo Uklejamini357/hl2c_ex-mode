@@ -114,7 +114,7 @@ local function FixMantissa(self) -- Just in case.
 
     if m == 0 then
         self.mantissa = 0*n_num
-        self.exponent = -math.huge return self end
+        self.exponent = 0 return self end
 
     if m == math_huge then
         m = MAX_NUMBER_mantissa
@@ -132,7 +132,7 @@ end
 local function FixExponent(self) -- Just in case.
     if not isinfnumber(self) then return end
 
-    if self.mantissa == 0 then self.exponent = -math.huge return self end
+    if self.mantissa == 0 then self.exponent = 0 return self end
     if math.abs(self.exponent) == math.huge then return self end
 
     if self.exponent ~= math_floor(self.exponent) then
@@ -349,7 +349,7 @@ function InfNumber(mantissa, exponent)
         exponent = exponent + MAX_NUMBER_exponent
     elseif mantissa == 0 then
         mantissa = 0
-        exponent = -math.huge
+        exponent = 0
     elseif mantissa >= 10 or mantissa < 1 then
         local e = math_floor(math_log10(mantissa))
         mantissa = mantissa / (10^e)
@@ -364,8 +364,9 @@ end
 
 function ConvertStringToInfNumber(str)
     if str == "0" then return InfNumber(0) end
+    if str == "inf" then return InfNumber(1, math_huge) end
     str = string.Replace(str, "nan", "0")
-    str = string.Replace(str, "inf", "1e1000")
+    str = string.Replace(str, "inf", "1.8e308")
 
     local t = string.Explode("e", str)
     local mantissa = tonumber(t[1]) or 1

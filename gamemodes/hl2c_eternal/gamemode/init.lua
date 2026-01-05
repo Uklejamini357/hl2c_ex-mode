@@ -157,9 +157,11 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	end
 	
 	local diff = self:GetDifficulty(true, true)
+	local normal_diff = infmath.ConvertInfNumberToNormalNumber(diff)
 	self:SetDifficulty(infmath.max(1, diff * (
-		diff >= InfNumber(1000) and 0.957 or diff >= InfNumber(100) and 0.962 or
-		diff >= InfNumber(10) and 0.968 or diff >= InfNumber(4) and 0.974 or 0.98
+		normal_diff >= 1000 and 0.957 or normal_diff >= 100 and 0.962 or
+		normal_diff >= 10 and 0.968 or normal_diff >= 4 and 0.974 or
+		0.98
 	)))
 
 
@@ -1509,18 +1511,20 @@ concommand.Add("hl2ce_restart_map", function(ply) if (IsValid(ply) && ply:IsAdmi
 
 function GM:OnMapFailed(ply)
 	local diff = self:GetDifficulty(true, true)
-	if diff > InfNumber(math.huge) then
+	local normal_diff = infmath.ConvertInfNumberToNormalNumber(diff)
+	if normal_diff > math.huge then
 		local result = 0.8/(1+math.log10(diff:log10())-math.log10(33))
 		self:SetDifficulty(diff^(0.9/math.log10(diff:log10())))
-	elseif diff > InfNumber(1, 33) then
+	elseif normal_diff > 1e33 then
 		local result = 0.9/(1+math.log10(diff:log10())-math.log10(33))
 		self:SetDifficulty(diff^(0.9/math.log10(diff:log10())))
-	elseif diff > InfNumber(1, 4) then
+	elseif normal_diff > 1e4 then
 		self:SetDifficulty(diff^0.95)
 	else
 		self:SetDifficulty(infmath.max(1, diff * (
-			diff >= InfNumber(1000) and 0.85 or diff >= InfNumber(100) and 0.87 or
-			diff >= InfNumber(10) and 0.87 or diff >= InfNumber(4) and 0.89 or 0.91
+			normal_diff >= 1000 and 0.85 or normal_diff >= 100 and 0.87 or
+			normal_diff >= 10 and 0.87 or normal_diff >= 4 and 0.89 or
+			0.91
 		)))
 	end
 end
