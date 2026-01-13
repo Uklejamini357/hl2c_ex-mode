@@ -45,10 +45,6 @@ GODLIKE_NPCS = {
 	"npc_vortigaunt"
 }
 
-hook.Add("Initialize", "ClientsideHookHL2c_EX", function()
-	GAMEMODE.EXMode = GAMEMODE.EnableEXMode
-	GAMEMODE.HyperEXMode = GAMEMODE.EnableHyperEXMode
-end)
 -- Create the teams that we are going to use throughout the game
 function GM:CreateTeams()
 

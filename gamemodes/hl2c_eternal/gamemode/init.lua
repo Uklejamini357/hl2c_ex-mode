@@ -841,13 +841,14 @@ function GM:OnNPCKilled(npc, killer, weapon)
 		local difficulty,nonmoddiff = self:GetDifficulty(), self:GetDifficulty(nil, true)
 		if NPC_XP_VALUES[npcclass] then
 			-- Too many local this is fine.
-			local xp = NPC_XP_VALUES[npcclass] 
-			local npckillxpmul,npckilldiffgainmul = self.XpGainOnNPCKillMul or 1, self.DifficultyGainOnNPCKillMul or 1
-			local npcxpmul = npc.XPGainMult or 1
+			local xp = NPC_XP_VALUES[npcclass]
+			local diffgain = 0.0005
+			local npckillxpmul = (self.XpGainOnNPCKillMul or 1) * (npc.XPGainMult or 1)
+			local npckilldiffgainmul = (self.DifficultyGainOnNPCKillMul or 1) * (npc.DifficultyGainMult or 1)
 
 			local gainfromdifficultymul = infmath.min(difficulty^0.8, killer:GetMaxDifficultyXPGainMul())
 			local better_knowledge_gain = killer:HasPerkActive("1_better_knowledge") and (self.EndlessMode and (infmath.ConvertInfNumberToNormalNumber(nonmoddiff) >= 6.50 and 1.55 or 1.3) or !self.EndlessMode and 1.25) or 1
-			local xpmul = gainfromdifficultymul * npckillxpmul * npcxpmul * better_knowledge_gain
+			local xpmul = gainfromdifficultymul * npckillxpmul * better_knowledge_gain
 
 			if killer:GetSkillAmount("Knowledge") > 15 then
 				npckilldiffgainmul = npckilldiffgainmul * (1 + (killer:GetSkillAmount("Knowledge")-15)*0.02)
@@ -872,14 +873,14 @@ function GM:OnNPCKilled(npc, killer, weapon)
 				end
 			end
 			killer:GiveXP(NPC_XP_VALUES[npcclass] * xpmul)
-			self:SetDifficulty(nonmoddiff + xp*0.0005*npckilldiffgainmul*killer:GetEternityUpgradeEffectValue("difficultygain_upgrader"))
+			self:SetDifficulty(nonmoddiff + xp*diffgain*npckilldiffgainmul*killer:GetEternityUpgradeEffectValue("difficultygain_upgrader"))
 		end
 
 		if NPC_MONEYS_VALUES[npcclass] then
 			local moneys = NPC_MONEYS_VALUES[npcclass]
 			local npckillxpmul,npckilldiffgainmul = self.MoneysGainOnNPCKillMul or 1
-			local npcxpmul = npc.MoneyGainMult or 1
-			killer:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*(infmath.min(killer:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25)))
+			local npcmoneymul = npc.MoneyGainMult or 1
+			killer:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*npcmoneymul*(infmath.min(killer:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25)))
 		end
 
 		if killer:HasPerkActive("2_vampiric_killer") then

@@ -476,6 +476,10 @@ function RestartMap(len)
 	restartMapCountdownStart = net.ReadFloat()
 	if restartMapCountdownStart == -1 then
 		restartMapCountdownStart = nil
+
+		-- when map restarts i guess
+		GAMEMODE.EXMode = GAMEMODE.EnableEXMode
+		GAMEMODE.HyperEXMode = GAMEMODE.EnableHyperEXMode
 	end
 
 	if GetGlobalString("losemusic") then

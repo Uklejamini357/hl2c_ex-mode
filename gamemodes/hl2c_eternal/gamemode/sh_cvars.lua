@@ -50,6 +50,9 @@ GM.EnableHyperEXMode = cvar:GetInt() >= 2
 cvars.AddChangeCallback("hl2ce_server_ex_mode_enabled", function(cvar, old, new)
 	GAMEMODE.EnableEXMode = tobool(new)
 	GAMEMODE.EnableHyperEXMode = (tonumber(new) or 0) >= 2
+
+	BroadcastLua(string.format([[GAMEMODE.EnableEXMode = %s]], GAMEMODE.EnableEXMode))
+	BroadcastLua(string.format([[GAMEMODE.EnableHyperEXMode = %s]], GAMEMODE.EnableHyperEXMode))
 end, "hl2ce_server_ex_mode_enabled")
 
 GM.ForceDifficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetString()

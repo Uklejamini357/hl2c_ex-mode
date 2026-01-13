@@ -284,6 +284,41 @@ function hl2cAcceptInput( ent, input, activator )
 	end
 
 	if GAMEMODE.EXMode then
+		if GAMEMODE.HyperEXMode then
+			if entname == "doors_Airlock_Outside" and lowerinput == "close" then
+				PrintMessage(3, "nah.")
+			end
+
+			if entname == "logic_startScene" and lowerinput == "trigger" then
+				for _,ent in ents.Iterator() do
+					if ent.SetColor then
+						ent:SetColor(HSVToColor(math.random(360), math.Rand(0,1), math.Rand(0,1)))
+					end
+				end
+			end
+
+			if entname == "lcs_airlock01" and lowerinput == "start" then
+
+				for _,ply in ipairs(player.GetLiving()) do
+					ply:SetPos(Vector(5100, 7416, 1450))
+				end
+
+				timer.Simple(0.5, function()
+					local bot = player.CreateNextBot("你完蛋了。")
+					bot:Kick("Nope.")
+
+
+					NEXT_MAP = "d1_town_01"
+					gamemode.Call("NextMap")
+					gamemode.Call("GrabAndSwitch")
+				end)
+
+				return true
+			end
+
+			return
+		end
+
 		if entname == "doors_Airlock_Outside" and lowerinput == "close" then
 			PrintMessage(3, ":)")
 
