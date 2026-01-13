@@ -191,11 +191,11 @@ function GM:HUDPaint()
 
 		if self.DifficultyDifferenceTimeChange + 3 >= CurTime() and self.DifficultyDifference ~= 0 then
 			colordifference.a = (self.DifficultyDifferenceTimeChange+3-CurTime())*155/3
-			draw.DrawText(Format("%s%s%%", diff_difference < 0 and "-" or "+", infmath.abs(infmath.Round(self.DifficultyDifference * 100, 2))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 15, colordifference, TEXT_ALIGN_CENTER )
+			draw.DrawText(Format("%s%s%%", diff_difference < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifference * 100, 2)))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 15, colordifference, TEXT_ALIGN_CENTER )
 
 			if self.DifficultyDifference ~= self.DifficultyDifferenceTotal and infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifferenceTotal) ~= 0 then
 				colordifference = self.DifficultyDifferenceTimeChange + 3 >= CurTime() and (diff_difference_total < 0 and Color(255, 220-((self.DifficultyDifferenceTimeChange+3-CurTime())*110), 0, colordifference.a) or Color(255-((self.DifficultyDifferenceTimeChange+3-CurTime())*255/2), 220, 0, colordifference.a)) or Color(255, 220, 0, colordifference.a)
-				draw.DrawText(Format("%s%s%% total", diff_difference_total < 0 and "-" or "+", infmath.abs(infmath.Round(self.DifficultyDifferenceTotal * 100, 2))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 30, colordifference, TEXT_ALIGN_CENTER )
+				draw.DrawText(Format("%s%s%% total", diff_difference_total < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifferenceTotal * 100, 2)))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 30, colordifference, TEXT_ALIGN_CENTER )
 			end
 		end
 	end
@@ -504,39 +504,92 @@ end
 
 -- Called by show help
 function ShowHelp(len)
-	local helpText = "-= ABOUT THIS GAMEMODE =-\nWelcome to Half-Life 2 Campaign EX!\nThis gamemode is based on Half-Life 2 Campaign made by Jai 'Choccy' Fox,\nwith new stuff like Leveling, Skills and more!\n\n-= KEYBOARD SHORTCUTS =-\n[F1] (Show Help) - Opens this menu.\n[F2] (Show Team) - Toggles the navigation marker on your HUD.\n[F3] (Spare 1) - Spawns a vehicle if allowed.\n[F4] (Spare 2) - Removes a vehicle if you have one.\n\n-= OTHER NOTES =-\nOnce you're dead you cannot respawn until the next map.\nDifficulty increases along with XP gain."
-	
-	local helpEXMode = GAMEMODE.EXMode and "EX Mode is enabled! Expect Map objectives, NPC variants and chaos here!" or "EX Mode is disabled!"
-	local helpEndlessMode = GAMEMODE.EndlessMode and "\nEndless Mode is enabled. Difficulty cap is increased drastically. Progression eventually becomes exponential." or "\nEndless Mode is disabled. Difficulty is limited, Skills and Perks have limited functionality."
+	local pl = LocalPlayer()
+	local helpText = [[-= ABOUT THIS GAMEMODE =-
+Welcome to Half-Life 2 Campaign Eternal!
+This gamemode is based on Half-Life 2 Campaign made by Jai 'Choccy' Fox, with new stuff like Leveling, Skills and more!
+
+-= KEYBOARD SHORTCUTS =-
+[F1] (Show Help) - Opens this menu.
+[F2] (Show Team) - Toggles the navigation marker on your HUD.
+[F3] (Spare 1) - Spawns a vehicle if allowed.
+[F4] (Spare 2) - Removes a vehicle if you have one.
+
+-= OTHER NOTES =-
+Once you're dead you cannot respawn until the next map.]]
 
 	local helpMenu = vgui.Create("DFrame")
-	local helpPanel = vgui.Create("DPanel", helpMenu)
-	local helpLabel = vgui.Create("DLabel", helpPanel)
-	local helpLabel2 = vgui.Create("DLabel", helpPanel)
-	local adminbutton
-	local pl = LocalPlayer()
+	GAMEMODE.HelpMenu = helpMenu
+	helpMenu:SetTitle("Welcome")
+	helpMenu:SetSize(ScrW(), ScrH())
+	helpMenu.Paint = function(self,w,h)
+		surface.SetDrawColor(0, 0, 0, 150)
+		surface.DrawRect(0, 0, w, h)
+	end
+	helpMenu:Center()
+	helpMenu:MakePopup()
 
-	if pl:IsValid() and pl:IsAdmin() then
-		adminbutton = vgui.Create("DButton", helpPanel)
+	local list = vgui.Create("DPanelList", helpMenu) -- i ain't using other panels, despite this one being deprecated.
+	list:SetSize(1000, 500)
+	list:Center()
+	list.Paint = function() end
+
+
+	local text = vgui.Create("DLabel", list)
+	text:SetText(helpText)
+	text:SetContentAlignment(5)
+	text:SizeToContents()
+	text:SetWrap(true)
+	list:AddItem(text)
+	text:Dock(TOP)
+	text:DockPadding(0, 12, 0, 12)
+
+	if GAMEMODE.EXMode then
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[
+			EX Mode is enabled. Good luck.
+		]])
+		text:SetColor(Color(255,0,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+		text:Dock(TOP)
+		text:DockPadding(0, 12, 0, 12)
 	end
 
-	helpLabel:SetText(helpText)
-	helpLabel:SetTextColor(Color(0,64,0,255))
-	helpLabel:SetPos(7, 5)
-	helpLabel:SizeToContents()
+	if GAMEMODE.HyperEXMode then
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[
+			HyperEXMode engaged. WTF IS WRONG WITH YOU?!
+		]])
+		text:SetColor(Color(255,0,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+		text:Dock(TOP)
+		text:DockPadding(0, 12, 0, 12)
 
-	local w, h = helpLabel:GetSize()
-	helpLabel2:SetText(helpEXMode..helpEndlessMode)
-	helpLabel2:SetTextColor(GAMEMODE.EXMode and Color(224,48,48,255) or Color(0,64,0,255))
-	helpLabel2:SetPos(7, h + 5)
-	helpLabel2:SizeToContents()
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[
+			OH MY GOD WE'RE DOOMED!!!!!!
+		]])
+		text:SetColor(Color(190,0,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+		text:Dock(TOP)
+		text:DockPadding(0, 12, 0, 12)
+	end
 
-	local w2, h2 = helpLabel2:GetSize()
-	helpMenu:SetSize(math.max(380, w + 13), math.max(259, h + h2 + 73))
-	helpPanel:StretchToParent( 5, 28, 5, 5 )
+	local adminbutton
+	if pl:IsValid() and pl:IsAdmin() then
+		adminbutton = vgui.Create("DButton", list)
+	end
 
 	if adminbutton and adminbutton:IsValid() then
-		adminbutton:SetPos(10, h + h2 + 10)
 		adminbutton:SetSize(120, 20)
 		adminbutton:SetText("Admin Mode")
 		adminbutton:SetTextColor(Color(0,0,255))
@@ -551,11 +604,11 @@ function ShowHelp(len)
 			surface.SetDrawColor(Color(0,0,155,100))
 			surface.DrawRect(0, 0, width, height)
 		end
+		list:AddItem(adminbutton)
+		adminbutton:Dock(TOP)
+		adminbutton:DockMargin(400, 0, 400, 0)
 	end
-	
-	helpMenu:SetTitle( "Help" )
-	helpMenu:Center()
-	helpMenu:MakePopup()
+
 end
 net.Receive("ShowHelp", ShowHelp)
 

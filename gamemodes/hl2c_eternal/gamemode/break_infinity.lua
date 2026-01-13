@@ -440,7 +440,7 @@ if net then
   function net.WriteInfNumber(tbl)
     tbl = ConvertNumberToInfNumber(tbl)
 
-    net.WriteDouble(tbl.mantissa)
+    net.WriteDouble(math.Round(tbl.mantissa, 12))
     net.WriteDouble(tbl.exponent)
 --[[
     net.WriteTable({

@@ -44,9 +44,12 @@ cvars.AddChangeCallback("hl2c_server_jeep_passenger_seat", function(cvar, old, n
 end, "hl2c_server_jeep_passenger_seat")
 
 
-GM.EnableEXMode = CreateConVar("hl2ce_server_ex_mode_enabled", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
+local cvar = CreateConVar("hl2ce_server_ex_mode_enabled", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE)
+GM.EnableEXMode = cvar:GetBool()
+GM.EnableHyperEXMode = cvar:GetInt() >= 2
 cvars.AddChangeCallback("hl2ce_server_ex_mode_enabled", function(cvar, old, new)
 	GAMEMODE.EnableEXMode = tobool(new)
+	GAMEMODE.EnableHyperEXMode = (tonumber(new) or 0) >= 2
 end, "hl2ce_server_ex_mode_enabled")
 
 GM.ForceDifficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetString()

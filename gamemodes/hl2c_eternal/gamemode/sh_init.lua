@@ -47,6 +47,7 @@ GODLIKE_NPCS = {
 
 hook.Add("Initialize", "ClientsideHookHL2c_EX", function()
 	GAMEMODE.EXMode = GAMEMODE.EnableEXMode
+	GAMEMODE.HyperEXMode = GAMEMODE.EnableHyperEXMode
 end)
 -- Create the teams that we are going to use throughout the game
 function GM:CreateTeams()
@@ -371,11 +372,15 @@ function FormatNumber(val, roundval)
 	end
 
 	if txt then return negative..txt end
-	return negative..math.floor(val*(10^(roundval or 1)))/(10^(roundval or 1))
+	return negative..math.Round(val*(10^(roundval or 1)))/(10^(roundval or 1))
 end
 
-function GlitchedText(text, prob)
+function GlitchedText(text, chance)
 	local str = ""
+
+	for i=1,#text do
+		str=str..(math.Rand(0,100) < chance and utf8.char(math.random(32, 2048)) or text[i])
+	end
 
 	return str
 end

@@ -33,7 +33,7 @@ GM.EndlessMode = true
 
 Only if you want to play the game normally or with no progression advantages
 ]]
-GM.NoProgressionAdvantage = false
+GM.NoProgressionAdvantage = true
 
 -- Difficulty Level
 -- Difficulty that increases specific stats after certain amount of difficulty
@@ -54,6 +54,9 @@ GM.NoProgressionAdvantage = false
 GM.ConfigList = {
 	["auto_prestige_enabled"] = "number",
 }
+
+-- i don't know about that.
+GM.GuidedEXMode = false
 
 -- DT FLOAT
 DT_FLOAT_ENT_HEALTH = 1

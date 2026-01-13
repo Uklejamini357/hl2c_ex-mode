@@ -493,7 +493,8 @@ function GM:Initialize()
 	self.XP_REWARD_ON_MAP_COMPLETION = self.XP_REWARD_ON_MAP_COMPLETION or 1 -- because it would call true if it was false, we use other values
 	self:SetDifficulty(1)
 	self.EXMode = self.EnableEXMode
-	
+	self.HyperEXMode = self.EnableHyperEXMode
+
 	-- Network strings
 	util.AddNetworkString("SetCheckpointPosition")
 	util.AddNetworkString("NextMap")

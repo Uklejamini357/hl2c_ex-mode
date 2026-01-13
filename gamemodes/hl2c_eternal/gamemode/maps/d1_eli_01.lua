@@ -130,7 +130,9 @@ function hl2cMapEdit()
 
 			table.insert(plys, ply)
 
-			PrintMessage(3, string.format("%s wants to proceed! (%d/%d)", ply:Nick(), table.Count(plys), math.ceil(#player.GetLivingHumans()*0.55)))
+			if GAMEMODE.GuidedEXMode then
+				PrintMessage(3, string.format("%s wants to proceed! (%d/%d)", ply:Nick(), table.Count(plys), math.ceil(#player.GetLivingHumans()*0.55)))
+			end
 
 			if table.Count(plys) >= #player.GetLivingHumans()*0.55 then
 				prop:Remove()
@@ -159,7 +161,9 @@ function hl2cMapEdit()
 			
 				table.insert(plys, ply)
 			
-				PrintMessage(3, string.format("%s wants to proceed! (%d/%d)", ply:Nick(), table.Count(plys), math.ceil(#player.GetLivingHumans()*0.55)))
+				if GAMEMODE.GuidedEXMode then
+					PrintMessage(3, string.format("%s wants to proceed! (%d/%d)", ply:Nick(), table.Count(plys), math.ceil(#player.GetLivingHumans()*0.55)))
+				end
 			
 				if table.Count(plys) >= #player.GetLivingHumans()*0.55 then
 					prop:Remove()
@@ -195,6 +199,7 @@ function hl2cMapEdit()
 
 		local plys = {}
 		timer.Create("hl2c.d1_eli_01.reminder", 1, 0, function()
+			if !GAMEMODE.GuidedEXMode then return end
 			for _,ply in ipairs(player.GetLiving()) do
 				if table.HasValue(plys, ply) then continue end
 				if prop:GetPos():DistToSqr(ply:GetPos()) > 90000 then continue end
@@ -219,7 +224,9 @@ hook.Add("OnMapFailed", "hl2cOnMapFailed", function(ply)
 		GAMEMODE:SetDifficulty(diff*0.85)
 
 		PrintMessage(3, "You failed!")
-		PrintMessage(3, "Remember to stock up on ammo before you proceed!")
+		if GAMEMODE.GuidedEXMode then
+			PrintMessage(3, "Remember to stock up on ammo before you proceed!")
+		end
 	end
 end)
 
@@ -490,7 +497,9 @@ function hl2cAcceptInput( ent, input, activator )
 
 
 			timer.Simple(10, function()
-				PrintMessage(3, "Don't let the fast zombies take over this lab with 40+ fast zombies... or YOU LOSE!")
+				if GAMEMODE.GuidedEXMode then
+					PrintMessage(3, "Don't let the fast zombies take over this lab with 40+ fast zombies... or YOU LOSE!")
+				end
 
 				local function func()
 					if !ent:IsValid() then return end
