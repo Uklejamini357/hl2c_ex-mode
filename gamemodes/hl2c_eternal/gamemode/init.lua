@@ -1540,11 +1540,18 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 	self:RestartMap()
 
 	if ply and ply:IsValid() and ply:IsPlayer() then
-		local xploss = ply.XP*0.1 + ply.MapStats.XPGained*1.1
+		local xploss = ply.XP*0.1 + (ply.MapStats.XPGained or 0)*1.1
 		ply.XP = ply.XP - xploss
 
-		ply:PrintMessage(3, "Don't cause the map to fail.")
-		ply:PrintMessage(3, "Lost "..xploss.." XP.")
+		ply.MapFailerCount = (ply.MapFailerCount or 0) + 1
+
+		if ply.MapFailerCount >= 2 then
+			ply:Kick("Caused the map to fail too much!")
+		else
+			ply:PrintMessage(3, "Don't cause the map to fail.")
+			ply:PrintMessage(3, string.format("Lost %s XP.", xploss))
+			ply:SendLua([[chat.AddText(Color(255,0,0), "[WARN] ", Color(255,128,0), "Causing the map to fail on purpose may lead to being automatically kicked from the game!")]])
+		end
 	end
 
 	gamemode.Call("OnMapFailed", ply)

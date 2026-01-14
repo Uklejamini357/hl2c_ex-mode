@@ -9,41 +9,27 @@ if CLIENT then
 			real = true
 			local last = CurTime()
 			-- MY EYES!!! MY EYEEESS!!!!!!
-			hook.Add("RenderScreenspaceEffects", "hl2chypere_fucked_up", function()
-				local idk = math.min(CurTime()-last-1, true_crazy and 5 or 1)
-				if idk < 0 then return end
-				local cols = {
-					["$pp_colour_addr"] = math.Rand(0, math.min(2, idk*0.05)),
-					["$pp_colour_addg"] = math.Rand(0, math.min(2, idk*0.05)),
-					["$pp_colour_addb"] = math.Rand(0, math.min(2, idk*0.05)),
-					["$pp_colour_brightness"] = math.Rand(0, math.min(0.1, idk*0.01)),
-					["$pp_colour_contrast"] = 1 + math.Rand(0, math.min(0.1, idk*0.01)),
-					["$pp_colour_colour"] = 1,
-					["$pp_colour_mulr"] = math.min(3.2, 1 + idk)^3 + idk,
-					["$pp_colour_mulg"] = 1 + math.Rand(0, math.min(8, idk*0.03)),
-					["$pp_colour_mulb"] = 1 + math.Rand(0, math.min(8, idk*0.03))
-				}
-
-				DrawColorModify(cols)
-			end)
-
-			-- ow my ears
 			if true_crazy then
-				for i=1,4 do
-					sound.PlayFile("sound/music/ravenholm_1.mp3", "", function(station)
-						if station then
-							station:SetVolume(91)
-							station:SetPlaybackRate(1)
-						end
-					end)
-				end
-			end
-
-			timer.Simple(20, function()
-				if !real then return end
 				hook.Add("RenderScreenspaceEffects", "hl2chypere_fucked_up", function()
-					local a = true_crazy and 25 or 21
-					local idk = (last+a)-CurTime() < 0 and math.sin(CurTime()-(last+a)) or (last+a)-CurTime()
+					local idk = math.min(CurTime()-last-1, true_crazy and 5 or 1)
+					if idk < 0 then return end
+					local cols = {
+						["$pp_colour_addr"] = math.Rand(0, math.min(2, idk*0.05)),
+						["$pp_colour_addg"] = math.Rand(0, math.min(2, idk*0.05)),
+						["$pp_colour_addb"] = math.Rand(0, math.min(2, idk*0.05)),
+						["$pp_colour_brightness"] = math.Rand(0, math.min(0.1, idk*0.01)),
+						["$pp_colour_contrast"] = 1 + math.Rand(0, math.min(0.1, idk*0.01)),
+						["$pp_colour_colour"] = 1,
+						["$pp_colour_mulr"] = math.min(3.2, 1 + idk)^3 + idk,
+						["$pp_colour_mulg"] = 1 + math.Rand(0, math.min(8, idk*0.03)),
+						["$pp_colour_mulb"] = 1 + math.Rand(0, math.min(8, idk*0.03))
+					}
+
+					DrawColorModify(cols)
+				end)
+			else
+				hook.Add("RenderScreenspaceEffects", "hl2chypere_fucked_up", function()
+					local idk = math.sin(CurTime()-last)
 					local cols = {
 						["$pp_colour_addr"] = math.Rand(0, math.min(2, idk*0.02)),
 						["$pp_colour_addg"] = math.Rand(0, math.min(2, idk*0.02)),
@@ -58,33 +44,60 @@ if CLIENT then
 
 					DrawColorModify(cols)
 				end)
+			end
 
-
-				if true_crazy then
-					for i=1,100 do
-						timer.Simple(i*0.05, function()
-							if i == 100 then
-								RunConsoleCommand("stopsound")
-								return
-							end
-							if !real then return end
-
-							local e = EffectData()
-							e:SetOrigin(LocalPlayer():GetPos())
-							for i=1,4 do
-								util.Effect("Explosion", e)
-							end
-
-							sound.PlayFile("sound/weapons/explode"..math.random(3,5)..".wav", "", function(station)
-								if station then
-									station:SetVolume(8)
-								end
-							end)
-						end)
-					end
+			-- ow my ears
+			if true_crazy then
+				for i=1,4 do
+					sound.PlayFile("sound/music/ravenholm_1.mp3", "", function(station)
+						if station then
+							station:SetVolume(91)
+							station:SetPlaybackRate(1)
+						end
+					end)
 				end
+			end
+		elseif event == "hl2c_hyperex_fuckedup2" then
+			hook.Add("RenderScreenspaceEffects", "hl2chypere_fucked_up", function()
+				local a = 25
+				local idk = (last+a)-CurTime() < 0 and math.sin(CurTime()-(last+a)) or (last+a)-CurTime()
+				local cols = {
+					["$pp_colour_addr"] = math.Rand(0, math.min(2, idk*0.02)),
+					["$pp_colour_addg"] = math.Rand(0, math.min(2, idk*0.02)),
+					["$pp_colour_addb"] = math.Rand(0, math.min(2, idk*0.02)),
+					["$pp_colour_brightness"] = math.Rand(0, math.min(1, idk*0.01)),
+					["$pp_colour_contrast"] = 1 + math.Rand(0, math.min(1, idk*0.01)),
+					["$pp_colour_colour"] = 1 + math.Rand(0, math.min(0.5, idk*0.01)),
+					["$pp_colour_mulr"] = math.min(3.2, 1 + idk)^3 + idk,
+					["$pp_colour_mulg"] = 1 + math.Rand(0, math.min(8, idk*0.03)),
+					["$pp_colour_mulb"] = 1 + math.Rand(0, math.min(8, idk*0.03))
+				}
+
+				DrawColorModify(cols)
 			end)
 
+
+			for i=1,100 do
+				timer.Simple(i*0.05, function()
+					if i == 100 then
+						RunConsoleCommand("stopsound")
+						return
+					end
+					if !real then return end
+
+					local e = EffectData()
+					e:SetOrigin(LocalPlayer():GetPos())
+					for i=1,4 do
+						util.Effect("Explosion", e)
+					end
+
+					sound.PlayFile("sound/weapons/explode"..math.random(3,5)..".wav", "", function(station)
+						if station then
+							station:SetVolume(8)
+						end
+					end)
+				end)
+			end
 		elseif event == "hl2c_hyperex_unfuckedup" then
 			real = nil
 			hook.Remove("RenderScreenspaceEffects", "hl2chypere_fucked_up")
@@ -149,85 +162,93 @@ function hl2cAcceptInput(ent, input)
 				net.WriteBool(!_lost)
 				net.Broadcast()
 
-				for i=1,6 do
-					if !IsValid(ent) then return end
-					timer.Simple(0.3*i, function()
-						if !IsValid(ent) then return end
-						BroadcastLua([[chat.AddText(Color(255,0,0), "UR FUCKED")]])
-						BroadcastLua(string.format([[chat.AddText(Color(255,0,0), "CRAZINESS: %d")]], (5+i*3)^(1+i*0.3)))
-					end)
-				end
-				timer.Simple(2, function()
-					if !IsValid(ent) then return end
+				if !_lost then
 					for i=1,6 do
-						timer.Simple(i*0.08, function()
 						if !IsValid(ent) then return end
-							PrintMessage(3, GlitchedText("CHAPTER 6", 10 + i*5))
+						timer.Simple(0.3*i, function()
+							if !IsValid(ent) then return end
+							BroadcastLua([[chat.AddText(Color(255,0,0), "UR FUCKED")]])
+							BroadcastLua(string.format([[chat.AddText(Color(255,0,0), "CRAZINESS: %d")]], (5+i*3)^(1+i*0.3)))
 						end)
 					end
-				end)
-				timer.Simple(2.8, function()
-					if !IsValid(ent) then return end
-					local s = "WELCOME TO HYPERHELL!!!!!!!!!!"
-					for i=1,30 do
-						timer.Simple(i*0.05, function()
+					timer.Simple(2, function()
 						if !IsValid(ent) then return end
-							PrintMessage(3, GlitchedText(string.sub(s,1,i-1), 10 + i*2)..s[i])
-						end)
-					end
-				end)
-				timer.Simple(10, function()
-					if !IsValid(ent) then return end
-					if _lost then
-						BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I don't know anymore.", 10))]])
-						return
-					end
-					BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I came here to tell you", 10))]])
-					timer.Simple(3, function()
-						if !IsValid(ent) then return end
-						BroadcastLua([[chat.AddText(Color(190,0,0), GlitchedText("that you fucked up", 20))]])
+						for i=1,6 do
+							timer.Simple(i*0.08, function()
+							if !IsValid(ent) then return end
+								PrintMessage(3, GlitchedText("CHAPTER 6", 10 + i*5))
+							end)
+						end
 					end)
-					timer.Simple(5, function()
+					timer.Simple(2.8, function()
 						if !IsValid(ent) then return end
-						BroadcastLua([[chat.AddText(Color(140,0,0), GlitchedText("real hard this time", 30))]])
+						local s = "WELCOME TO HYPERHELL!!!!!!!!!!"
+						for i=1,30 do
+							timer.Simple(i*0.05, function()
+							if !IsValid(ent) then return end
+								PrintMessage(3, GlitchedText(string.sub(s,1,i-1), 10 + i*2)..s[i])
+							end)
+						end
 					end)
-					timer.Simple(7.6, function()
+					timer.Simple(10, function()
 						if !IsValid(ent) then return end
-						BroadcastLua([[chat.AddText(Color(140,0,0), GlitchedText("GOODBYE!!!", 50))]])
-					end)
-				end)
-
-				timer.Simple(20, function()
-					if !IsValid(ent) then return end
-					if _lost then return end
-					_lost = true
-					timer.Create("HAHAHAHAHAHAHA", 0.05, 100, function()
-						if !IsValid(ent) then return end
-						if tonumber(timer.RepsLeft("HAHAHAHAHAHAHA")) == 0 then
-							for _,ply in pairs(player.GetAll()) do
-								ply:Spectate(OBS_MODE_ROAMING)
-								ply:SetPos(Vector(math.random(-(2^17)+1, (2^17)-1), math.random(-(2^17)+1, (2^17)-1), math.random(-(2^17)+1, (2^17)-1)))
-							end
-
-							net.Start("hl2ce_map_event")
-							net.WriteString("hl2c_hyperex_unfuckedup")
-							net.Broadcast()
-
+						if _lost then
+							BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I don't know anymore.", 10))]])
 							return
 						end
-
-						changingLevel = nil
-						GAMEMODE.DisableDataSave = true
-						gamemode.Call("FailMap", nil, GlitchedText("All players have died!!!", 100-tonumber(timer.RepsLeft("HAHAHAHAHAHAHA"))))
-						for _,ply in pairs(player.GetAll()) do
-							ply:Kill()
-							local rag = ply:GetRagdollEntity()
-							if rag:IsValid() then
-								rag:Remove()
-							end
-						end
+						BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I came here to tell you", 10))]])
+						timer.Simple(3, function()
+							if !IsValid(ent) then return end
+							BroadcastLua([[chat.AddText(Color(190,0,0), GlitchedText("that you fucked up", 20))]])
+						end)
+						timer.Simple(5, function()
+							if !IsValid(ent) then return end
+							BroadcastLua([[chat.AddText(Color(140,0,0), GlitchedText("real hard this time", 30))]])
+						end)
+						timer.Simple(7.6, function()
+							if !IsValid(ent) then return end
+							BroadcastLua([[chat.AddText(Color(140,0,0), GlitchedText("GOODBYE!!!", 50))]])
+						end)
 					end)
-				end)
+
+					timer.Simple(20, function()
+						if !IsValid(ent) then return end
+						_lost = true
+
+						net.Start("hl2ce_map_event")
+						net.WriteString("hl2c_hyperex_fuckedup2")
+						net.Broadcast()
+
+						timer.Create("HAHAHAHAHAHAHA", 0.05, 100, function()
+							if !IsValid(ent) then return end
+							if tonumber(timer.RepsLeft("HAHAHAHAHAHAHA")) == 0 then
+								for _,ply in pairs(player.GetAll()) do
+									ply:Spectate(OBS_MODE_ROAMING)
+									ply:SetPos(Vector(math.random(-(2^17)+1, (2^17)-1), math.random(-(2^17)+1, (2^17)-1), math.random(-(2^17)+1, (2^17)-1)))
+								end
+							
+								net.Start("hl2ce_map_event")
+								net.WriteString("hl2c_hyperex_unfuckedup")
+								net.Broadcast()
+							
+								return
+							end
+						
+							changingLevel = nil
+							GAMEMODE.DisableDataSave = true
+							gamemode.Call("FailMap", nil, GlitchedText("All players have died!!!", 100-tonumber(timer.RepsLeft("HAHAHAHAHAHAHA"))))
+							for _,ply in pairs(player.GetAll()) do
+								ply:Kill()
+								local rag = ply:GetRagdollEntity()
+								if rag:IsValid() then
+									rag:Remove()
+								end
+							end
+						end)
+					end)
+
+					_lost = true
+				end
 
 				return true
 			end

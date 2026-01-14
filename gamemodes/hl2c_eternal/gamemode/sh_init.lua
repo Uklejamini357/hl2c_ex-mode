@@ -18,8 +18,10 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^2" -- also known as 0.inf.inf
-GM.DateVer = "26-12-2025"
+GM.Version = "0.inf^3" -- also known as 0.inf.inf.inf
+GM.DateVer = "14-01-2025" -- fuck 2026
+
+-- crazier things inbound... beware!
 
 
 -- Constants
