@@ -41,7 +41,7 @@ function HL2cEX_NPCVariantSpawn(ent)
 			ent.ent_MaxHealthMul = 1.3
 			ent.ent_HealthMul = 1.3
 			ent.XPGainMult = 1.2
-		elseif ent.VariantType == 2 then -- Deathbringer variant - 0.9x health and damage, Special: Launches a manhack towards the player upon dying, dealing 7x damage on its' first slashing hit, damage then decreases by 0.65x for every hit inflicted, down to 0.5x
+		elseif ent.VariantType == 2 then -- Deathbringer variant - 0.9x health and damage, Special: Launches a manhack towards the player upon dying, dealing 5.5x damage on its' first slashing hit, damage then decreases by 0.65x for every hit inflicted, down to 0.5x
 			ent.ent_Color = Color(255,128,192)
 			ent.ent_MaxHealthMul = 0.9
 			ent.ent_HealthMul = 0.9
@@ -264,13 +264,13 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 	if not ent.VariantType then
 		ent.VariantType = math.random(1,2)
 	end
-	if ent:GetClass() == "npc_metropolice" then -- Elite variant - Increased damage and Health. (No manhack spawn and launched to the killer upon death)
+	if ent:GetClass() == "npc_metropolice" then -- Elite variant - Increased damage and Health.
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(128,128,255)
 			ent.ent_MaxHealthMul = 1.3
 			ent.ent_HealthMul = 1.3
 			ent.XPGainMult = 1.2
-		elseif ent.VariantType == 2 then -- Deathbringer variant - 0.9x health and damage, Special: Launches a manhack towards the player upon dying, dealing 7x damage on its' first slashing hit, damage then decreases by 0.65x for every hit inflicted, down to 0.5x
+		elseif ent.VariantType == 2 then -- Deathbringer variant - 0.9x health and damage, Special: Launches a manhack towards the player upon dying, dealing 5.5x damage on its' first slashing hit, damage then decreases by 0.65x for every hit inflicted, down to 0.5x
 			ent.ent_Color = Color(255,128,192)
 			ent.ent_MaxHealthMul = 0.9
 			ent.ent_HealthMul = 0.9
@@ -356,7 +356,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			effectdata:SetOrigin(ent:GetPos() + Vector(0, 0, 60))
 			util.Effect("zw_master_strike", effectdata)
 			ent:EmitSound("ambient/machines/thumper_hit.wav", 120, 70)
-		elseif ent.VariantType == 2 and math.random(1,100) < 99 then
+		elseif ent.VariantType == 2 and math.random(1,100) <= 95 then
 			local ent2 = ents.Create("npc_zombie")
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
 			ent2:SetAngles(ent:GetAngles())
@@ -365,8 +365,8 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2.XPGainMult = math.max(0.01, (ent.XPGainMult or 1) * 0.6)
 			ent2.DifficultyGainMult = math.max(0.01, (ent.DifficultyGainMult or 1) * 0.6)
 			ent2.VariantType = 2
-			ent2.ent_MaxHealthMul = math.min(1e10, infmath.ConvertInfNumberToNormalNumber(ent.ent_MaxHealthMul or 1)*1.1)
-			ent2.ent_HealthMul = math.min(1e10, infmath.ConvertInfNumberToNormalNumber(ent.ent_HealthMul or 1)*1.1)
+			ent2.ent_MaxHealthMul = math.min(1e10, infmath.ConvertInfNumberToNormalNumber(ent.ent_MaxHealthMul or 1)*1.01 + 0.05)
+			ent2.ent_HealthMul = math.min(1e10, infmath.ConvertInfNumberToNormalNumber(ent.ent_HealthMul or 1)*1.01 + 0.05)
 
 			ent:Remove()
 		end

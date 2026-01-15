@@ -7,13 +7,13 @@ if CLIENT then return end
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-	ply:Give( "weapon_physcannon" )
-	ply:Give( "weapon_shotgun" )
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_shotgun")
 	ply:Give( "weapon_ar2" )
 	ply:Give( "weapon_rpg" )
 	ply:Give( "weapon_crossbow" )
@@ -26,11 +26,11 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 
-	ents.FindByName( "player_spawn_items_maker" )[ 1 ]:Remove()
+	ents.FindByName("player_spawn_items_maker")[1]:Remove()
 
-	if ( !game.SinglePlayer() ) then
+	if !game.SinglePlayer() then
 	
-		ents.FindByName( "lobby_combinedoor_portalbrush" )[ 1 ]:Remove()
+		ents.FindByName("lobby_combinedoor_portalbrush")[1]:Remove()
 	
 	end
 
@@ -45,7 +45,7 @@ function hl2cMapEdit()
 	barney:Activate()
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
@@ -53,22 +53,22 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "firstdropship_lcs1" ) && string.lower(input) == "start" ) then
 	
-		ents.FindByName( "barney" )[ 1 ]:SetLastPosition( Vector( 2466.740234, -466.801117, 256.03125 ) )
-		ents.FindByName( "barney" )[ 1 ]:SetSchedule( SCHED_FORCED_GO )
+		ents.FindByName("barney")[1]:SetLastPosition( Vector( 2466.740234, -466.801117, 256.03125 ) )
+		ents.FindByName("barney")[1]:SetSchedule( SCHED_FORCED_GO )
 	
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "ctrlrm_east_field_off_relay" ) && ( string.lower(input) == "trigger" ) ) then
 	
-		ents.FindByName( "barney" )[ 1 ]:SetLastPosition( Vector( 3429.184814, -509.042206, 512.03125 ) )
-		ents.FindByName( "barney" )[ 1 ]:SetSchedule( SCHED_FORCED_GO_RUN )
+		ents.FindByName("barney")[1]:SetLastPosition( Vector( 3429.184814, -509.042206, 512.03125 ) )
+		ents.FindByName("barney")[1]:SetSchedule( SCHED_FORCED_GO_RUN )
 	
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "barney_laseroom_lcs" ) && string.lower(input) == "start" ) then
 	
-		ents.FindByName( "barney" )[ 1 ]:SetLastPosition( Vector( 3168.077881, -1477.226807, 512.03125 ) )
-		ents.FindByName( "barney" )[ 1 ]:SetSchedule( SCHED_FORCED_GO_RUN )
+		ents.FindByName("barney")[1]:SetLastPosition( Vector( 3168.077881, -1477.226807, 512.03125 ) )
+		ents.FindByName("barney")[1]:SetSchedule( SCHED_FORCED_GO_RUN )
 	
 	end
 
@@ -83,9 +83,9 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		end
 		GAMEMODE:CreateSpawnPoint( Vector( 3140, 830, 513 ), -90 )
 	
-		ents.FindByName( "barney" )[ 1 ]:SetPos( Vector( 3213, 1099, 513 ) )
-		ents.FindByName( "barney" )[ 1 ]:SetLastPosition( Vector( 3416.997314, 917.139099, 512.03125 ) )
-		ents.FindByName( "barney" )[ 1 ]:SetSchedule( SCHED_FORCED_GO_RUN )
+		ents.FindByName("barney")[1]:SetPos( Vector( 3213, 1099, 513 ) )
+		ents.FindByName("barney")[1]:SetLastPosition( Vector( 3416.997314, 917.139099, 512.03125 ) )
+		ents.FindByName("barney")[1]:SetSchedule( SCHED_FORCED_GO_RUN )
 	
 	end
 
@@ -93,7 +93,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 	
 		timer.Simple( 20, function()
 		
-			for _, ent in pairs( ents.FindByName( "s_room_doors" ) ) do
+			for _, ent in pairs( ents.FindByName("s_room_doors" ) ) do
 			
 				if ( IsValid( ent ) ) then
 				
@@ -103,7 +103,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			
 			end
 		
-			for _, ent in pairs( ents.FindByName( "s_room_turret_*" ) ) do
+			for _, ent in pairs( ents.FindByName("s_room_turret_*" ) ) do
 			
 				if ( IsValid( ent ) ) then
 				
@@ -113,7 +113,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			
 			end
 		
-			for _, ent in pairs( ents.FindByName( "s_laser*" ) ) do
+			for _, ent in pairs( ents.FindByName("s_laser*" ) ) do
 			
 				if ( IsValid( ent ) && ( ent:GetClass() == "env_beam" ) ) then
 				
@@ -123,9 +123,9 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			
 			end
 		
-			ents.FindByName( "s_room_nodelink_2" )[ 1 ]:Fire( "TurnOn" )
-			ents.FindByName( "s_room_panelswitch" )[ 1 ]:Fire( "Unlock" )
-			ents.FindByName( "laser_on_sound" )[ 1 ]:Fire( "PlaySound" )
+			ents.FindByName("s_room_nodelink_2")[1]:Fire( "TurnOn" )
+			ents.FindByName("s_room_panelswitch")[1]:Fire( "Unlock" )
+			ents.FindByName("laser_on_sound")[1]:Fire( "PlaySound" )
 		
 		end)
 	
@@ -133,7 +133,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 	if ( ( ent:GetName() == "lcs_barney_h4x_pows" ) && string.lower(input) == "start" ) then
 	
-		for _, ent in pairs( ents.FindByName( "citizen_pod*" ) ) do
+		for _, ent in pairs( ents.FindByName("citizen_pod*" ) ) do
 		
 			if ( IsValid( ent ) && ent:IsNPC() ) then
 			

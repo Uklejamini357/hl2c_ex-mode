@@ -18,8 +18,6 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
-
-	ents.FindByName( "global_newgame_template" )[ 1 ]:Remove()
-
+	ents.FindByName("global_newgame_template")[1]:Remove()
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)

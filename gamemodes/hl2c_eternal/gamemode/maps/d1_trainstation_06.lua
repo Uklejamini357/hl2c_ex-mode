@@ -8,11 +8,11 @@ local disable_delayed_explode = false
 -- Initialize entities
 function hl2cMapEdit()
 
-	ents.FindByName( "player_spawn_items_template" )[ 1 ]:Remove()
+	ents.FindByName("player_spawn_items_template")[1]:Remove()
 
-	if ( !game.SinglePlayer() ) then
+	if !game.SinglePlayer() then
 	
-		ents.FindByName( "scriptcond_seebarney" )[ 1 ]:Remove()
+		ents.FindByName("scriptcond_seebarney")[1]:Remove()
 	
 		-- Create a trigger to replace script conditions
 		local condition_trigger = ents.Create( "trigger_once" )
@@ -36,7 +36,7 @@ function hl2cMapEdit()
 
 	disable_delayed_explode = false
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 function hl2cAcceptInput(ent, input)
 	if GAMEMODE.EXMode then

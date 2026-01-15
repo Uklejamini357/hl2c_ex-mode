@@ -18,13 +18,13 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 function hl2cPlayerInitialSpawn(ply)
 end
-hook.Add( "PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn )
+hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 
 
 -- Initialize entities
 function hl2cMapEdit()
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 local hastriggered
 

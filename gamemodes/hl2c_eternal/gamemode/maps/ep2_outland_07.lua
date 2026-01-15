@@ -13,14 +13,14 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 
-	-- ents.FindByName( "global_newgame_template_base_items" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_local_items" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_ammo" )[ 1 ]:Remove()
+	-- ents.FindByName("global_newgame_template_base_items")[1]:Remove()
+	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
+	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 
-	-- if ( !game.SinglePlayer() ) then ents.FindByName( "boxcar_door_close" )[ 1 ]:Remove(); end
+	-- if !game.SinglePlayer() then ents.FindByName("boxcar_door_close")[1]:Remove(); end
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input

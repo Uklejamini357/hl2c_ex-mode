@@ -10,19 +10,19 @@ function hl2cPlayerInitialSpawn( ply )
 	ply:SendLua( "table.insert( FRIENDLY_NPCS, \"npc_antlion\" )" )
 
 end
-hook.Add( "PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn )
+hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-	ply:Give( "weapon_physcannon" )
-	ply:Give( "weapon_shotgun" )
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_shotgun")
 	ply:Give( "weapon_ar2" )
 	ply:Give( "weapon_rpg" )
 	ply:Give( "weapon_crossbow" )
@@ -40,7 +40,7 @@ function hl2cMapEdit()
 	table.insert( FRIENDLY_NPCS, "npc_antlion" )
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input

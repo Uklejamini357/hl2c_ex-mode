@@ -12,7 +12,6 @@ local function SpawnNPC(class, pos, ang, func)
 end
 
 if CLIENT then
-
 	net.Receive("hl2ce_music", function()
 		local bool = net.ReadBool()
 		local sound = "#hl2c_eternal/music/zombie_survival.wav"
@@ -26,9 +25,8 @@ if CLIENT then
 	end)
 end
 
-if ( file.Exists( "hl2c_eternal/d1_town_03.txt", "DATA" ) ) then
-
-	INFO_PLAYER_SPAWN = { Vector( -3755, -28, -3366 ), 45 }
+if file.Exists("hl2c_eternal/d1_town_03.txt", "DATA") then
+	INFO_PLAYER_SPAWN = {Vector(-3755, -28, -3366), 45}
 
 	NEXT_MAP = "d1_town_02a"
 
@@ -36,15 +34,13 @@ if ( file.Exists( "hl2c_eternal/d1_town_03.txt", "DATA" ) ) then
 
 	-- Player spawns
 	function hl2cPlayerSpawn(ply)
-	
-		ply:Give( "weapon_crowbar" )
-		ply:Give( "weapon_pistol" )
-		ply:Give( "weapon_smg1" )
-		ply:Give( "weapon_357" )
-		ply:Give( "weapon_frag" )
-		ply:Give( "weapon_physcannon" )
-		ply:Give( "weapon_shotgun" )
-	
+		ply:Give("weapon_crowbar")
+		ply:Give("weapon_pistol")
+		ply:Give("weapon_smg1")
+		ply:Give("weapon_357")
+		ply:Give("weapon_frag")
+		ply:Give("weapon_physcannon")
+		ply:Give("weapon_shotgun")
 	end
 	hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -111,23 +107,19 @@ if ( file.Exists( "hl2c_eternal/d1_town_03.txt", "DATA" ) ) then
 		end
 	end
 	hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
-
 else
-
 	NEXT_MAP = "d1_town_03"
 
 	if CLIENT then return end
 
 	-- Player spawns
 	function hl2cPlayerSpawn(ply)
-	
-		ply:Give( "weapon_crowbar" )
-		ply:Give( "weapon_pistol" )
-		ply:Give( "weapon_smg1" )
-		ply:Give( "weapon_357" )
-		ply:Give( "weapon_frag" )
-		ply:Give( "weapon_physcannon" )
-	
+		ply:Give("weapon_crowbar")
+		ply:Give("weapon_pistol")
+		ply:Give("weapon_smg1")
+		ply:Give("weapon_357")
+		ply:Give("weapon_frag")
+		ply:Give("weapon_physcannon")
 	end
 	hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 	
@@ -138,27 +130,21 @@ else
 		local inputlower = input:lower()
 
 
-		if ( !game.SinglePlayer() && ( ent:GetName() == "freightlift_lift" ) && ( string.lower(input) == "startforward" ) ) then
-		
+		if !game.SinglePlayer() and ent:GetName() == "freightlift_lift" and input:lower() == "startforward" then
 			for _, ply in pairs( player.GetLiving() ) do
 				if ply == activator then continue end
-				ply:SetVelocity( Vector( 0, 0, 0 ) )
-				ply:SetPos( Vector( -2943, 896, -3136 ) )
-			
+				ply:SetVelocity(Vector(0, 0, 0))
+				ply:SetPos(Vector(-2943, 896, -3136))
 			end
-			GAMEMODE:CreateSpawnPoint( Vector( -2944, 1071, -3520 ), -90 )
-
+			GAMEMODE:CreateSpawnPoint(Vector(-2944, 1071, -3520), -90)
 		end
 	end
 	hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
-
 end
 
 
 -- Initialize entities
 function hl2cMapEdit()
-
-	ents.FindByName( "startobjects_template" )[ 1 ]:Remove()
-
+	ents.FindByName("startobjects_template")[1]:Remove()
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)

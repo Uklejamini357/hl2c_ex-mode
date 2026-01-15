@@ -11,7 +11,6 @@ TRIGGER_CHECKPOINT = {
 
 TRAINSTATION_LEAVEBARNEYDOOROPEN = false
 
-
 table.RemoveByValue(GODLIKE_NPCS, "npc_barney")
 table.RemoveByValue(FRIENDLY_NPCS, "npc_citizen")
 if CLIENT then return end
@@ -19,55 +18,54 @@ if CLIENT then return end
 local gman_killed, respawning_crate, respawning_crate_kill
 local barney_killed_themselves
 
+local function getdiff()
+	return infmath.ConvertInfNumberToNormalNumber(GAMEMODE:GetDifficulty())
+end
+
 -- Player initial spawn
 function hl2cPlayerInitialSpawn( ply )
 end
-hook.Add( "PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn )
+hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:RemoveSuit()
-	timer.Simple(0.01, function() if ( IsValid( ply ) ) then GAMEMODE:SetPlayerSpeed( ply, 150, 150 ) end end)
+	timer.Simple(0.01, function()
+		if !IsValid(ply) then return end
+		GAMEMODE:SetPlayerSpeed(ply, 150, 150)
+	end)
 
-	if ( !game.SinglePlayer() && IsValid(PLAYER_VIEWCONTROL) && PLAYER_VIEWCONTROL:GetClass() == "point_viewcontrol" ) then
-	
+	if !game.SinglePlayer() and IsValid(PLAYER_VIEWCONTROL) and PLAYER_VIEWCONTROL:GetClass() == "point_viewcontrol" then
 		ply:SetViewEntity(PLAYER_VIEWCONTROL)
 		ply:Freeze(true)
-	
 	end
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	gman_killed = nil
 	respawning_crate = nil
 	respawning_crate_kill = nil
 	barney_killed_themselves = nil
 	
 
-	game.SetGlobalState( "gordon_precriminal", GLOBAL_ON )
-	game.SetGlobalState( "gordon_invulnerable", GLOBAL_ON )
+	game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
+	game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)
 
-	if ( !game.SinglePlayer() ) then
-	
-		ents.FindByName( "razor_gate_retreat_block_2" )[ 1 ]:Remove()
-		ents.FindByName( "cage_playerclip" )[ 1 ]:Remove()
-		ents.FindByName( "barney_room_blocker_2" )[ 1 ]:Remove()
-	
+	if !game.SinglePlayer() then
+		ents.FindByName("razor_gate_retreat_block_2")[1]:Remove()
+		ents.FindByName("cage_playerclip")[1]:Remove()
+		ents.FindByName("barney_room_blocker_2")[1]:Remove()
 	end
-
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator )
+function hl2cAcceptInput(ent, input, activator)
 	local entname = ent:GetName()
 	local inputlower = input:lower()
 
@@ -79,7 +77,7 @@ function hl2cAcceptInput( ent, input, activator )
 				ply:SetViewEntity(ent)
 				ply:Freeze(true)
 			end
-		
+
 			if !ent.doubleEnabled then
 				ent.doubleEnabled = true
 				ent:Fire("Enable")
@@ -87,7 +85,7 @@ function hl2cAcceptInput( ent, input, activator )
 
 		elseif inputlower == "disable" then
 			PLAYER_VIEWCONTROL = nil
-		
+
 			for _, ply in ipairs(player.GetAll()) do
 				ply:SetViewEntity(ply)
 				ply:Freeze(false)
@@ -127,7 +125,7 @@ function hl2cAcceptInput( ent, input, activator )
 	end
 
 	if GAMEMODE.EXMode then
-		if infmath.ConvertInfNumberToNormalNumber(GAMEMODE:GetDifficulty()) > 15 and ent:GetName() == "scene2_flash_mode_2" and string.lower(input) == "enablerefire" then
+		if getdiff() > 15 and ent:GetName() == "scene2_flash_mode_2" and string.lower(input) == "enablerefire" then
 			if gman_killed then return true end
 
 			if math.random(10) == 1 then
@@ -161,8 +159,12 @@ function hl2cAcceptInput( ent, input, activator )
 		end
 
 		if ent:GetName() == "scene4_start" and string.lower(input) == "enablerefire" then
-			timer.Simple(3, function() PrintMessage(3, "Chapter 1") end)
-			timer.Simple(math.Rand(6.5,7.5), function() PrintMessage(3, "The new beginnings") end)
+			timer.Simple(3, function()
+				PrintMessage(3, "Chapter 1")
+			end)
+			timer.Simple(math.Rand(6.5,7.5), function()
+				PrintMessage(3, "The new beginnings")
+			end)
 			ents.FindByName("scene2_flash_mode_2")[1]:Fire("kill")
 		end
 
@@ -189,7 +191,7 @@ function hl2cAcceptInput( ent, input, activator )
 			return true
 		end
 
-		if infmath.ConvertInfNumberToNormalNumber(GAMEMODE:GetDifficulty()) > 69.6969696969 and ent:GetName() == "ss_luggagedrop_2" and string.lower(input) == "beginsequence" then
+		if getdiff() > 69.6969696969 and ent:GetName() == "ss_luggagedrop_2" and string.lower(input) == "beginsequence" then
 			local randommodels = {
 				"models/props_junk/watermelon01.mdl",
 				"models/props_junk/GlassBottle01a.mdl",
@@ -253,7 +255,7 @@ function hl2cAcceptInput( ent, input, activator )
 			activator:TakeDamage(1) -- kill it
 		end
 
-		if infmath.ConvertInfNumberToNormalNumber(GAMEMODE:GetDifficulty()) > 10 and ent:GetName() == "storage_room_door" then
+		if getdiff() > 10 and ent:GetName() == "storage_room_door" then
 			local entity = ents.FindByClass("npc_barney")[1]
 			if !entity or !entity:IsValid() then return end
 
@@ -320,4 +322,4 @@ function hl2cOnNPCKilled( ent, attacker )
 		end
 	end
 end
-hook.Add( "OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled )
+hook.Add("OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled )

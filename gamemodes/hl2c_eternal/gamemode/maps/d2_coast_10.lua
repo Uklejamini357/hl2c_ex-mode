@@ -9,13 +9,13 @@ if CLIENT then return end
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-	ply:Give( "weapon_physcannon" )
-	ply:Give( "weapon_shotgun" )
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_shotgun")
 	ply:Give( "weapon_ar2" )
 	ply:Give( "weapon_rpg" )
 	ply:Give( "weapon_crossbow" )
@@ -29,17 +29,17 @@ function hl2cMapEdit()
 
 	game.SetGlobalState( "no_seagulls_on_jeep", GLOBAL_ON )
 
-	ents.FindByName( "player_spawn_items_maker" )[ 1 ]:Remove()
-	ents.FindByName( "jeep_filter" )[ 1 ]:Fire( "AddOutput", "filterclass prop_vehicle_jeep_old" )
+	ents.FindByName("player_spawn_items_maker")[1]:Remove()
+	ents.FindByName("jeep_filter")[1]:Fire( "AddOutput", "filterclass prop_vehicle_jeep_old" )
 
-	if ( !game.SinglePlayer() ) then
+	if !game.SinglePlayer() then
 	
---		ents.FindByName( "push_brush" )[ 1 ]:Remove()
+--		ents.FindByName("push_brush")[1]:Remove()
 	
 	end
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
@@ -47,7 +47,7 @@ function hl2cAcceptInput(ent, input)
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "greeter_briefing_conditions" ) && string.lower(input) == "enable" ) then
 	
-		if ( IsValid( ents.FindByName( "briefing_relay" )[ 1 ] ) ) then ents.FindByName( "briefing_relay" )[ 1 ]:Fire( "Trigger" ) end
+		if ( IsValid( ents.FindByName("briefing_relay")[1] ) ) then ents.FindByName("briefing_relay")[1]:Fire( "Trigger" ) end
 		return true
 	
 	end
@@ -80,7 +80,7 @@ end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 
 
-if ( !game.SinglePlayer() ) then
+if !game.SinglePlayer() then
 
 	-- Entity takes damage
 	function hl2cEntityTakeDamage( ent, dmgInfo )
@@ -92,6 +92,6 @@ if ( !game.SinglePlayer() ) then
 		end
 	
 	end
-	hook.Add( "EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage )
+	hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage )
 
 end

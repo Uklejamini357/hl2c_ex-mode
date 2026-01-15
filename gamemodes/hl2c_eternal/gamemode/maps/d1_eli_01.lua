@@ -4,7 +4,7 @@ GM.XpGainOnNPCKillMul = 0.25
 GM.DifficultyGainOnNPCKillMul = 0.3
 
 TRIGGER_CHECKPOINT = {
-	{ Vector( 364, 1764, -2730 ), Vector( 549, 1787, -2575 ) }
+	{Vector(364, 1764, -2730), Vector(549, 1787, -2575)}
 }
 
 TRIGGER_DELAYMAPLOAD = { Vector( -703, 989, -2688 ), Vector( -501, 1029, -2527 ) }
@@ -22,13 +22,11 @@ local chaos_begun = false
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -49,15 +47,15 @@ end)
 -- Initialize entities
 function hl2cMapEdit()
 
-	ents.FindByName( "global_newgame_template_ammo" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_base_items" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_local_items" )[ 1 ]:Remove()
+	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
+	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
+	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
-	if ( !game.SinglePlayer() ) then
-		ents.FindByName( "pclip_airlock_1_a" )[ 1 ]:Remove()
-		ents.FindByName( "brush_exit_door_raven_PClip" )[ 1 ]:Remove()
-		ents.FindByName( "pclip_exit_door_raven2" )[ 1 ]:Remove()
-		ents.FindByName( "pclip_airlock_2_a" )[ 1 ]:Remove()
+	if !game.SinglePlayer() then
+		ents.FindByName("pclip_airlock_1_a")[1]:Remove()
+		ents.FindByName("brush_exit_door_raven_PClip")[1]:Remove()
+		ents.FindByName("pclip_exit_door_raven2")[1]:Remove()
+		ents.FindByName("pclip_airlock_2_a")[1]:Remove()
 	end
 
 	if GAMEMODE.EXMode then
@@ -211,7 +209,7 @@ function hl2cMapEdit()
 	end
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 hook.Add("OnMapFailed", "hl2cOnMapFailed", function(ply)
 	timer.Remove("d1_eli_01.trap")
@@ -256,7 +254,7 @@ local function SpawnItem(class, pos, ang, func)
 end
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator )
+function hl2cAcceptInput(ent, input, activator)
 	local entname = ent:GetName()
 	local lowerinput = input:lower()
 
@@ -272,15 +270,13 @@ function hl2cAcceptInput( ent, input, activator )
 		end
 	end
 
-	if ( !game.SinglePlayer() && ( entname == "lcs_mosstour05" ) && ( lowerinput == "start" ) ) then
-	
-		for _, ply in pairs( player.GetLiving() ) do
+	if !game.SinglePlayer() and entname == "lcs_mosstour05" and lowerinput == "start" then
+		for _, ply in ipairs(player.GetLiving()) do
 			if ply == activator then continue end
 			ply:SetVelocity(-ply:GetVelocity())
 			ply:SetPos(Vector(457, 1656, -1267))
-			ply:SetEyeAngles( Angle( 0, 90, 0 ) )
+			ply:SetEyeAngles(Angle(0, 90, 0))
 		end
-
 	end
 
 	if GAMEMODE.EXMode then

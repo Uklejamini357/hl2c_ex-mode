@@ -5,13 +5,13 @@ if CLIENT then return end
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-	ply:Give( "weapon_physcannon" )
-	ply:Give( "weapon_shotgun" )
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_shotgun")
 	ply:Give( "weapon_ar2" )
 
 end
@@ -20,16 +20,27 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
+	ALLOWED_VEHICLE = nil
 
 	game.SetGlobalState( "no_seagulls_on_jeep", GLOBAL_ON )
 
-	ents.FindByName( "global_newgame_template_ammo" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_base_items" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_local_items" )[ 1 ]:Remove()
+	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
+	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
+	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
-	ents.FindByName( "jeep" )[ 1 ]:Fire( "EnableGun", "1" )
-	ents.FindByName( "jeep" )[ 1 ]:SetBodygroup( 1, 1 )
+	ents.FindByName("jeep")[1]:Fire( "EnableGun", "1" )
+	ents.FindByName("jeep")[1]:SetBodygroup( 1, 1 )
 
+
+	local ent = ents.Create("prop_dynamic")
+	ent:SetModel("models/props_wasteland/cargo_container01.mdl")
+	ent:SetPos(Vector(-8610, 512, 956))
+	ent:SetAngles(Angle(0, 0, 0))
+
+
+	if ent:PhysicsInit(SOLID_VPHYSICS) then
+		ent:GetPhysicsObject():EnableMotion(false)
+	end
 
 	if GAMEMODE.EXMode then -- oh boy you AIN'T SURVIVING THE SANDS.
 		ents.FindByName("antlion_spawner")[1]:SetKeyValue("pool_max", 38)
@@ -40,17 +51,20 @@ function hl2cMapEdit()
 		ents.FindByName("antlion_spawner")[1]:SetKeyValue("MaxNPCCount", 40)
 
 		ents.FindByClass("phys_magnet")[1]:AddCallback("PhysicsCollide", function(ent, phys)
+			local hit = phys.HitEntity
 			timer.Simple(0.15, function()
 				local eff = EffectData()
 				eff:SetOrigin(phys.HitPos)
 				for i=1,20 do
 					util.Effect("Explosion", eff)
 				end
+
+				hit:SetColor(HSVToColor(math.random(360), math.Rand(0,1), math.Rand(0,1)))
 			end)
 		end)
 	end
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
@@ -59,10 +73,8 @@ function hl2cAcceptInput(ent, input, caller)
 	local inputlower = input:lower()
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "logic_startcraneseq" ) && ( string.lower(input) == "trigger" ) ) then
-	
 		ALLOWED_VEHICLE = "Jeep"
 		PrintMessage( HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3)." )
-	
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "push_car_superjump_01" ) && string.lower(input) == "disable" ) then
@@ -76,14 +88,21 @@ function hl2cAcceptInput(ent, input, caller)
 		end
 
 		if entname == "logic_jeepflipped" and inputlower == "trigger" then
-			for i=1,106 do
-				timer.Simple(i/20, function()
+			for i=1,166 do
+				timer.Simple(i/27, function()
 					local ent = ents.Create("npc_antlion")
 					ent:SetKeyValue("startburrowed", 1)
-					ent:SetPos(ents.FindByName("jeep")[1]:GetPos() + Vector(math.random(-1000,1000), math.random(-1000,1000), 500))
+					if math.random(10) == 1 then
+						ent:AddFlags(262144)
+					end
+					local a = 1500
+					ent:SetPos(ents.FindByName("jeep")[1]:GetPos() + Vector(math.random(-a,a), math.random(-a,a), 500))
 					ent:SetAngles(Angle(0, math.Rand(-180, 180), 0))
 					ent:DropToFloor()
 					ent:Spawn()
+					local enemy = player.GetAll()[math.random(#player.GetAll())]
+					ent:SetEnemy(enemy)
+					ent:UpdateEnemyMemory(enemy, enemy:GetPos())
 					ent:Input("unburrow")
 				end)
 			end
@@ -92,7 +111,7 @@ function hl2cAcceptInput(ent, input, caller)
 				PrintMessage(3, "Chapter 7")
 			end)
 			timer.Simple(5.6, function()
-				PrintMessage(3, "welcome to the coast.")
+				PrintMessage(3, "The coast of DEATH.")
 			end)
 		end
 	end

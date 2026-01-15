@@ -301,6 +301,8 @@ function GM:Initialize()
 
 	-- Initial variables for client
 	self.ShowScoreboard = false
+	self.MapVars = {}
+	self.MapVarsPersisting = {}
 	showNav = false
 	scoreboard = nil
 
@@ -480,6 +482,9 @@ function RestartMap(len)
 		-- when map restarts i guess
 		GAMEMODE.EXMode = GAMEMODE.EnableEXMode
 		GAMEMODE.HyperEXMode = GAMEMODE.EnableHyperEXMode
+
+		GAMEMODE.MapVars = {}
+		GAMEMODE.MapVarsPersisting = {}
 	end
 
 	if GetGlobalString("losemusic") then

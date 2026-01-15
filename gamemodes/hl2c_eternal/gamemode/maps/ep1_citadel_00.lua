@@ -12,22 +12,21 @@ TRIGGER_CHECKPOINT = {
 
 if CLIENT then return end
 
-local shouldnotfreeze
 local allowunlock
 
 function hl2cPlayerSpawn(ply)
-	ply:Freeze(not shouldnotfreeze)
+	ply:Freeze(not GAMEMODE.MapVars.ShouldNotFreezePlayer)
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
-function hl2cPlayerPostThink( ply )
-    if shouldnotfreeze then return end
+function hl2cPlayerPostThink(ply)
+    if GAMEMODE.MapVars.ShouldNotFreezePlayer then return end
 	ply:Freeze(true)
 end
-hook.Add( "PlayerPostThink", "hl2cPlayerPostThink", hl2cPlayerPostThink )
+hook.Add("PlayerPostThink", "hl2cPlayerPostThink", hl2cPlayerPostThink)
 
 function hl2cMapEdit()
-    shouldnotfreeze = false
+    GAMEMODE.MapVars.ShouldNotFreezePlayer = false
 
     ents.FindByName("trigger_falldeath")[1]:Remove()
 end
@@ -44,8 +43,8 @@ function hl2cAcceptInput(ent, input)
         end
     end
 
-    if ent:GetName() == "maker_template_gravgun" and string.lower(input) == "setparent" and not shouldnotfreeze then
-        shouldnotfreeze = true
+    if ent:GetName() == "maker_template_gravgun" and string.lower(input) == "setparent" and not GAMEMODE.MapVars.ShouldNotFreezePlayer then
+        GAMEMODE.MapVars.ShouldNotFreezePlayer = true
 
         for _,ply in ipairs(player.GetAll()) do
             ply:Freeze(false)
@@ -62,7 +61,7 @@ function hl2cAcceptInput(ent, input)
             end
         end
 
-        GAMEMODE:CreateSpawnPoint( Vector( 4624, 4116, -6342 ), -90 )
+        GAMEMODE:CreateSpawnPoint(Vector(4624, 4116, -6342), -90)
 
         local entity = ents.FindByName("van")[1]
         if entity and entity:IsValid() then

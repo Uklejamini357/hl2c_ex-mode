@@ -21,15 +21,13 @@ end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-	ply:Give( "weapon_physcannon" )
-	ply:Give( "weapon_shotgun" )
-
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_shotgun")
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -37,7 +35,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 
-	ents.FindByName( "startobjects_template" )[ 1 ]:Remove()
+	ents.FindByName("startobjects_template")[1]:Remove()
 
 	local monk = ents.Create( "npc_monk" )
 	monk:SetPos( Vector( -5221, 2034, -3240 ) )
@@ -48,14 +46,14 @@ function hl2cMapEdit()
 	monk:Spawn()
 	monk:Activate()
 
-	if ( !game.SinglePlayer() ) then
+	if !game.SinglePlayer() then
 	
-		ents.FindByName( "graveyard_exit_momentary_wheel" )[ 1 ]:Fire( "Lock" )
+		ents.FindByName("graveyard_exit_momentary_wheel")[1]:Fire( "Lock" )
 	
 	end
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input

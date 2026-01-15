@@ -47,7 +47,7 @@ function hl2cEntityRemoved( ent )
 		end
 	end
 end
-hook.Add( "EntityRemoved", "hl2cEntityRemoved", hl2cEntityRemoved )
+hook.Add("EntityRemoved", "hl2cEntityRemoved", hl2cEntityRemoved )
 
 function hl2cMapEdit()
 	TRAINSTATION_REMOVESUIT = true

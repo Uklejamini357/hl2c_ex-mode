@@ -1,20 +1,18 @@
 NEXT_MAP = "d1_town_01"
 
 TRIGGER_CHECKPOINT = {
-	{ Vector( -1939, 1833, -2736 ), Vector( -1897, 2001, -2629 ) }
+	{Vector(-1939, 1833, -2736), Vector(-1897, 2001, -2629)}
 }
 
 if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -35,19 +33,15 @@ end
 
 -- Initialize entities
 function hl2cMapEdit()
+	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
+	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
+	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
-	ents.FindByName( "global_newgame_template_ammo" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_base_items" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_local_items" )[ 1 ]:Remove()
-
-	if ( !game.SinglePlayer() ) then
-	
-		ents.FindByName( "brush_doorAirlock_PClip_2" )[ 1 ]:Remove()
-	
+	if !game.SinglePlayer() then
+		ents.FindByName("brush_doorAirlock_PClip_2")[1]:Remove()
 	end
-
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 local function SpawnNPC(class, pos, ang, func)
 	local ent = ents.Create(class)
@@ -70,7 +64,6 @@ function hl2cAcceptInput(ent, input, activator)
 		if (entname == "airlock_south_door_exit") or entname == "airlock_south_door_exitb" and inputlower == "close" then 
 			return true
 		end
-	
 	end
 
 	if !game.SinglePlayer() and entname == "command_physcannon" and inputlower == "command" then
@@ -209,8 +202,6 @@ function hl2cAcceptInput(ent, input, activator)
 			activator:Remove()
 		end
 	end
-
-
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 

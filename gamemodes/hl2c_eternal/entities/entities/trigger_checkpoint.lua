@@ -88,7 +88,7 @@ function ENT:StartTouch( ent )
 		-- Update checkpoints on the client
 		if checkpointPositions[1] then
 			net.Start( "SetCheckpointPosition" )
-			net.WriteVector( checkpointPositions[ 1 ] )
+			net.WriteVector( checkpointPositions[1] )
 			net.Broadcast()
 		end
 	

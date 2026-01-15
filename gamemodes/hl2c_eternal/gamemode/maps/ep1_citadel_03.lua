@@ -22,7 +22,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 hook.Add("Think", "hl2cThink", function()
 	if game.GetGlobalState("super_phys_gun") == GLOBAL_ON then
-		for _, ent in pairs( ents.FindByClass( "weapon_*" ) ) do
+		for _, ent in pairs( ents.FindByClass("weapon_*" ) ) do
 			if ( IsValid( ent ) && ent:IsWeapon() && ( ent:GetClass() != "weapon_physcannon" ) && ( !IsValid( ent:GetOwner() ) || ( IsValid( ent:GetOwner() ) && ent:GetOwner():IsPlayer() ) ) ) then
 				ent:Remove()
 			end
@@ -35,12 +35,12 @@ function hl2cMapEdit()
 
 	game.SetGlobalState( "super_phys_gun", GLOBAL_ON )
 
-	-- ents.FindByName( "global_newgame_template_ammo" )[ 1 ]:Remove()
-	-- ents.FindByName( "global_newgame_template_base_items" )[ 1 ]:Remove()
-	-- ents.FindByName( "global_newgame_template_local_items" )[ 1 ]:Remove()
+	-- ents.FindByName("global_newgame_template_ammo")[1]:Remove()
+	-- ents.FindByName("global_newgame_template_base_items")[1]:Remove()
+	-- ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
@@ -70,6 +70,6 @@ function hl2cOnNPCKilled( ent, attacker, wep )
 		end
 	end
 end
-hook.Add( "OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled )
+hook.Add("OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled )
 
 

@@ -130,7 +130,7 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	ply.deathPos = ply:EyePos()
 
 	-- Add to deadPlayers table to prevent respawning on re-connect
-	if ((!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING) and !table.HasValue(deadPlayers, ply:SteamID()) then
+	if ((!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING) and !table.HasValue(deadPlayers, ply:SteamID()) and !ply:IsBot() then
 		table.insert(deadPlayers, ply:SteamID())
 	end
 	
@@ -490,6 +490,11 @@ function GM:Initialize()
 	nextAreaOpenTime = 0
 	startingWeapons = {}
 
+	self.MapVars = {}
+	if self.MapVarsPersisting == nil then
+		self.MapVarsPersisting = {}
+	end
+
 	self.XP_REWARD_ON_MAP_COMPLETION = self.XP_REWARD_ON_MAP_COMPLETION or 1 -- because it would call true if it was false, we use other values
 	self:SetDifficulty(1)
 	self.EXMode = self.EnableEXMode
@@ -731,14 +736,14 @@ function GM:MapEntitiesSpawned()
 
 	-- Setup INFO_PLAYER_SPAWN
 	if (INFO_PLAYER_SPAWN) then
-		GAMEMODE:CreateSpawnPoint(INFO_PLAYER_SPAWN[ 1 ], INFO_PLAYER_SPAWN[ 2 ])
+		GAMEMODE:CreateSpawnPoint(INFO_PLAYER_SPAWN[1], INFO_PLAYER_SPAWN[ 2 ])
 	end
 
 	-- Setup TRIGGER_CHECKPOINT
 	if (!game.SinglePlayer() && TRIGGER_CHECKPOINT) then
 		for _, tcpInfo in pairs(TRIGGER_CHECKPOINT) do
 			local tcp = ents.Create("trigger_checkpoint")
-			tcp.min = tcpInfo[ 1 ]
+			tcp.min = tcpInfo[1]
 			tcp.max = tcpInfo[ 2 ]
 			tcp.pos = tcp.max - ((tcp.max - tcp.min) / 2)
 			tcp.skipSpawnpoint = tcpInfo[ 3 ]
@@ -1149,6 +1154,7 @@ function GM:PlayerInitialSpawn(ply)
     	    GAMEMODE:RestartMap(0, true)
     	    print("forced restart initiate")
     	end)
+
     	print("force restart in 1 sec")
 	end
 end 
@@ -1190,7 +1196,7 @@ function GM:PlayerLoadout(ply)
 		
 			if (ply.info.loadout[ wepClass ]) then
 			
-				wep:SetClip1(tonumber(ply.info.loadout[ wepClass ][ 1 ]))
+				wep:SetClip1(tonumber(ply.info.loadout[ wepClass ][1]))
 				wep:SetClip2(tonumber(ply.info.loadout[ wepClass ][ 2 ]))
 				ply:GiveAmmo(tonumber(ply.info.loadout[ wepClass ][ 3 ]), wep:GetPrimaryAmmoType())
 				ply:GiveAmmo(tonumber(ply.info.loadout[ wepClass ][ 4 ]), wep:GetSecondaryAmmoType())

@@ -13,7 +13,7 @@ if CLIENT then return end
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 
-	ply:Give( "weapon_physcannon" )
+	ply:Give("weapon_physcannon")
 
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
@@ -28,12 +28,12 @@ function hl2cMapEdit()
 	game.ConsoleCommand( "physcannon_maxmass 850\n" )
 	game.ConsoleCommand( "physcannon_pullforce 8000\n" )
 
-	ents.FindByName( "global_newgame_template_ammo" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_base_items" )[ 1 ]:Remove()
-	ents.FindByName( "global_newgame_template_local_items" )[ 1 ]:Remove()
+	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
+	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
+	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
@@ -76,7 +76,7 @@ function hl2cThink()
 
 	if game.GetGlobalState("super_phys_gun") == GLOBAL_ON then
 	
-		for _, ent in pairs( ents.FindByClass( "weapon_physcannon" ) ) do
+		for _, ent in pairs( ents.FindByClass("weapon_physcannon" ) ) do
 		
 			if ( IsValid( ent ) && ent:IsWeapon() ) then
 			
@@ -86,7 +86,7 @@ function hl2cThink()
 		
 		end
 	
-		for _, ent in pairs( ents.FindByClass( "weapon_*" ) ) do
+		for _, ent in pairs( ents.FindByClass("weapon_*" ) ) do
 		
 			if ( IsValid( ent ) && ent:IsWeapon() && ( ent:GetClass() != "weapon_physcannon" ) && ( !IsValid( ent:GetOwner() ) || ( IsValid( ent:GetOwner() ) && ent:GetOwner():IsPlayer() ) ) ) then
 			
@@ -99,4 +99,4 @@ function hl2cThink()
 	end
 
 end
-hook.Add( "Think", "hl2cThink", hl2cThink )
+hook.Add("Think", "hl2cThink", hl2cThink )

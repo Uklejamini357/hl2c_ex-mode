@@ -13,27 +13,26 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
+	ents.FindByName("start_item_template")[1]:Remove()
 
-	ents.FindByName( "start_item_template" )[ 1 ]:Remove()
-
-	if ( !game.SinglePlayer() ) then ents.FindByName( "boxcar_door_close" )[ 1 ]:Remove(); end
-
+	if !game.SinglePlayer() then
+		ents.FindByName("boxcar_door_close")[1]:Remove()
+	end
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "barrelpush_cop1_sched" ) && ( string.lower(input) == "startschedule" ) ) then
+	if !game.SinglePlayer() and ent:GetName() == "barrelpush_cop1_sched" and input:lower() == "startschedule" then
 		CANALS_TRAIN_PREVENT_STARTFOWARD = true
 	end
 
-	if ( !game.SinglePlayer() && CANALS_TRAIN_PREVENT_STARTFOWARD && ( ent:GetName() == "looping_traincar1" ) && ( string.lower(input) == "startforward" ) ) then
+	if !game.SinglePlayer() and CANALS_TRAIN_PREVENT_STARTFOWARD and ent:GetName() == "looping_traincar1" and input:lower() == "startforward" then
 		return true
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "looping_traincar2" ) && ( string.lower(input) == "startforward" ) ) then
+	if !game.SinglePlayer() and ent:GetName() == "looping_traincar2" and input:lower() == "startforward" then
 		return true
 	end
 

@@ -1,12 +1,13 @@
 NEXT_MAP = "d1_town_01a"
 
+
+
 if CLIENT then
-	local real = nil
 	net.Receive("hl2ce_map_event", function()
 		local event = net.ReadString()
 		if event == "hl2c_hyperex_fuckedup" then
 			local true_crazy = net.ReadBool()
-			real = true
+			GAMEMODE.MapVars.Started = true
 			local last = CurTime()
 			-- MY EYES!!! MY EYEEESS!!!!!!
 			if true_crazy then
@@ -48,18 +49,17 @@ if CLIENT then
 
 			-- ow my ears
 			if true_crazy then
-				for i=1,4 do
-					sound.PlayFile("sound/music/ravenholm_1.mp3", "", function(station)
-						if station then
-							station:SetVolume(91)
-							station:SetPlaybackRate(1)
-						end
-					end)
-				end
+				sound.PlayFile("sound/music/ravenholm_1.mp3", "", function(station)
+					if station then
+						station:SetVolume(390)
+						station:SetPlaybackRate(1)
+					end
+				end)
 			end
 		elseif event == "hl2c_hyperex_fuckedup2" then
+			local last = CurTime()
 			hook.Add("RenderScreenspaceEffects", "hl2chypere_fucked_up", function()
-				local a = 25
+				local a = 5
 				local idk = (last+a)-CurTime() < 0 and math.sin(CurTime()-(last+a)) or (last+a)-CurTime()
 				local cols = {
 					["$pp_colour_addr"] = math.Rand(0, math.min(2, idk*0.02)),
@@ -83,7 +83,7 @@ if CLIENT then
 						RunConsoleCommand("stopsound")
 						return
 					end
-					if !real then return end
+					if !GAMEMODE.MapVars.Started then return end
 
 					local e = EffectData()
 					e:SetOrigin(LocalPlayer():GetPos())
@@ -99,7 +99,7 @@ if CLIENT then
 				end)
 			end
 		elseif event == "hl2c_hyperex_unfuckedup" then
-			real = nil
+			GAMEMODE.MapVars.Started = nil
 			hook.Remove("RenderScreenspaceEffects", "hl2chypere_fucked_up")
 			RunConsoleCommand("stopsound")
 		elseif event == "hl2c_ex_mapstart" then
@@ -150,7 +150,6 @@ local function SpawnZombie(class, pos, ang)
 end
 
 
-local _lost
 function hl2cAcceptInput(ent, input)
 	local entname = ent:GetName()
 	local inputlower = input:lower()
@@ -159,10 +158,10 @@ function hl2cAcceptInput(ent, input)
 			if GAMEMODE.HyperEXMode then -- WTF?! NEW EX MODE ALREADY?!
 				net.Start("hl2ce_map_event")
 				net.WriteString("hl2c_hyperex_fuckedup")
-				net.WriteBool(!_lost)
+				net.WriteBool(!GAMEMODE.MapVarsPersisting.AlreadyLost)
 				net.Broadcast()
 
-				if !_lost then
+				if !GAMEMODE.MapVarsPersisting.AlreadyLost then
 					for i=1,6 do
 						if !IsValid(ent) then return end
 						timer.Simple(0.3*i, function()
@@ -192,7 +191,7 @@ function hl2cAcceptInput(ent, input)
 					end)
 					timer.Simple(10, function()
 						if !IsValid(ent) then return end
-						if _lost then
+						if GAMEMODE.MapVarsPersisting.AlreadyLost then
 							BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I don't know anymore.", 10))]])
 							return
 						end
@@ -213,7 +212,7 @@ function hl2cAcceptInput(ent, input)
 
 					timer.Simple(20, function()
 						if !IsValid(ent) then return end
-						_lost = true
+						GAMEMODE.MapVarsPersisting.AlreadyLost = true
 
 						net.Start("hl2ce_map_event")
 						net.WriteString("hl2c_hyperex_fuckedup2")
@@ -247,7 +246,7 @@ function hl2cAcceptInput(ent, input)
 						end)
 					end)
 
-					_lost = true
+					GAMEMODE.MapVarsPersisting.AlreadyLost = true
 				end
 
 				return true
@@ -291,7 +290,7 @@ hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 -- Initialize entities
 function hl2cMapEdit()
 
-	ents.FindByName( "player_spawn_template" )[ 1 ]:Remove()
+	ents.FindByName("player_spawn_template")[1]:Remove()
 
 	if GAMEMODE.EXMode then
 		if GAMEMODE.HyperEXMode then
@@ -367,11 +366,11 @@ function hl2cMapEdit()
 	end
 	
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
 	if !GAMEMODE.EXMode then return end
 	if !ent:IsPlayer() then return end
-	dmginfo:ScaleDamage(5)
+	dmginfo:ScaleDamage(2.5)
 end)
 

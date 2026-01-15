@@ -35,7 +35,7 @@ end)
 -- Initialize entities
 function hl2cMapEdit()
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 function hl2cAcceptInput(ent, input)
 end

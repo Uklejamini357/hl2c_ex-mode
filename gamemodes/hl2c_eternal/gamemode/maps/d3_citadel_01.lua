@@ -12,13 +12,13 @@ if CLIENT then return end
 local failer
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-	ply:Give( "weapon_crowbar" )
-	ply:Give( "weapon_pistol" )
-	ply:Give( "weapon_smg1" )
-	ply:Give( "weapon_357" )
-	ply:Give( "weapon_frag" )
-	ply:Give( "weapon_physcannon" )
-	ply:Give( "weapon_shotgun" )
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_shotgun")
 	ply:Give( "weapon_ar2" )
 	ply:Give( "weapon_rpg" )
 	ply:Give( "weapon_crossbow" )
@@ -61,7 +61,7 @@ end, HOOK_LOW)
 
 -- Initialize entities
 function hl2cMapEdit()
-	ents.FindByName("global_newgame_template_ammo" )[1]:Remove()
+	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
@@ -112,7 +112,7 @@ function hl2cMapEdit()
 	PLAYER_VIEWCONTROL = nil
 	failer = nil
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
@@ -195,7 +195,7 @@ end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 
 
-if ( !game.SinglePlayer() ) then
+if !game.SinglePlayer() then
 
 	-- Player entered vehicle
 	function hl2cPlayerEnteredVehicle( ply, vehicle )

@@ -29,7 +29,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 function hl2cPlayerInitialSpawn( ply )
 	ply:SendLua( "table.insert( FRIENDLY_NPCS, \"npc_turret_floor\" )" )
 end
-hook.Add( "PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn )
+hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
@@ -44,11 +44,11 @@ function hl2cMapEdit()
 		vort:Spawn()
 	end
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator )
+function hl2cAcceptInput(ent, input, activator)
 	if !game.SinglePlayer() and ent:GetName() == "turret_arena_vcd_2" and string.lower(input) == "start" then
 		for _,ply in ipairs(player.GetAll()) do
 			if ply ~= activator then

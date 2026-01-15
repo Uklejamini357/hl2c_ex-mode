@@ -38,7 +38,7 @@ function hl2cMapEdit()
 		game.SetGlobalState( "gordon_invulnerable", GLOBAL_ON )
 	end
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 function hl2cEntityTakeDamage(ent, dmginfo)
 	if !GAMEMODE.EXMode then return end

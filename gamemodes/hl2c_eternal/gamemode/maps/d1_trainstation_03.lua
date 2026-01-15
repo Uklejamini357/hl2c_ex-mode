@@ -2,7 +2,7 @@ NEXT_MAP = "d1_trainstation_04"
 GM.XP_REWARD_ON_MAP_COMPLETION = 1
 
 TRIGGER_CHECKPOINT = {
-	{ Vector( -4998, -4918, 512 ), Vector( -4978, -4699, 619 ) }
+	{Vector(-4998, -4918, 512), Vector(-4978, -4699, 619)}
 }
 
 OVERRIDE_PLAYER_RESPAWNING = true
@@ -20,10 +20,11 @@ end)
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:RemoveSuit()
-	timer.Simple(0.01, function() if ( IsValid( ply ) ) then GAMEMODE:SetPlayerSpeed( ply, 150, 150 ); end; end)
-
+	timer.Simple(0.01, function()
+		if !IsValid(ply) then return end
+		GAMEMODE:SetPlayerSpeed(ply, 150, 150)
+	end)
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -39,17 +40,14 @@ function hl2cMapEdit()
 		game.SetGlobalState( "gordon_invulnerable", GLOBAL_ON )
 	end
 
-	if ( !game.SinglePlayer() ) then
-	
-		ents.FindByName( "npc_breakincop3" )[ 1 ]:Remove()
-		ents.FindByName( "ai_breakin_cop3goal3_blockplayer" )[ 1 ]:Remove()
-		ents.FindByName( "ai_breakin_cop3goal3_blockplayer2" )[ 1 ]:Remove()
-		ents.FindByName( "ai_breakin_cop3goal4_blockplayer" )[ 1 ]:Remove()
-	
+	if !game.SinglePlayer() then
+		ents.FindByName("npc_breakincop3")[1]:Remove()
+		ents.FindByName("ai_breakin_cop3goal3_blockplayer")[1]:Remove()
+		ents.FindByName("ai_breakin_cop3goal3_blockplayer2")[1]:Remove()
+		ents.FindByName("ai_breakin_cop3goal4_blockplayer")[1]:Remove()
 	end
-
 end
-hook.Add( "MapEdit", "hl2cMapEdit", hl2cMapEdit )
+hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
