@@ -24,15 +24,21 @@ function hl2cPlayerSpawn(ply)
 	ply:Give( "weapon_bugbait" )
 
 	if ( !game.SinglePlayer() && IsValid(PLAYER_VIEWCONTROL) && PLAYER_VIEWCONTROL:GetClass() == "point_viewcontrol" ) then
-	
 		ply:SetViewEntity(PLAYER_VIEWCONTROL)
 		ply:Spectate( OBS_MODE_ROAMING )
 		ply:DrawWorldModel( false )
 		ply:Lock()
-	
+	else
+		ply:SetViewEntity(NULL)
+		ply:UnSpectate()
+		ply:DrawWorldModel(true)
+		ply:UnLock()
 	end
 
-	timer.Simple( 0.1, function() if ( IsValid( ply ) ) then ply:SetNoTarget(true); end; end)
+	timer.Simple(0.1, function()
+		if !IsValid(ply) then return end
+		ply:SetNoTarget(true)
+	end)
 
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
@@ -40,12 +46,14 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
+	if GAMEMODE.HyperEXMode then
+		return
+	end
+
 	if !game.SinglePlayer() then
-	
 		local viewcontrol = ents.Create( "point_viewcontrol" )
 		viewcontrol:SetName( "pod_player_viewcontrol" )
 		viewcontrol:SetPos( ents.FindByName("pod_player")[1]:GetPos() )
@@ -55,9 +63,7 @@ function hl2cMapEdit()
 		viewcontrol:SetParent( ents.FindByName("pod_player")[1] )
 		viewcontrol:Fire( "SetParentAttachment", "vehicle_driver_eyes" )
 		viewcontrol:Fire( "Enable", "", 1 )
-	
 	end
-
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
@@ -118,6 +124,9 @@ function hl2cAcceptInput(ent, input)
 	
 	end
 
+	if GAMEMODE.HyperEXMode then
+		-- return true
+	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 

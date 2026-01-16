@@ -7,7 +7,27 @@ GM.XP_REWARD_ON_MAP_COMPLETION = 0.3
 
 CITADEL_VEHICLE_ENTITY = nil
 
-if CLIENT then return end
+if CLIENT then
+	hook.Add("RenderScreenspaceEffects", "hl2c_HyperEX_ColorMod", function()
+		if !GAMEMODE.HyperEXMode then return end
+
+		local tbl = {
+			["$pp_colour_addr"] = 0,
+			["$pp_colour_addg"] = 0,
+			["$pp_colour_addb"] = 0,
+			["$pp_colour_brightness"] = -0.04,
+			["$pp_colour_contrast"] = 1,
+			["$pp_colour_colour"] = 1,
+			["$pp_colour_mulr"] = 0,
+			["$pp_colour_mulg"] = 0,
+			["$pp_colour_mulb"] = 0
+		}
+
+		DrawColorModify(tbl)
+		DrawSobel(2)
+	end)
+	return
+end
 
 local failer
 -- Player spawns
@@ -65,7 +85,11 @@ function hl2cMapEdit()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
-	if GAMEMODE.EXMode then
+	if GAMEMODE.HyperEXMode then
+		for _,npc in ipairs(ents.FindByClass("npc_*")) do
+			npc:Remove() -- we never had a lifeless map didn't we?
+		end
+	elseif GAMEMODE.EXMode then
 		local ent = ents.Create("npc_combine_s")
 		ent:SetPos(Vector(10094,3364,-1470))
 		ent:SetAngles(Angle(0,180,0))
@@ -143,7 +167,7 @@ function hl2cAcceptInput(ent, input, caller)
 				ply:SetNoDraw(false)
 				ply:DrawWorldModel(true)
 				ply:UnLock()
-				ply:SetCollisionGroup( COLLISION_GROUP_PLAYER )
+				ply:SetCollisionGroup(COLLISION_GROUP_PLAYER)
 				ply:CollisionRulesChanged()
 			end
 
@@ -165,7 +189,24 @@ function hl2cAcceptInput(ent, input, caller)
 		return true
 	end
 
-	if GAMEMODE.EXMode then
+	if GAMEMODE.HyperEXMode then
+		if ent:GetClass() == "ambient_generic" then
+			return true
+		end
+
+		if ent:GetClass() == "point_template" and input:lower() == "forcespawn" then
+			return true
+		end
+
+		if ent:GetName() == "relay_crow_fly" and input:lower() == "trigger" then
+			timer.Simple(2.5, function()
+			end)
+			timer.Simple(5.1, function()
+			end)
+		end
+
+		-- if input:lower() ~= "use" then return true end
+	elseif GAMEMODE.EXMode then
 		if ent:GetName() == "relay_crow_fly" and input:lower() == "trigger" then
 			timer.Simple(2.5, function()
 				PrintMessage(3, "Chapter 12")
@@ -204,11 +245,16 @@ if !game.SinglePlayer() then
 			CITADEL_VEHICLE_ENTITY = vehicle
 			if !failer and string.sub(vehicle:GetName(), 1, 9) == "zapperpod" then
 				failer = ply
-				BroadcastLua([[chat.AddText(Color(255,0,0), "BOI YO FUCKED UP REAL HARD")]])
+
+				if GAMEMODE.HyperEXMode then
+					gamemode.Call("FailMap", failer, "you softlocked yourself")
+				else
+					BroadcastLua([[chat.AddText(Color(255,0,0), "BOI YO FUCKED UP REAL HARD")]])
+				end
 				for _,e in pairs(ents.FindByName("playerpod*")) do
 					e:Dissolve()
 				end
-			-- elseif failer and string.sub(vehicle:GetName(), 1, 9) == "playerpod" then
+			elseif string.sub(vehicle:GetName(), 1, 9) == "playerpod" then
 			-- 	BroadcastLua([[chat.AddText(Color(0,255,0), "AY YO WTF.. HOW YOU CLUTCHED THIS!?!?")]])
 			end
 
@@ -231,17 +277,10 @@ if !game.SinglePlayer() then
 
 	-- Update player position to the vehicle
 	function hl2cUpdatePlayerPosition()
-	
 		for _, ply in ipairs( team.GetPlayers( TEAM_ALIVE ) ) do
-		
 			if ( IsValid( ply ) && ply:Alive() && IsValid( CITADEL_VEHICLE_ENTITY ) ) then
-			
 				ply:SetPos( CITADEL_VEHICLE_ENTITY:GetPos() )
-			
 			end
-		
 		end
-	
 	end
-
 end

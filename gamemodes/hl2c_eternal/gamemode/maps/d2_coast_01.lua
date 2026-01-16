@@ -75,6 +75,16 @@ function hl2cAcceptInput(ent, input, caller)
 	if ( !game.SinglePlayer() && ( ent:GetName() == "logic_startcraneseq" ) && ( string.lower(input) == "trigger" ) ) then
 		ALLOWED_VEHICLE = "Jeep"
 		PrintMessage( HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3)." )
+
+		-- if GAMEMODE.EXMode then
+		-- ignore this
+			-- local spawner = ents.FindByName("antlion_spawner")[1]
+			-- spawner:Fire("SetMaxLiveChildren", )
+			-- spawner:Fire("SetSpawnRadius", )
+			-- spawner:Fire("SetSpawnFrequency", )
+			-- spawner:Fire("SetPoolRegenTime", )
+			-- spawner:Fire("SetPoolRegenAmount", )
+		-- end
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "push_car_superjump_01" ) && string.lower(input) == "disable" ) then
@@ -113,6 +123,11 @@ function hl2cAcceptInput(ent, input, caller)
 			timer.Simple(5.6, function()
 				PrintMessage(3, "The coast of DEATH.")
 			end)
+		end
+
+		-- had to fix it, else it could just get overridden easily
+		if entname == "antlion_spawner" and string.sub(inputlower, 1, 3) == "set" then
+			return true
 		end
 	end
 
