@@ -47,20 +47,20 @@ function hl2cMapEdit()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
-	if GAMEMODE.HyperEXMode then
-		return
-	end
-
 	if !game.SinglePlayer() then
-		local viewcontrol = ents.Create( "point_viewcontrol" )
-		viewcontrol:SetName( "pod_player_viewcontrol" )
-		viewcontrol:SetPos( ents.FindByName("pod_player")[1]:GetPos() )
-		viewcontrol:SetKeyValue( "spawnflags", "12" )
+		local viewcontrol = ents.Create("point_viewcontrol")
+		viewcontrol:SetName("pod_player_viewcontrol")
+		viewcontrol:SetPos(ents.FindByName("pod_player")[1]:GetPos())
+		viewcontrol:SetKeyValue("spawnflags", "12")
 		viewcontrol:Spawn()
 		viewcontrol:Activate()
-		viewcontrol:SetParent( ents.FindByName("pod_player")[1] )
-		viewcontrol:Fire( "SetParentAttachment", "vehicle_driver_eyes" )
-		viewcontrol:Fire( "Enable", "", 1 )
+		viewcontrol:SetParent(ents.FindByName("pod_player")[1])
+		viewcontrol:Fire("SetParentAttachment", "vehicle_driver_eyes")
+		viewcontrol:Fire("Enable", "", 1)
+	end
+
+	if GAMEMODE.HyperEXMode then
+		return
 	end
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
@@ -72,6 +72,7 @@ function hl2cAcceptInput(ent, input)
 	if !game.SinglePlayer() and ent:GetClass() == "point_viewcontrol" then
 		if string.lower(input) == "enable" then
 			PLAYER_VIEWCONTROL = ent
+
 			for _, ply in ipairs(player.GetAll()) do
 				ply:SetViewEntity(ent)
 				ply:Spectate(OBS_MODE_ROAMING)
