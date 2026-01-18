@@ -124,9 +124,7 @@ net.Receive("hl2ce_prestige", function(len, ply)
     elseif prestige == "eternity" then
         ply:GainEternity()
     elseif prestige == "celestiality" then
-        ply:PrintMessage(3, "There is no such thing as Celestiality.")
-        ply:PrintMessage(3, "Not. Yet. Implemented.")
-        -- ply:GainCelestiality()
+        ply:GainCelestiality()
     end
 end)
 

@@ -71,7 +71,7 @@ function hl2cAcceptInput(ent, input)
 		elseif string.lower(input) == "disable" then
 
 			PLAYER_VIEWCONTROL = nil
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 				ply:SetViewEntity( ply )
 				ply:Freeze( false )
 			end

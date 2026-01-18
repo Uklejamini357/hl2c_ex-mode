@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^3" -- also known as 0.inf.inf.inf
-GM.DateVer = "14-01-2025" -- fuck 2026
+GM.Version = "0.inf^4" -- also known as 0.inf.inf.inf... you get it
+GM.DateVer = "18-01-2025" -- fuck 2026 lol
 
 -- crazier things inbound... beware!
 
@@ -60,8 +60,8 @@ end
 
 function GM:CalculateXPNeededForLevels(lvl)
 	local xp = 0
-	if lvl >= 1000 then
-		for i=lvl-1000,lvl do
+	if lvl >= 100 then
+		for i=lvl-100,lvl do
 			xp = xp + self:GetReqXPCount(i)
 		end
 	else
@@ -87,8 +87,11 @@ function GM:GetReqXPCount(lvl)
 	local totalxpreq = InfNumber(basexpreq)
 	totalxpreq = totalxpreq + ((lvl_inf * addxpperlevel) ^ morelvlreq)
 
+	if lvl >= 100 then
+		totalxpreq = totalxpreq * infmath.max(1 + (lvl_inf-100) * 0.05, 1)
+	end
 	if lvl >= 250 then
-		totalxpreq = totalxpreq * infmath.max(1 + (lvl_inf-250) * 0.05, 1)
+		totalxpreq = totalxpreq * infmath.max(1 + (lvl_inf-250) * 1.05^(1.05 + (lvl_inf-250)*0.05), 1)
 	end
 	if lvl >= 400 then
 		totalxpreq = totalxpreq * infmath.max(InfNumber(1) + (lvl_inf-400) * (0.05+(lvl_inf-400)*0.01), 1)

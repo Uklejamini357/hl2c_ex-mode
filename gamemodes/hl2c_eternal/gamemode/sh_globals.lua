@@ -33,7 +33,7 @@ GM.EndlessMode = true
 
 Only if you want to play the game normally or with no progression advantages
 ]]
-GM.NoProgressionAdvantage = true
+GM.NoProgressionAdvantage = false
 
 -- Difficulty Level
 -- Difficulty that increases specific stats after certain amount of difficulty

@@ -3,10 +3,18 @@ NEXT_MAP = "d1_town_01a"
 
 
 if CLIENT then
+	hook.Add("HUDPaint", "Hl2ce_HyperEX_Progress", function()
+		if !GAMEMODE.HyperEXMode then return end
+		if !GAMEMODE.MapVars.NoChaos then return end
+
+		draw.DrawText(string.format("Zombies killed: %d/%d", GAMEMODE.MapVars.ZombiesKilled, 250), "TargetIDSmall", 5, 5, GAMEMODE.MapVars.ZombiesKilled > 250 and Color(0,255,0) or Color(255,255,0), TEXT_ALIGN_LEFT)
+	end)
+
 	net.Receive("hl2ce_map_event", function()
 		local event = net.ReadString()
 		if event == "hl2c_hyperex_fuckedup" then
 			local true_crazy = net.ReadBool()
+			GAMEMODE.MapVars.NoChaos = !true_crazy
 			GAMEMODE.MapVars.Started = true
 			local last = CurTime()
 			-- MY EYES!!! MY EYEEESS!!!!!!
@@ -102,6 +110,13 @@ if CLIENT then
 			GAMEMODE.MapVars.Started = nil
 			hook.Remove("RenderScreenspaceEffects", "hl2chypere_fucked_up")
 			RunConsoleCommand("stopsound")
+		elseif event == "hl2c_hyperex_objective" then
+			GAMEMODE.MapVars.ZombiesKilled = 0
+			chat.AddText(Color(255,255,0), "Objective: Kill 250 zombies")
+			chat.AddText(Color(255,160,0), "The what?! 250 ZOMBIES?!")
+			chat.AddText(Color(255,60,0), "THIS MAP GOT ONLY LESS THAN 50 ZOMBIES!! HOW CAN WE KILL 250 ZOMBIES ON THIS MAP LIKE THAT?!?!?!?")
+		elseif event == "hl2c_hyperex_objectiveprogress" then
+			GAMEMODE.MapVars.ZombiesKilled = net.ReadUInt(16)
 		elseif event == "hl2c_ex_mapstart" then
 			LocalPlayer():EmitSound("music/hl2_song7.mp3", 0, 70)
 			LocalPlayer():EmitSound("music/ravenholm_1.mp3", 0, 170)
@@ -116,12 +131,15 @@ if CLIENT then
 			end
 		end
 	end)
+
+	function InitMapVars(vars)
+		vars.ZombiesKilled = 0
+	end
 	return
 end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:Give("weapon_crowbar")
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_smg1")
@@ -138,6 +156,25 @@ local function hl2cHyperEXOnEntityCreated(ent)
 	end
 end
 hook.Add("OnEntityCreated", "hl2cHyperEXOnEntityCreated", hl2cHyperEXOnEntityCreated)
+
+local function hl2cHyperEXOnNPCKilled(ent)
+	if !GAMEMODE.HyperEXMode then return end
+	if ent:GetClass() == "npc_zombie" then
+		local vars = GAMEMODE.MapVars
+		local prev = vars.ZombiesKilled
+		vars.ZombiesKilled = vars.ZombiesKilled + 1
+
+		net.Start("hl2ce_map_event")
+		net.WriteString("hl2c_hyperex_objectiveprogress")
+		net.WriteUInt(vars.ZombiesKilled, 16)
+		net.Broadcast()
+
+		if vars.ZombiesKilled >= 250 and prev < 250 then
+			BroadcastLua([[chat.AddText(Color(0,255,0), "Finally.. WE CAN GET OUT OF HERE!!")]])
+		end
+	end
+end
+hook.Add("OnNPCKilled", "hl2cHyperEXOnNPCKilled", hl2cHyperEXOnNPCKilled)
 
 
 local function SpawnZombie(class, pos, ang)
@@ -191,10 +228,7 @@ function hl2cAcceptInput(ent, input)
 					end)
 					timer.Simple(10, function()
 						if !IsValid(ent) then return end
-						if GAMEMODE.MapVarsPersisting.AlreadyLost then
-							BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I don't know anymore.", 10))]])
-							return
-						end
+
 						BroadcastLua([[chat.AddText(Color(255,0,0), GlitchedText("I came here to tell you", 10))]])
 						timer.Simple(3, function()
 							if !IsValid(ent) then return end
@@ -247,7 +281,14 @@ function hl2cAcceptInput(ent, input)
 					end)
 
 					GAMEMODE.MapVarsPersisting.AlreadyLost = true
+					return true
 				end
+
+				GAMEMODE.MapVars.Started = true
+				GAMEMODE.MapVars.ZombiesKilled = 0
+				net.Start("hl2ce_map_event")
+				net.WriteString("hl2c_hyperex_objective")
+				net.Broadcast()
 
 				return true
 			end
@@ -289,12 +330,12 @@ hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	ents.FindByName("player_spawn_template")[1]:Remove()
 
 	if GAMEMODE.EXMode then
 		if GAMEMODE.HyperEXMode then
 			GAMEMODE.DisableDataSave = false
+			GAMEMODE.MapVars.ZombiesKilled = 0
 		end
 
 		local prop = ents.Create("prop_dynamic")
@@ -367,6 +408,41 @@ function hl2cMapEdit()
 	
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
+
+hook.Add("PlayerReady", "hl2ce_hyperEX_playerReady", function(ply)
+	if !GAMEMODE.HyperEXMode then return end
+	local vars = GAMEMODE.MapVars
+	if !vars or !vars.Started then return end
+
+	net.Start("hl2ce_map_event")
+	net.WriteString("hl2c_hyperex_fuckedup")
+	net.WriteBool(false)
+	net.Broadcast()
+
+	net.Start("hl2ce_map_event")
+	net.WriteString("hl2c_hyperex_objective")
+	net.Broadcast()
+
+	net.Start("hl2ce_map_event")
+	net.WriteString("hl2c_hyperex_objectiveprogress")
+	net.WriteUInt(vars.ZombiesKilled, 16)
+	net.Broadcast()
+end)
+
+hook.Add("CompleteMap", "hl2ce_hyperEX_", function(ply)
+	if !GAMEMODE.HyperEXMode then return end
+
+	local mapvars = GAMEMODE.MapVars
+	if mapvars and (mapvars.ZombiesKilled or 0) < 250 then
+		ply:SendLua([[chat.AddText(Color(255,0,0), "YOU DID NOT MEET THE REQUIREMENTS!")]])
+		ply:Kill()
+		local rag = ply:GetRagdollEntity()
+		if rag and rag:IsValid() then
+			rag:Dissolve()
+		end
+		return false
+	end
+end)
 
 hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
 	if !GAMEMODE.EXMode then return end

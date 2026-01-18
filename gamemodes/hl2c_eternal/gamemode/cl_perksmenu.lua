@@ -277,7 +277,7 @@ function GM:PerksMenu()
 	perksvgui:MakePopup()
 	perksvgui.Paint = function(this)
 		draw.RoundedBox(2, 0, 0, this:GetWide(), this:GetTall(), Color(0, 0, 0, 200))
-		surface.SetDrawColor(150, 150, 0,255)
+		surface.SetDrawColor(50, 50, 50, 255)
 		surface.DrawOutlinedRect(0, 0, this:GetWide(), this:GetTall())
 	end
 	perksvgui.Think = function(this)
@@ -483,7 +483,7 @@ function GM:PerksMenu()
 		sheet:AddSheet("Eternity", perklist2, "icon16/star.png", false, false, "Eternity Perks. They are far more powerful.")
 	end
 	if ply:HasCelestialityUnlocked() then
-		sheet:AddSheet("Celestiality", perklist3, "icon16/star.png", false, false, "Celestiality Perks")
+		sheet:AddSheet("Celestiality", perklist3, "icon16/star.png", false, false, "Celestialized Perks power are unmatched for previous perks.")
 	end
 	-- if ply:HasEternityUnlocked() then
 		-- sheet:AddSheet("Rebirth", perklist4, "icon16/star.png", false, false, "")
@@ -509,6 +509,14 @@ function GM:MakePrestigePanel()
 		draw.RoundedBox(2, 0, 0, w, h, Color(0, 0, 0, 200))
 		surface.SetDrawColor(150, 50, 0, 255)
 		surface.DrawOutlinedRect(0, 0, w, h)
+	end
+	self.PrestigePanel.Think = function(this)
+		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
+			timer.Simple(0, function()
+				this:Remove()
+			end)
+			gui.HideGameUI()
+		end
 	end
 
 	local list = vgui.Create("DPanelList", self.PrestigePanel)
@@ -548,10 +556,13 @@ function GM:MakePrestigePanel()
 	end, Color(150, 50, 0, 200)))
 	list:AddItem(MakeText(self.PrestigePanel, "Prestige will reset all your levels, XP and skills, but you will gain +20% boost to xp gain (every prestige) and a perk point.\nPrestigin will also unlock new perks after time.", "TargetIDSmall"))
 	list:AddItem(MakeText(self.PrestigePanel, "You must reach Level "..MAX_LEVEL.." and reach max XP for the next level in order to prestige.", "TargetIDSmall"))
-	list:AddItem(MakeText(self.PrestigePanel, "Prestiging for the first time will permanently increase skill points gain to 2 per level and will increase skills max level to 35.", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "Upon first prestige:", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Gain 2 skill points per level", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Increase skills max level to 35", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Unlocks perks", "TargetIDSmall"))
 
 	if !pl:HasPrestigeUnlocked() then return end
-	list:AddItem(MakeButton("Eternity", 0, 0, function()
+	list:AddItem(MakeButton("Eternize", 0, 0, function()
 		if !pl:HasEternityUnlocked() then
 			self.PrestigePanel:Remove()
 		end
@@ -560,13 +571,16 @@ function GM:MakePrestigePanel()
 		net.WriteString("eternity")
 		net.SendToServer()
 	end, Color(50, 150, 200, 200)))
-	list:AddItem(MakeText(self.PrestigePanel, "Eternity to reset your levels, XP, skills, prestiges and prestige perks, but you gain a +120% boost to xp gain (every eternity) and\nEternity point. Eternity perks are more powerful than regular perks.", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "Eternizing will reset your levels, XP, skills, prestiges and prestige perks, but you gain a +120% boost to xp gain (every eternity) and\nEternity point. Eternity perks are more powerful than regular perks.", "TargetIDSmall"))
 	list:AddItem(MakeText(self.PrestigePanel, "Must be able prestige with the exception of prestige limit or be above "..MAX_PRESTIGE.." prestiges in order to Eternity", "TargetIDSmall"))
-	list:AddItem(MakeText(self.PrestigePanel, "Upon eternity you are given lots of buffs. (TO BE IMPLEMENTED)", "TargetIDSmall"))
-	list:AddItem(MakeText(self.PrestigePanel, "", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "Upon first eternity:", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Your skill max level is raised to 50", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Your max level is raised to 250", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Unlocks Eternity Upgrades", "TargetIDSmall"))
 
-	list:AddItem(MakeButton("Celestiality", 0, 0, function()
-		if !pl:HasEternityUnlocked() then
+	if !pl:HasEternityUnlocked() then return end
+	list:AddItem(MakeButton("Celestialize", 0, 0, function()
+		if !pl:HasCelestialityUnlocked() then
 			self.PrestigePanel:Remove()
 		end
 
@@ -575,8 +589,11 @@ function GM:MakePrestigePanel()
 		net.SendToServer()
 	end, Color(50, 150, 200, 200)))
 	list:AddItem(MakeText(self.PrestigePanel, "Celestiality will reset pre-Celestiality progress.", "TargetIDSmall"))
-	list:AddItem(MakeText(self.PrestigePanel, "Must be able to prestige (Exception: Prestige limit) and reach "..MAX_ETERNITIES.." Eternities", "TargetIDSmall"))
-	list:AddItem(MakeText(self.PrestigePanel, "", "TargetIDSmall"))
-	list:AddItem(MakeText(self.PrestigePanel, "", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "XP gain multiplier from prestiges are increased by x+0.5 for each celestiality!", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "The above Effect softcaps after reaching x10 mult.", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "Must be able to prestige and reach "..MAX_ETERNITIES.." Eternities", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "First celestiality:", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Raises max level to 1000", "TargetIDSmall"))
+	list:AddItem(MakeText(self.PrestigePanel, "- Max skills level are raised to 350", "TargetIDSmall"))
 
 end

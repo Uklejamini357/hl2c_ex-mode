@@ -463,7 +463,7 @@ function GM:GrabAndSwitch()
 	changingLevel = true
 
 	-- Since the file can build up with useless files we should clear it
-	hook.Call("ClearPlayerDataFolder", GAMEMODE)
+	gamemode.Call("ClearPlayerDataFolder")
 
 	-- Store player information
 	for _, ply in ipairs(player.GetAll()) do
@@ -494,6 +494,11 @@ function GM:Initialize()
 	if self.MapVarsPersisting == nil then
 		self.MapVarsPersisting = {}
 	end
+
+	if InitMapVars then
+		InitMapVars(self.MapVars, self.MapVarsPersisting)
+	end
+
 
 	self.XP_REWARD_ON_MAP_COMPLETION = self.XP_REWARD_ON_MAP_COMPLETION or 1 -- because it would call true if it was false, we use other values
 	self:SetDifficulty(1)
@@ -559,7 +564,7 @@ function GM:Initialize()
 
 	-- Kill global states
 	-- Reasoning behind this is because changing levels would keep these known states and cause issues on other maps
-	hook.Call("KillAllGlobalStates", GAMEMODE)
+	gamemode.Call("KillAllGlobalStates")
 	
 	-- Jeep
 	local jeep = {
@@ -616,7 +621,7 @@ function GM:Initialize()
 	self:AddResources()
 	self:LoadServerData()
 	
-	print(GAMEMODE.Name.." ("..GAMEMODE.Version..") gamemode loaded")
+	print(self.Name.." ("..self.Version..") gamemode loaded")
 end
 
 function GM:OnMapCompleted()
@@ -630,6 +635,45 @@ end
 
 function GM:PostOnCampaignCompleted()
 end
+
+function GM:CompleteMap(ply)
+	if ply:Team() ~= TEAM_ALIVE then return end
+
+	local completed = team.NumPlayers(TEAM_COMPLETED_MAP)
+	ply:SetTeam(TEAM_COMPLETED_MAP)
+	self:WriteCampaignSaveData(ply)
+
+	-- Remove their vehicle
+	if IsValid(ply:GetVehicle()) then
+		ply:ExitVehicle()
+		ply:RemoveVehicle()
+	end
+
+	-- Freeze them and make sure they don't push people away (and also so they don't get targeted by NPC's)
+	ply:Spectate(OBS_MODE_ROAMING)
+	ply:StripWeapons()
+	ply:SetAvoidPlayers(false)
+	ply:SetNoTarget(true)
+
+	if completed == 0 then
+		gamemode.Call("OnMapCompleted", ply)
+	end
+
+	-- Start the nextmap countdown
+	if !changingLevel and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
+		self:NextMap()
+	end
+
+	if completed == 0 then
+		gamemode.Call("PostOnMapCompleted", ply)
+	end
+
+	-- Let everyone know that someone entered the loading section
+	PrintMessage(HUD_PRINTTALK, Format("%s completed the map (%s) [%i of %i]", ply:Name(), string.ToMinutesSeconds(CurTime() - ply.startTime), team.NumPlayers(TEAM_COMPLETED_MAP), self.playersAlive))
+
+	gamemode.Call("PlayerCompletedMap", ply)
+end
+
 
 function GM:PlayerCompletedMap(ply)
 	-- XP
@@ -883,8 +927,13 @@ function GM:OnNPCKilled(npc, killer, weapon)
 
 		if NPC_MONEYS_VALUES[npcclass] then
 			local moneys = NPC_MONEYS_VALUES[npcclass]
-			local npckillxpmul,npckilldiffgainmul = self.MoneysGainOnNPCKillMul or 1
 			local npcmoneymul = npc.MoneyGainMult or 1
+			local moneygain = 1
+
+			if killer:HasPerkActive("2_difficult_decision") then
+				moneygain = moneygain * 1.85
+			end
+
 			killer:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*npcmoneymul*(infmath.min(killer:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25)))
 		end
 
@@ -1020,18 +1069,18 @@ function GM:PlayerInitialSpawn(ply)
 	ply:SetTeam(TEAM_ALIVE)
 
 	ply.XP = InfNumber(0)
-	ply.Level = InfNumber(0)
-	ply.StatPoints = InfNumber(0)
+	ply.Level = 0
+	ply.StatPoints = 0
 
 
 	-- a HUGE EXTREME LIST OF PRESTIGE LAYERS. (nah we stick to the ones previously for now)
 
-	ply.Prestige = InfNumber(0)
-	ply.PrestigePoints = InfNumber(0)
-	ply.Eternities = InfNumber(0)
-	ply.EternityPoints = InfNumber(0)
-	ply.Celestiality = InfNumber(0)
-	ply.CelestialityPoints = InfNumber(0)
+	ply.Prestige = 0
+	ply.PrestigePoints = 0
+	ply.Eternities = 0
+	ply.EternityPoints = 0
+	ply.Celestiality = 0
+	ply.CelestialityPoints = 0
 
 	--[[
 	ply.Resets = InfNumber(0) -- 2nd layer
@@ -1540,8 +1589,9 @@ end
 function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, giving them a quite big penalty
 	if changingLevel then return end
 	net.Start("hl2ce_fail")
-	net.WriteString(reason or "Map failed!")
+	net.WriteString(OVERRIDE_FAIL_REASON or reason or "Map failed!")
 	net.Broadcast()
+	OVERRIDE_FAIL_REASON = nil
 
 	self:RestartMap()
 
@@ -1714,6 +1764,15 @@ local SecondTick = 0
 local delayedDMGTick = 0
 -- Called every frame 
 function GM:Think()
+	self.playersAlive = team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)
+
+	if !changingLevel and self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
+		GAMEMODE:NextMap()
+	end
+
+	if self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_INSTANT_PERCENT / 100) then
+		GAMEMODE:GrabAndSwitch()
+	end
 
 	-- Restart the map if all players are dead
 	if ((!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING) and player.GetCount() > 0 and ((team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)) <= 0) then

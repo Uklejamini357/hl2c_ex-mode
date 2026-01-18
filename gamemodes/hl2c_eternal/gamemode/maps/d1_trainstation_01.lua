@@ -96,7 +96,7 @@ function hl2cAcceptInput(ent, input, activator)
 	end
 
 	if !game.SinglePlayer() and ent:GetClass() == "env_zoom" and inputlower == "zoom"  then
-		for _, ply in ipairs( player.GetAll() ) do
+		for _, ply in ipairs(player.GetAll()) do
 			local keyValues = ent:GetKeyValues()
 			ply:SetFOV(tonumber(keyValues.FOV), tonumber(keyValues.Rate))
 		end

@@ -392,7 +392,7 @@ GM.PerksData = {
 
 	["2_difficult_decision"] = {
 		Name = "A very difficult decision",
-		DescriptionEndless = "3.35x difficulty gain per NPC kill, and a +45% XP Gain",
+		DescriptionEndless = "3.35x difficulty gain per NPC kill, and a +45% XP Gain. +85% boost to moneys gain.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 2
@@ -406,8 +406,8 @@ GM.PerksData = {
 		PrestigeLevel = 2
 	},
 
-	["2_prestige_improvement_2"] = {
-		Name = "Prestige Improvement II",
+	["2_prestige_improver_2"] = {
+		Name = "Prestige Improver II",
 		DescriptionEndless = "On prestige you keep 25% of your XP. You will keep your Prestige perks after Eternity. (Affects your Prestige Points)\nHas a increased damage taken penalty when having negative prestige points.",
 		Cost = 1,
 		PrestigeReq = 4,
@@ -416,7 +416,7 @@ GM.PerksData = {
 
 	["2_perk_points"] = {
 		Name = "Perk Points I",
-		DescriptionEndless = "+12 Perk Points for each Eternity",
+		DescriptionEndless = "+12 Perk Points for each Eternity\nCosts for eternity upgrades are divided by 2.5",
 		Cost = 1,
 		PrestigeReq = 4,
 		PrestigeLevel = 2
@@ -424,7 +424,7 @@ GM.PerksData = {
 
 	["2_damageboost"] = {
 		Name = "Super Damage Boost",
-		DescriptionEndless = "+40% damage dealt, +5% damage for every unspent perk point\n(Negative points will apply too but can reduce only up to 40%)",
+		DescriptionEndless = "+40% damage dealt, +5% damage for every unspent perk point\n(Negative points will apply too but can reduce only up to 40%)\nDamage boost for eternity upgrade increased by +3%.",
 		Cost = 1,
 		PrestigeReq = 4,
 		PrestigeLevel = 2
@@ -463,15 +463,15 @@ GM.PerksData = {
 		PrestigeReq = 1,
 		PrestigeLevel = 3
 	},
---[[
-	["3_prestige_improvement_3"] = {
-		Name = "Prestige Improvement III",
+
+	["3_prestige_improver_3"] = {
+		Name = "Prestige Improver III",
 		DescriptionEndless = " (NYI)",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,
 	},
-]]
+
 	["3_extremility"] = {
 		Name = "Extremility",
 		DescriptionEndless = "^0.9 to the effective difficulty.\nEffective difficulty affects only damage dealt to, and taken by NPC's.",
@@ -522,6 +522,14 @@ GM.PerksData = {
 		PrestigeLevel = 3
 	},
 
+	["3_eternal_will"] = {
+		Name = "Eternal Will",
+		DescriptionEndless = "Unlocks a new eternity upgrade. Moneys gain are boosted by ^1.5",
+		Cost = 2,
+		PrestigeReq = 7,
+		PrestigeLevel = 3
+	},
+
 	["3_exponentially_cursed"] = {
 		Name = "Exponentially Cursed",
 		DescriptionEndless = "Your health and damage taken becomes logarithmed (min 0.01 damage taken)\nx100 to your health after logarithm (NYI)",
@@ -538,7 +546,8 @@ GM.UpgradesEternity = {
 		Description = "Increases damage multiplier by %s%%",
 		Cost = function(ply, amt) return InfNumber(100) + InfNumber(25*amt*amt)^(1 + amt*0.01)^math.max(1, amt*0.001) end,
 		EffectValue = function(ply, amt)
-			return 1 + 0.1*amt
+			amt = 1 + (ply:HasPerkActive("2_damageboost") and 0.13 or 0.1)*amt
+			return amt
 		end,
 	},
 
@@ -571,6 +580,21 @@ GM.UpgradesEternity = {
 
 			return val
 		end,
+	},
+
+	["moneygain_upgrader"] = {
+		Name = "Money Gain Upgrader",
+		Description = "+%s%% to money gain",
+		Cost = function(ply, amt) return InfNumber(250) + InfNumber(35*amt*amt)^(1 + amt*0.01)^math.max(1, 0.5+amt/2e3) end,
+		EffectValue = function(ply, amt)
+			local val = 1 + 0.25*amt
+			val = val^(1 + amt*0.05)
+
+			return val
+		end,
+		Unlocked = function(ply)
+			return ply:HasPerkActive("3_eternal_will")
+		end
 	},
 }
 

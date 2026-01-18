@@ -13,9 +13,11 @@ include("cl_config.lua")
 include("cl_upgradesmenu.lua")
 
 local hl2ce_cl_noearringing = CreateClientConVar("hl2ce_cl_noearringing", 0, true, true, "Disables annoying tinnitus sound when taking damage from explosions", 0, 1)
-local hl2ce_cl_nohuddifficulty = CreateClientConVar("hl2ce_cl_nohuddifficulty", 0, true, true, "Disables Difficulty text from HUD if not having CMenu Open", 0, 1)
-local hl2ce_cl_nodifficultytext = CreateClientConVar("hl2ce_cl_nodifficultytext", 0, true, true, "Displays only the % on difficulty", 0, 1)
-local hl2ce_cl_nocustomhud = CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, true, "Disables the HL2 Health and Armor Bars", 0, 1)
+local hl2ce_cl_nohuddifficulty = CreateClientConVar("hl2ce_cl_nohuddifficulty", 0, true, false, "Disables Difficulty text from HUD if not having CMenu Open", 0, 1)
+local hl2ce_cl_nodifficultytext = CreateClientConVar("hl2ce_cl_nodifficultytext", 0, true, false, "Displays only the % on difficulty", 0, 1)
+local hl2ce_cl_noshowdifficultychange = CreateClientConVar("hl2ce_cl_noshowdifficultychange", 0, true, false, "Displays when difficulty changed", 0, 1)
+local hl2ce_cl_nocustomhud = CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, false, "Disables the HL2 Health and Armor Bars", 0, 1)
+local hl2ce_cl_drawxpgaintext = CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)
 
 timeleft = timeleft or 0
 
@@ -150,7 +152,7 @@ function GM:HUDPaint()
 	local diff_difference_total = infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifferenceTotal)
 
 	if (ContextMenu and ContextMenu:IsValid()) or not hl2ce_cl_nohuddifficulty:GetBool() then
-		colordifference = self.DifficultyDifferenceTimeChange + 3 >= CurTime() and (diff_difference < 0 and Color(255, 220-((self.DifficultyDifferenceTimeChange+3-CurTime())*110), 0) or Color(255-((self.DifficultyDifferenceTimeChange+3-CurTime())*255/2), 220, 0)) or Color(255, 220, 0)
+		colordifference = !hl2ce_cl_noshowdifficultychange:GetBool() and self.DifficultyDifferenceTimeChange + 3 >= CurTime() and (diff_difference < 0 and Color(255, 220-((self.DifficultyDifferenceTimeChange+3-CurTime())*110), 0) or Color(255-((self.DifficultyDifferenceTimeChange+3-CurTime())*255/2), 220, 0)) or Color(255, 220, 0)
 		colordifference.a = 155
 
 		local d = self:GetDifficulty() * 100
@@ -189,7 +191,7 @@ function GM:HUDPaint()
 			draw.DrawText(Format("(Effective: %s%%)", FormatNumber(self:GetEffectiveDifficulty(pl)*100)), "TargetIDSmall", ScrW() / 2, ScrH() / 6 - 15, c, TEXT_ALIGN_CENTER)
 		end
 
-		if self.DifficultyDifferenceTimeChange + 3 >= CurTime() and self.DifficultyDifference ~= 0 then
+		if !hl2ce_cl_noshowdifficultychange:GetBool() and self.DifficultyDifferenceTimeChange + 3 >= CurTime() and self.DifficultyDifference ~= 0 then
 			colordifference.a = (self.DifficultyDifferenceTimeChange+3-CurTime())*155/3
 			draw.DrawText(Format("%s%s%%", diff_difference < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifference * 100, 2)))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 15, colordifference, TEXT_ALIGN_CENTER )
 
@@ -260,7 +262,7 @@ function GM:PostDrawHUD()
 	-- draw.SimpleText(self.Name.." "..self.Version, "TargetIDSmall", 5, 5, Color(255,255,192,25))
 	surface.SetDrawColor(0, 0, 0, 0)
 
-	if XPColor > 0 then
+	if hl2ce_cl_drawxpgaintext:GetBool() and XPColor > 0 then
 		draw.SimpleText(tostring(infmath.Round(XPGained, 2)).." XP gained", "TargetID", ScrW() / 2 + 15, (ScrH() / 2) + 15, Color(255,255,255,XPColor), 0, 1 )
 		if XPGainedTotal ~= XPGained then
 			draw.SimpleText("("..tostring(infmath.Round(XPGainedTotal, 2)).." XP gained total)", "TargetIDSmall", ScrW() / 2 + 15, (ScrH() / 2) + 30, Color(255,255,205,XPColor), 0, 1 )
@@ -301,8 +303,15 @@ function GM:Initialize()
 
 	-- Initial variables for client
 	self.ShowScoreboard = false
+	self.EXMode = self.EnableEXMode
+	self.HyperEXMode = self.EnableHyperEXMode
+
 	self.MapVars = {}
 	self.MapVarsPersisting = {}
+	if InitMapVars then
+		InitMapVars(GAMEMODE.MapVars, GAMEMODE.MapVarsPersisting)
+	end
+
 	showNav = false
 	scoreboard = nil
 
@@ -480,11 +489,20 @@ function RestartMap(len)
 		restartMapCountdownStart = nil
 
 		-- when map restarts i guess
+		gamemode.Call("OnMapRestart")
+
 		GAMEMODE.EXMode = GAMEMODE.EnableEXMode
 		GAMEMODE.HyperEXMode = GAMEMODE.EnableHyperEXMode
 
 		GAMEMODE.MapVars = {}
-		GAMEMODE.MapVarsPersisting = {}
+		if GAMEMODE.MapVarsPersisting == nil then
+			GAMEMODE.MapVarsPersisting = {}
+		end
+		if InitMapVars then
+			InitMapVars(GAMEMODE.MapVars, GAMEMODE.MapVarsPersisting)
+		end
+
+		gamemode.Call("PostOnMapRestart")
 	end
 
 	if GetGlobalString("losemusic") then
@@ -493,6 +511,12 @@ function RestartMap(len)
 	end
 end
 net.Receive("RestartMap", RestartMap)
+
+function GM:OnMapRestart()
+end
+
+function GM:PostOnMapRestart()
+end
 
 function GM:OnMapCompleted()
 end

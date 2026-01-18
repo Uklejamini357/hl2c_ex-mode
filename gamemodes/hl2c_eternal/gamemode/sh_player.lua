@@ -127,7 +127,7 @@ function meta:GetEternityGainMul()
 end
 
 function meta:GetMaxLevel()
-	return self:HasEternityUnlocked() and 250 or MAX_LEVEL
+	return self:HasCelestialityUnlocked() and 1000 or self:HasEternityUnlocked() and 250 or MAX_LEVEL
 end
 
 function meta:GetMaxPrestige()
@@ -135,11 +135,11 @@ function meta:GetMaxPrestige()
 end
 
 function meta:GetMaxEternity()
-	return MAX_ETERNITIES
+	return self:HasCelestialityUnlocked() and 50 or MAX_ETERNITIES
 end
 
 function meta:GetMaxCelestiality()
-	return MAX_ETERNITIES
+	return math.huge
 end
 
 function meta:GetMaxSkillLevel(perk)
@@ -186,7 +186,7 @@ function meta:GetEternityUpgradeEffectValue(upg, forcevalue)
 	
 
 
-	local amt = math.max(0, forcevalue or self.EternityUpgradeValues[upg])
+	local amt = math.max(0, forcevalue or self.EternityUpgradeValues[upg] or 0)
 	if isfunction(upgrade.EffectValue) then
 		return upgrade.EffectValue(self, amt)
 	end
@@ -204,11 +204,16 @@ function meta:GetEternityUpgradeCost(upg, forcevalue)
 	local upgrade = GAMEMODE.UpgradesEternity[upg]
 	if not upgrade then return end
 
-	local amt = math.max(0, forcevalue or self.EternityUpgradeValues[upg])
+	local amt = math.max(0, forcevalue or self.EternityUpgradeValues[upg] or 0)
 	local cost = upgrade.Cost
 
 	if isfunction(cost) then
-		return cost(self, amt)
+		cost = cost(self, amt)
+
+		if self:HasPerkActive("2_perk_points") then
+			cost = cost / 2.5
+		end
+		return cost
 	end
 
 	return cost

@@ -361,6 +361,7 @@ function InfNumber(mantissa, exponent)
 
     return tbl
 end
+IN = InfNumber -- alias for InfNumber
 
 function ConvertStringToInfNumber(str)
     if str == "0" then return InfNumber(0) end

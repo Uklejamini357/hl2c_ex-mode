@@ -57,7 +57,7 @@ function hl2cAcceptInput(ent, input)
 		
 			PLAYER_VIEWCONTROL = ent
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetViewEntity( ent )
 				ply:SetNoDraw(true)
@@ -80,7 +80,7 @@ function hl2cAcceptInput(ent, input)
 		
 			PLAYER_VIEWCONTROL = nil
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetViewEntity( ply )
 				ply:SetNoDraw( false )

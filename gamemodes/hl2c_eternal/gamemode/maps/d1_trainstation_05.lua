@@ -64,7 +64,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		
 			PLAYER_VIEWCONTROL = ent
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetViewEntity( ent )
 				ply:Freeze(true)
@@ -82,7 +82,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		
 			PLAYER_VIEWCONTROL = nil
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetViewEntity( ply )
 				ply:Freeze( false )

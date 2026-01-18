@@ -15,3 +15,5 @@ LANG.Medical = "Medical"
 LANG.Medical_d = "Your medical abilities are much more useful, especially in combat.\nYour medical tools have 2% more effectiveness."
 LANG.Vitality = "Vitality"
 LANG.Vitality_d = "You grow stronger, max health is increased by 3 per point."
+
+LANG.you_lost = "You lost!"

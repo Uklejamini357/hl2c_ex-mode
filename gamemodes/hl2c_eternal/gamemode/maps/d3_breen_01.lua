@@ -188,7 +188,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			if string.lower(input) == "enable" then
 				PLAYER_VIEWCONTROL = ent
 
-				for _, ply in ipairs( player.GetAll() ) do
+				for _, ply in ipairs(player.GetAll()) do
 					ply:SetViewEntity( ent )
 					ply:SetNoDraw(true)
 					ply:DrawWorldModel( false )
@@ -203,7 +203,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			elseif string.lower(input) == "disable" then
 				PLAYER_VIEWCONTROL = nil
 
-				for _, ply in ipairs( player.GetAll() ) do
+				for _, ply in ipairs(player.GetAll()) do
 					ply:SetViewEntity( ply )
 					ply:SetNoDraw( false )
 					ply:DrawWorldModel(true)
@@ -228,7 +228,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 		if ent:GetName() == "clip_door_BreenElevator" and string.lower(input) == "enable" then
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetVelocity( Vector( 0, 0, 0 ) )
 				ply:SetPos( Vector( -1968, 0, 600 ) )
@@ -241,7 +241,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 		if ent:GetName() == "lcs_al_doworst" and string.lower(input) == "start" then
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetVelocity( Vector( 0, 0, 0 ) )
 				ply:SetPos( Vector( -1056, 464, 1340 ) )
@@ -254,7 +254,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 		if ent:GetName() == "citadel_scene_al_rift1" and string.lower(input) == "start" then
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetVelocity( Vector( 0, 0, 0 ) )
 				ply:SetPos( Vector( -640, -400, 1320 ) )
@@ -286,7 +286,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		
 			CITADEL_ENDING = true
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:RemoveAllItems()
 				ply:SetNoDraw(true)
@@ -313,7 +313,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 		if ent:GetClass() == "player_speedmod" and string.lower(input) == "modifyspeed" then
 		
-			for _, ply in ipairs( player.GetAll() ) do
+			for _, ply in ipairs(player.GetAll()) do
 			
 				ply:SetLaggedMovementValue( tonumber( value ) )
 			
