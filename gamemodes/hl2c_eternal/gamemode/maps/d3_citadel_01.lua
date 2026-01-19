@@ -323,7 +323,7 @@ function hl2cAcceptInput(ent, input, caller)
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "zapper_fade" ) && ( string.lower(input) == "fade" ) ) then
 		if failer then
-			gamemode.Call("FailMap", failer, "BRUHHHHHHHHHHH YOU TOOK THE WRONG POD WHAT IS WRONG WITH YOU?!")
+			gamemode.Call("FailMap", failer, "wrong_pod_taken")
 		else
 			caller:PrintMessage(3, "No.")
 			return true
@@ -414,7 +414,7 @@ function hl2cPlayerEnteredVehicle(ply, vehicle)
 			failer = ply
 
 			if GAMEMODE.HyperEXMode then
-				gamemode.Call("FailMap", failer, "you softlocked yourself")
+				gamemode.Call("FailMap", failer, "you_softlocked")
 			elseif GAMEMODE.EXMode then
 				BroadcastLua([[chat.AddText(Color(255,0,0), "BOI YO FUCKED UP REAL HARD")]])
 			else
@@ -452,7 +452,7 @@ function hl2cPlayerEnteredVehicle(ply, vehicle)
 				timer.Simple(GAMEMODE.MapVars.OpportunityTimeEnd + math.Rand(2,3), function()
 					if !IsValid(vehicle) then return end
 					if #team.GetPlayers(TEAM_COMPLETED_MAP) == 0 then
-						gamemode.Call("FailMap", nil, "You failed to escape the endless trap!\nYou had the chance, but you blew it!")
+						gamemode.Call("FailMap", nil, "you_failed_to_escape")
 					end
 
 					net.Start("hl2ce_map_event")

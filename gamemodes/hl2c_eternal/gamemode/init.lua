@@ -382,7 +382,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	-- end
 
 	if self.EXMode and attacker:GetClass() == "npc_sniper" and attacker.VariantType == 1 then
-		PrintMessage(3, tostring(attacker).." "..(ent:IsPlayer() and ent:Nick() or ent:GetClass()).." "..dmgInfo:GetDamage())
+		PrintMessage(3, tostring(attacker).." "..(ent:IsPlayer() and ent:Nick() or ent:GetClass()).." "..tostring(damage))
 	end
 
 	local cantakedamage = ent:IsValid() and ent:IsPlayer() and not (ent:HasGodMode() or not gamemode.Call("PlayerShouldTakeDamage", ent, attacker)) or ent:IsValid() and !ent:IsPlayer()
@@ -461,6 +461,7 @@ end
 -- Called by GoToNextLevel
 function GM:GrabAndSwitch()
 	changingLevel = true
+	timer.Remove("hl2c_next_map")
 
 	-- Since the file can build up with useless files we should clear it
 	gamemode.Call("ClearPlayerDataFolder")
@@ -471,7 +472,9 @@ function GM:GrabAndSwitch()
 		self:SavePlayer(ply)
 	end
 
-	timer.Simple(1, function() game.ConsoleCommand("changelevel "..NEXT_MAP.."\n") end)
+	timer.Simple(1, function()
+		game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
+	end)
 end
 
 function GM:ShutDown()
@@ -669,7 +672,7 @@ function GM:CompleteMap(ply)
 	end
 
 	-- Let everyone know that someone entered the loading section
-	PrintMessage(HUD_PRINTTALK, Format("%s completed the map (%s) [%i of %i]", ply:Name(), string.ToMinutesSeconds(CurTime() - ply.startTime), team.NumPlayers(TEAM_COMPLETED_MAP), self.playersAlive))
+	PrintTranslatedMessage(HUD_PRINTTALK, "x_completed_map", ply:Name(), string.ToMinutesSeconds(CurTime() - ply.startTime), team.NumPlayers(TEAM_COMPLETED_MAP), self.playersAlive)
 
 	gamemode.Call("PlayerCompletedMap", ply)
 end
@@ -1767,23 +1770,23 @@ function GM:Think()
 	self.playersAlive = team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)
 
 	if !changingLevel and self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
-		GAMEMODE:NextMap()
+		self:NextMap()
 	end
 
 	if self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_INSTANT_PERCENT / 100) then
-		GAMEMODE:GrabAndSwitch()
+		self:GrabAndSwitch()
 	end
 
 	-- Restart the map if all players are dead
 	if ((!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING) and player.GetCount() > 0 and ((team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)) <= 0) then
 		if !changingLevel then
-			gamemode.Call("FailMap", nil, "All players have died!")
+			gamemode.Call("FailMap", nil, "all_players_died")
 
 			for _,ply in ipairs(player.GetAll()) do
 				if ply:Team() ~= TEAM_ALIVE and ply:Team() ~= TEAM_COMPLETED_MAP and ply:Team() ~= TEAM_DEAD then
-					PrintMessage(3, "One of the players are on the invalid team!")
+					PrintMessage(3, "One of the players are not on the invalid team!")
 					if ULib and ULib.isSandbox and ULib.isSandbox() then
-						PrintMessage(3, "It's likely it's due to a team being applied to one of the player's groups!")
+						PrintMessage(3, "ULX issue: It's likely it's due to a team being applied to one of the player's groups!")
 					end
 
 					break

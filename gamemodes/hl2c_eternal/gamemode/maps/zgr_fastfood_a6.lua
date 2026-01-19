@@ -23,6 +23,7 @@ hook.Add("EntityTakeDamage", "InfDifficulty", function(ent, dmginfo)
 			if moneys < 0 then
 				s = s.." (at debt of "..moneys.." moneys)"
 			end
+			BroadcastLua("surface.PlaySound('npc/stalker/go_alert2a.wav')")
 			PrintMessage(3, s)
 
 			if moneys < -100 then
@@ -104,6 +105,7 @@ hook.Add("AcceptInput", "InfDifficulty", function(ent, input)
 		end)
 	elseif entname == "pizzaoven_relay3" and inputlower == "trigger" then
 		timer.Remove(timerhandler)
+		GAMEMODE:SetDifficulty(1)
 		gamemode.Call("FailMap", nil, "You let the oven get blown up!\nYou got fired and arrested, for causing catastrophic damages to the restaurant!")
 	end
 end)

@@ -12,12 +12,20 @@ include("cl_prestige.lua")
 include("cl_config.lua")
 include("cl_upgradesmenu.lua")
 
+local translate_Get = translate.Get
+local translate_Format = translate.Format
+
 local hl2ce_cl_noearringing = CreateClientConVar("hl2ce_cl_noearringing", 0, true, true, "Disables annoying tinnitus sound when taking damage from explosions", 0, 1)
 local hl2ce_cl_nohuddifficulty = CreateClientConVar("hl2ce_cl_nohuddifficulty", 0, true, false, "Disables Difficulty text from HUD if not having CMenu Open", 0, 1)
 local hl2ce_cl_nodifficultytext = CreateClientConVar("hl2ce_cl_nodifficultytext", 0, true, false, "Displays only the % on difficulty", 0, 1)
 local hl2ce_cl_noshowdifficultychange = CreateClientConVar("hl2ce_cl_noshowdifficultychange", 0, true, false, "Displays when difficulty changed", 0, 1)
 local hl2ce_cl_nocustomhud = CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, false, "Disables the HL2 Health and Armor Bars", 0, 1)
 local hl2ce_cl_drawxpgaintext = CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)
+local hl2ce_cl_noepilepsy = CreateClientConVar("hl2ce_cl_noepilepsy", 1, true, false, "Greatly weakens violently flashing lights, or disables them.", 0, 1)
+GM.NoEpilepsy = hl2ce_cl_noepilepsy:GetBool()
+cvars.AddChangeCallback("hl2ce_cl_noepilepsy", function(cvar, old, new)
+	GAMEMODE.NoEpilepsy = tobool(new)
+end, "hl2ce_cl_noepilepsy")
 
 timeleft = timeleft or 0
 
@@ -157,7 +165,7 @@ function GM:HUDPaint()
 
 		local d = self:GetDifficulty() * 100
 		local d_normal = infmath.ConvertInfNumberToNormalNumber(d)
-		local s = Format(hl2ce_cl_nodifficultytext:GetBool() and "%s%%" or "Difficulty: %s%%", FormatNumber(infmath.Round(d, 2)))
+		local s = Format(hl2ce_cl_nodifficultytext:GetBool() and "%s%%" or translate.Get("difficulty").." %s%%", FormatNumber(infmath.Round(d, 2)))
 		surface.SetFont("TargetIDSmall")
 		local len = surface.GetTextSize(s)
 		local l = 0
@@ -173,15 +181,16 @@ function GM:HUDPaint()
 			-- I know it's unoptimal, but frick it
 			local max = d.exponent == math.huge and 1e4 or math.log10(d:log10()+100)
 			local max2 = d.exponent == math.huge and 1e4 or math.log10(d:log10())-2
-			for i=1,#s do
+			for i=1,utf8.len(s) do
 				local r = math.Rand(0.5, 1)
 				c = HSVToColor((SysTime()*(60+max*10) + (
 					d:log10() > 6969 and -math.sin(l/5)*10*max2 or l/(3/math.max(1, (d:log10()-308)^0.8/100))
 			))%360, d:log10() > 1e6 and 0.8+math.sin(SysTime()*0.6+l/5)/5 or 1,
 			d:log10() > 1e9 and 0.8+math.sin(SysTime()+l/5)/5 or 1)
 
-				draw.DrawText(s[i], "TargetIDSmall", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT)
-				l = l + surface.GetTextSize(s[i])
+				local _ch = utf8.sub(s, i, i)
+				draw.DrawText(_ch, "TargetIDSmall", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT)
+				l = l + surface.GetTextSize(_ch)
 			end
 		else
 			draw.DrawText(s, "TargetIDSmall", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT )
@@ -206,13 +215,13 @@ function GM:HUDPaint()
 		local hp,ap = pl:Health(),pl:Armor()
 		local mhp,map = pl:GetMaxHealth(), pl:GetMaxArmor()
 
-		draw.DrawText(Format("Health: %s/%s (%d%%)", pl:Health(), pl:GetMaxHealth(), hp/mhp*100), "TargetIDSmall", 16, ScrH()-100, Color(255,155,155,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Health(), pl:GetMaxHealth(), hp/mhp*100), "TargetIDSmall", 16, ScrH()-100, Color(255,155,155,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 80, 200, 10)
 		surface.SetDrawColor(205, 25, 25, 255)
 		surface.DrawRect(16, ScrH() - 79, 198*math.Clamp(hp/mhp,0,1), 10)
 
-		draw.DrawText(Format("Armor: %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), ap/map*100), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), ap/map*100), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 40, 200, 10)
 		surface.SetDrawColor(25, 25, 205, 255)
@@ -538,22 +547,11 @@ end
 -- Called by show help
 function ShowHelp(len)
 	local pl = LocalPlayer()
-	local helpText = [[-= ABOUT THIS GAMEMODE =-
-Welcome to Half-Life 2 Campaign Eternal!
-This gamemode is based on Half-Life 2 Campaign made by Jai 'Choccy' Fox, with new stuff like Leveling, Skills and more!
-
--= KEYBOARD SHORTCUTS =-
-[F1] (Show Help) - Opens this menu.
-[F2] (Show Team) - Toggles the navigation marker on your HUD.
-[F3] (Spare 1) - Spawns a vehicle if allowed.
-[F4] (Spare 2) - Removes a vehicle if you have one.
-
--= OTHER NOTES =-
-Once you're dead you cannot respawn until the next map.]]
 
 	local helpMenu = vgui.Create("DFrame")
 	GAMEMODE.HelpMenu = helpMenu
 	helpMenu:SetTitle("Welcome")
+	helpMenu:SetDraggable(false)
 	helpMenu:SetSize(ScrW(), ScrH())
 	helpMenu.Paint = function(self,w,h)
 		surface.SetDrawColor(0, 0, 0, 150)
@@ -563,58 +561,98 @@ Once you're dead you cannot respawn until the next map.]]
 	helpMenu:MakePopup()
 
 	local list = vgui.Create("DPanelList", helpMenu) -- i ain't using other panels, despite this one being deprecated.
-	list:SetSize(1000, 500)
+	list:SetSize(1000, 700)
+	list:SetSpacing(12)
 	list:Center()
 	list.Paint = function() end
+	list:EnableVerticalScrollbar()
 
 
 	local text = vgui.Create("DLabel", list)
-	text:SetText(helpText)
+	text:SetText([[-= ABOUT THIS GAMEMODE =-
+Welcome to Half-Life 2 Campaign Eternal!
+This gamemode is based on Half-Life 2 Campaign made by Jai 'Choccy' Fox!
+Expanded by Uklejamini]])
+	text:SetTextColor(Color(255,255,255))
 	text:SetContentAlignment(5)
 	text:SizeToContents()
 	text:SetWrap(true)
 	list:AddItem(text)
-	text:Dock(TOP)
-	text:DockPadding(0, 12, 0, 12)
+
+	local text = vgui.Create("DLabel", list)
+	text:SetText([[-= KEYBOARD SHORTCUTS =-
+[F1] (Show Help) - Opens this menu.
+[F2] (Show Team) - Toggles the navigation marker on your HUD.
+[F3] (Spare 1) - Spawns a vehicle if allowed.
+[F4] (Spare 2) - Removes a vehicle if you have one.]])
+	text:SetTextColor(Color(255,255,155))
+	text:SetContentAlignment(5)
+	text:SizeToContents()
+	text:SetWrap(true)
+	list:AddItem(text)
+
+	local text = vgui.Create("DLabel", list)
+	text:SetText([[-= OTHER NOTES =-
+Once you're dead you cannot respawn until the next map.]])
+	text:SetTextColor(Color(155,155,255))
+	text:SetContentAlignment(5)
+	text:SizeToContents()
+	text:SetWrap(true)
+	list:AddItem(text)
 
 	if GAMEMODE.EXMode then
 		local text = vgui.Create("DLabel", list)
-		text:SetText([[
-			EX Mode is enabled. Good luck.
-		]])
+		text:SetText([[EX Mode has been enabled. Good luck.]])
 		text:SetColor(Color(255,0,0))
 		text:SetContentAlignment(5)
 		text:SizeToContents()
 		text:SetWrap(true)
 		list:AddItem(text)
-		text:Dock(TOP)
-		text:DockPadding(0, 12, 0, 12)
+
+		local text = vgui.Create("DLabel", list)
+		text:SetText("What is EX Mode?")
+		text:SetColor(Color(255,160,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[EX mode is a (not so) new mode added in Hl2c Eternal.
+In this new mode, you should expect new map gimnicks, various npc variants, and more overall chaos.
+Experience Half-Life 2 in a new, and twisted way!]])
+		text:SetColor(Color(255,110,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
 	end
 
 	if GAMEMODE.HyperEXMode then
 		local text = vgui.Create("DLabel", list)
-		text:SetText([[
-			HyperEXMode engaged. WTF IS WRONG WITH YOU?!
-		]])
+		text:SetText([[HyperEXMode engaged. WTF IS WRONG WITH YOU?!]])
 		text:SetColor(Color(255,0,0))
 		text:SetContentAlignment(5)
 		text:SizeToContents()
 		text:SetWrap(true)
 		list:AddItem(text)
-		text:Dock(TOP)
-		text:DockPadding(0, 12, 0, 12)
 
 		local text = vgui.Create("DLabel", list)
-		text:SetText([[
-			OH MY GOD WE'RE DOOMED!!!!!!
-		]])
+		text:SetText([[HyperEX mode is one of the sequels to the EX mode.
+It's much more insane than the regular EX mode.]])
+		text:SetColor(Color(255,110,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[OH MY GOD WE'RE DOOMED!!!!!!]])
 		text:SetColor(Color(190,0,0))
 		text:SetContentAlignment(5)
 		text:SizeToContents()
 		text:SetWrap(true)
 		list:AddItem(text)
-		text:Dock(TOP)
-		text:DockPadding(0, 12, 0, 12)
 	end
 
 	local adminbutton
@@ -638,7 +676,7 @@ Once you're dead you cannot respawn until the next map.]]
 			surface.DrawRect(0, 0, width, height)
 		end
 		list:AddItem(adminbutton)
-		adminbutton:Dock(TOP)
+		adminbutton:Dock(BOTTOM)
 		adminbutton:DockMargin(400, 0, 400, 0)
 	end
 
@@ -700,14 +738,19 @@ function GM:ShowSkills()
 
 	local function DoStatsList()
 		for k, v in SortedPairs(self.SkillsInfo) do
+			local name = translate_Get(v.Name)
+			local d = translate_Get(v.Description)
+			local de = translate_Get(v.DescriptionEndless)
+
+			local formatted = name.."\n\n"..translate_Get("in_ne_mode").."\n"..d..(de and "\n\n"..translate_Get("in_e_mode")..":\n"..de or "")
 			local LabelDefense = vgui.Create("DLabel")
 			LabelDefense:SetPos(50, 50)
-			LabelDefense:SetText(v.Name..": "..tostring(pl.Skills[k]))
+			LabelDefense:SetText(name..": "..tostring(pl.Skills[k]))
 			LabelDefense:SetTextColor(color_black)
-			LabelDefense:SetToolTip(v.Name..("\n\n"..v.DescriptionEndless and "(In Non-Endless Mode:\n)" or "")..v.Description..(v.DescriptionEndless and "\n\nIn Endless Mode:\n"..v.DescriptionEndless or ""))
+			LabelDefense:SetToolTip(formatted)
 			LabelDefense:SizeToContents()
 			LabelDefense.Think = function(this)
-				local txt = v.Name..": "..tostring(pl.Skills[k])
+				local txt = name..": "..tostring(pl.Skills[k])
 				if txt == this:GetText() then return end
 				this:SetText(txt)
 				this:SizeToContents()
@@ -718,8 +761,8 @@ function GM:ShowSkills()
 			Button:SetPos(50, 100)
 			Button:SetSize(15, 20)
 			Button:SetTextColor(color_black)
-			Button:SetText("Increase "..v.Name.." by 1 point")
-			Button:SetToolTip(v.Name.."\n\nIn Non-Endless Mode:\n"..v.Description..(v.DescriptionEndless and "\n\nIn Endless Mode:\n"..v.DescriptionEndless or ""))
+			Button:SetText(translate_Format("inc_sk", name, 1))
+			Button:SetToolTip(formatted)
 			Button.DoClick = function(Button)
 				net.Start("UpgradePerk")
 				net.WriteString(k)

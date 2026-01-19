@@ -5,6 +5,7 @@
 --[[Copied from ZS because was too lazy to add one by myself, anyways it was edited a bit for file reduce]]
 
 translate = {}
+local translate = translate
 
 local Languages = {}
 local Translations = {}
@@ -24,6 +25,17 @@ if CLIENT then
 		end
 	end)
 end
+
+local translate_GetLanguages
+local translate_GetLanguageName
+local translate_GetTranslations
+local translate_AddLanguage
+local translate_AddTranslation
+local translate_Get
+local translate_Format
+local translate_ClientGet
+local translate_ClientFormat
+local plPrintMessage
 
 function translate.GetLanguages()
 	return Languages
@@ -49,40 +61,59 @@ function translate.AddTranslation(id, text)
 	Translations[AddingLanguage][id] = text
 end
 
+local function returnDefault(id)
+	return GAMEMODE.DebugTranslate and "@"..id.."@" or id
+end
+
 function translate.Get(id)
-	return translate.GetTranslations(CurrentLanguage)[id] or translate.GetTranslations(DefaultLanguage)[id] or ("@"..id.."@")
+	if GAMEMODE.DebugNoTranslate then
+		return returnDefault(id)
+	end
+
+	return translate_GetTranslations(CurrentLanguage)[id] or translate_GetTranslations(DefaultLanguage)[id] or returnDefault(id)
 end
 
 function translate.Format(id, ...)
-	return string.format(translate.Get(id), ...)
+	return string.format(translate_Get(id), ...)
 end
 
 if SERVER then
 	function translate.ClientGet(pl, ...)
 		CurrentLanguage = pl:GetInfo("gmod_language_rep")
-		return translate.Get(...)
+		return translate_Get(...)
 	end
 
 	function translate.ClientFormat(pl, ...)
 		CurrentLanguage = pl:GetInfo("gmod_language_rep")
-		return translate.Format(...)
+		return translate_Format(...)
 	end
 
 	function PrintTranslatedMessage(printtype, str, ...)
 		for _, pl in ipairs(player.GetAll()) do
-			pl:PrintMessage(printtype, translate.ClientFormat(pl, str, ...))
+			pl:PrintMessage(printtype, translate_ClientFormat(pl, str, ...))
 		end
 	end
 end
 
 if CLIENT then
 	function translate.ClientGet(_, ...)
-		return translate.Get(...)
+		return translate_Get(...)
 	end
 	function translate.ClientFormat(_, ...)
-		return translate.Format(...)
+		return translate_Format(...)
 	end
 end
+
+translate_GetLanguages = translate.GetLanguages
+translate_GetLanguageName = translate.GetLanguageName
+translate_GetTranslations = translate.GetTranslations
+translate_AddLanguage = translate.AddLanguage
+translate_AddTranslation = translate.AddTranslation
+translate_Get = translate.Get
+translate_Format = translate.Format
+translate_ClientGet = translate.ClientGet
+translate_ClientFormat = translate.ClientFormat
+
 
 local function AddLanguages(late)
 	local GM = GM or GAMEMODE
@@ -91,11 +122,12 @@ local function AddLanguages(late)
 		AddCSLuaFile((late and "late_languages" or "languages").."/"..filename)
 		include((late and "late_languages" or "languages").."/"..filename)
 		for k, v in pairs(LANG) do
-			translate.AddTranslation(k, v)
+			translate_AddTranslation(k, v)
 		end
 		LANG = nil
 	end
 end
+
 AddLanguages()
 
 /* -- Not working due to ERROR
@@ -103,13 +135,15 @@ timer.Simple(0, function()
 	AddLanguages(true)
 end)
 */
+
 local meta = FindMetaTable("Player")
 if not meta then return end
 
+plPrintMessage = meta.PrintMessage
 function meta:PrintTranslatedMessage(hudprinttype, translateid, ...)
 	if ... ~= nil then
-		self:PrintMessage(hudprinttype, translate.ClientFormat(self, translateid, ...))
+		plPrintMessage(self, hudprinttype, translate.ClientFormat(self, translateid, ...))
 	else
-		self:PrintMessage(hudprinttype, translate.ClientGet(self, translateid))
+		plPrintMessage(self, hudprinttype, translate.ClientGet(self, translateid))
 	end
 end

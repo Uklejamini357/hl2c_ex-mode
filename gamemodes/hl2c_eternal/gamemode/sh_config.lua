@@ -202,32 +202,32 @@ WHITELISTED_WEAPONS = {
 GM.SkillsInfo = {
 	["Gunnery"] = {
 		Name = "Gunnery",
-		Description = "+1% damage dealt with firearms",
-		DescriptionEndless = "+3% damage dealt with firearms\nAbove Gunnery Level 15: +2.5% damage dealt with non-firearms per point",
+		Description = "Gunnery_d",
+		DescriptionEndless = "Gunnery_de",
 	},
 
 	["Defense"] = {
 		Name = "Defense",
-		Description = "+0.8% damage resistance from enemy bullets",
-		DescriptionEndless = "+2.5% damage resistance from enemy bullets\nAbove Level 15: +2% damage resistance all sources but guns",
+		Description = "Defense_d",
+		DescriptionEndless = "Defense_de",
 	},
 
 	["Medical"] = {
 		Name = "Medical",
-		Description = "+2% effectiveness to medkits",
-		DescriptionEndless = "+5% effectiveness to medkits"
+		Description = "Medical_d",
+		DescriptionEndless = "Medical_de"
 	},
 
 	["Surgeon"] = {
 		Name = "Surgeon",
-		Description = "+2% max ammo to medkits / +2% increased medkit recharge speed",
-		DescriptionEndless = "+10% max ammo to medkits / +10% increased medkit recharge speed"
+		Description = "Surgeon_d",
+		DescriptionEndless = "Surgeon_de"
 	},
 
 	["Vitality"] = {
 		Name = "Vitality",
-		Description = "+1 health",
-		DescriptionEndless = "+5 health",
+		Description = "Vitality_d",
+		DescriptionEndless = "Vitality_de",
 		OnApply = function(ply, oldamt, newamt)
 			local oldmhp = ply:GetMaxHealth()
 			local newmhp = ply:GetOriginalMaxHealth()
@@ -239,8 +239,8 @@ GM.SkillsInfo = {
 
 	["Knowledge"] = {
 		Name = "Knowledge",
-		Description = "+3% xp gain",
-		DescriptionEndless = "+5% xp gain\nAbove Level 15: +2% difficulty gain on NPC Kill"
+		Description = "Knowledge_d",
+		DescriptionEndless = "Knowledge_de"
 	},
 
 }

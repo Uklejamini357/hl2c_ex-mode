@@ -25,6 +25,13 @@ end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
+hook.Add("ApplyNPCVariant", "hl2ce_HyperEX_ApplyVariant", function(ent, class)
+	if !GAMEMODE.HyperEXMode then return end
+	if class == "npc_combine_s" then
+		ent.VariantType = 1
+	end
+end)
+
 -- Accept input
 function hl2cAcceptInput(ent, input)
 

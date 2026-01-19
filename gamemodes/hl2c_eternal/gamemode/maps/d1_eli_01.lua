@@ -544,7 +544,7 @@ function hl2cAcceptInput(ent, input, activator)
 					end)
 
 					if #ents.FindByClass("npc_fastzombie") > 40 then
-						gamemode.Call("FailMap", nil, "Could not hold off the fast zombies!")
+						gamemode.Call("FailMap", nil, "lose_fzm")
 
 						for _,ent in pairs(ents.FindByClass("npc_*")) do
 							ent:SetHealth(0)

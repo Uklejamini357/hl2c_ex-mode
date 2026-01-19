@@ -20,15 +20,16 @@ function hl2cPlayerSpawn(ply)
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
-hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", function(ply)
+hook.Add("PlayerReady", "hl2cPlayerReady", function(ply)
 	timer.Simple(5, function()
-		if !ply:IsValid() then return end
+		if !IsValid(ply) then return end
 		ply:PrintMessage(3, "Pretty sure you know where this is going..")
 	end)
 end)
 
-function hl2cOnEntityCreated(ent)
-	if !GAMEMODE.EXMode or !ent:IsNPC() then return end
+function hl2cEXPostApplyNPCVariant(ent, variant)
+	if !GAMEMODE.EXMode then return end
+
 	if ent:GetClass() == "npc_antlion" then
 		ent:SetColor(Color(128,255,0,255))
 		timer.Simple(0, function()
@@ -45,7 +46,7 @@ function hl2cOnEntityCreated(ent)
 		end)
 	end
 end
-hook.Add("OnEntityCreated", "hl2cOnEntityCreated", hl2cOnEntityCreated)
+hook.Add("PostApplyNPCVariant", "hl2cEXPostApplyNPCVariant", hl2cEXPostApplyNPCVariant)
 
 
 -- Shouldn't cause the map to be stuck
@@ -68,14 +69,16 @@ hook.Add("EntityRemoved", "NOANTLIONGUARDREMOVE", function(ent)
 			timer.Simple(math.Rand(2,5), function() PrintMessage(3, "I give up.") end)
 			timer.Simple(math.Rand(8,9), function() GAMEMODE:SetDifficulty(InfNumber(6.66666, 666)) end)
 			timer.Simple(math.Rand(9,10), function() PrintMessage(3, "Have fun.") end)
-			timer.Simple(math.Rand(11,12), function() for _,ply in pairs(player.GetLiving()) do ents.FindByClass("trigger_delaymapload")[1]:StartTouch(ply) end end)
+			timer.Simple(math.Rand(11,12), function()
+				for _,ply in ipairs(player.GetLiving()) do gamemode.Call("CompleteMap", ply) end
+			end)
 		else
 			gamemode.Call("FailMap", nil, failtries > 5 and "..." or
-			failtries > 4 and "ONE MORE TIME I SEE THIS. AND YOU WILL BE BANNED!!!" or
-			failtries > 3 and "You will not be able to progress if you keep killing the antlion guard unfairly" or
-			failtries > 2 and "Kill the antlion guard the intended way!!" or
-			failtries > 1 and "Are you seriously trying to pass the map easily?!" or
-			"The hell was your plan?! killing the antlion guard the easy way?!\nNo! This whole plan caused your team to fail!\nYou should know better!")
+			failtries > 4 and "lose_attempt5" or
+			failtries > 3 and "lose_attempt4" or
+			failtries > 2 and "lose_attempt3" or
+			failtries > 1 and "lose_attempt2" or
+			"lose_attempt1")
 			failtries = failtries + 1
 
 			local e = EffectData()

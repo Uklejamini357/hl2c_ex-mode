@@ -20,7 +20,7 @@ if CLIENT then
 			-- MY EYES!!! MY EYEEESS!!!!!!
 			if true_crazy then
 				hook.Add("RenderScreenspaceEffects", "hl2chypere_fucked_up", function()
-					local idk = math.min(CurTime()-last-1, true_crazy and 5 or 1)
+					local idk = math.min(CurTime()-last-1, true_crazy and 5*(GAMEMODE.NoEpilepsy and 0.1 or 1) or 1)
 					if idk < 0 then return end
 					local cols = {
 						["$pp_colour_addr"] = math.Rand(0, math.min(2, idk*0.05)),
@@ -59,7 +59,7 @@ if CLIENT then
 			if true_crazy then
 				sound.PlayFile("sound/music/ravenholm_1.mp3", "", function(station)
 					if station then
-						station:SetVolume(390)
+						station:SetVolume(GAMEMODE.NoEpilepsy and 4 or 370)
 						station:SetPlaybackRate(1)
 					end
 				end)
@@ -149,13 +149,14 @@ function hl2cPlayerSpawn(ply)
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
-local function hl2cHyperEXOnEntityCreated(ent)
-	if !GAMEMODE.HyperEXMode or !ent:IsNPC() then return end
+local function hl2cHyperEXApplyNPCVariant(ent)
+	if !GAMEMODE.HyperEXMode then return end
+
 	if ent:GetClass() == "npc_zombie" then
 		ent.VariantType = 2
 	end
 end
-hook.Add("OnEntityCreated", "hl2cHyperEXOnEntityCreated", hl2cHyperEXOnEntityCreated)
+hook.Add("ApplyNPCVariant", "hl2cHyperEXApplyNPCVariant", hl2cHyperEXApplyNPCVariant)
 
 local function hl2cHyperEXOnNPCKilled(ent)
 	if !GAMEMODE.HyperEXMode then return end
@@ -412,6 +413,12 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 hook.Add("PlayerReady", "hl2ce_hyperEX_playerReady", function(ply)
 	if !GAMEMODE.HyperEXMode then return end
 	local vars = GAMEMODE.MapVars
+
+	if !GAMEMODE.MapVarsPersisting.AlreadyLost then
+		ply:PrintMessage(3, "BEWARE: This map has high flashing and epilepsy right at the start...")
+		ply:PrintMessage(3, "Set volume to 0 and enable option to weaken light flashes in the options.")
+		return
+	end
 	if !vars or !vars.Started then return end
 
 	net.Start("hl2ce_map_event")

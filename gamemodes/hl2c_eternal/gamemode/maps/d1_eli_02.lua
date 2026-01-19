@@ -96,7 +96,7 @@ function hl2cAcceptInput(ent, input, activator)
 		end
 
 		if entname == "logic_alyx_failsafe_letout" and inputlower == "trigger" then
-			gamemode.Call("FailMap", nil, "ZOMBIES ARE RELEASED\nYOU TOOK TOO LONG!")
+			gamemode.Call("FailMap", nil, "zms_released")
 			for _,ply in ipairs(player.GetLiving()) do
 				for i=1,4 do
 					local zm = ents.Create("npc_zombie")
