@@ -20,6 +20,14 @@ end)
 
 -- Initialize entities
 function hl2cMapEdit()
+	ents.FindByName("new_game_template")[1]:Remove()
+
+	local alyx = ents.Create("npc_alyx")
+	alyx:SetName("alyx")
+	alyx:SetKeyValue("GameEndAlly", "1")
+	alyx:Give("weapon_alyxgun")
+	alyx:SetPos(Vector(4977, -5977, -116))
+	alyx:Spawn()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 

@@ -221,6 +221,9 @@ function GM:OnEntityCreated(ent)
 		-- ent:EnableCustomCollisions(true)
 	end
 
+	if ent:IsNPC() then
+		ent.PlyAttackers = {}
+	end
 	timer.Simple(0, function()
 		if !ent:IsNPC() then return end
 		if ent.ent_MaxHealthMul then
@@ -354,7 +357,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		damage = damage * infmath.min(diff, 1e5) * diff2
 	end
 
-	infmath.ConvertInfNumberToNormalNumber(damage)
+	damage = infmath.ConvertInfNumberToNormalNumber(damage)
 	dmgInfo:SetDamage(damage)
 
 	-- if attacker:IsPlayer() then
@@ -367,12 +370,16 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 
 	local cantakedamage = ent:IsValid() and ent:IsPlayer() and not (ent:HasGodMode() or not gamemode.Call("PlayerShouldTakeDamage", ent, attacker)) or ent:IsValid() and !ent:IsPlayer()
 	if cantakedamage then
+		if ent.PlyAttackers and attacker:IsPlayer() then
+			ent.PlyAttackers[attacker] = (ent.PlyAttackers[attacker] or 0) + damage 
+		end
+
 		if ent:Inf_Health() > 2e9 then
-			if infmath.ConvertInfNumberToNormalNumber(damage) < ent:Inf_Health() then
-				dmgInfo:SetDamage(infmath.ConvertInfNumberToNormalNumber(infmath.min(damage, 2e9-1)))
+			if damage < ent:Inf_Health() then
+				dmgInfo:SetDamage(math.min(damage, 2e9-1))
 			end
 
-			ent:Inf_SetHealth(infmath.ConvertInfNumberToNormalNumber(ent:Inf_Health() - damage))
+			ent:Inf_SetHealth(ent:Inf_Health() - damage)
 		end
 	else return true
 	end
@@ -856,70 +863,87 @@ end)
 
 -- Called when an NPC dies
 function GM:OnNPCKilled(npc, killer, weapon)
-	if (IsValid(killer) && killer:IsVehicle() && IsValid(killer:GetDriver()) && killer:GetDriver():IsPlayer()) then
+	if IsValid(killer) and killer:IsVehicle() and IsValid(killer:GetDriver()) and killer:GetDriver():IsPlayer() then
 		killer = killer:GetDriver()
 	end
 
+	local npcclass = npc:GetClass()
 	-- If the killer is a player then decide what to do with their points
-	if IsValid(killer) && killer:IsPlayer() && IsValid(npc) then
-		local npcclass = npc:GetClass()
+	if IsValid(killer) and killer:IsPlayer() and IsValid(npc) then
 		if NPC_POINT_VALUES[npcclass] then
 			killer:AddFrags(NPC_POINT_VALUES[npcclass])
 		else
 			killer:AddFrags(1)
 		end
+	end
 
+	if npc.PlyAttackers and table.Count(npc.PlyAttackers) > 0 then
 		local difficulty,nonmoddiff = self:GetDifficulty(), self:GetDifficulty(nil, true)
+
 		if NPC_XP_VALUES[npcclass] then
-			-- Too many local this is fine.
+			-- Too many local. this is fine.
 			local xp = NPC_XP_VALUES[npcclass]
 			local diffgain = 0.0005
 			local npckillxpmul = (self.XpGainOnNPCKillMul or 1) * (npc.XPGainMult or 1)
 			local npckilldiffgainmul = (self.DifficultyGainOnNPCKillMul or 1) * (npc.DifficultyGainMult or 1)
+			local difficulty_gain = IN(0)
 
-			local gainfromdifficultymul = infmath.min(difficulty^0.8, killer:GetMaxDifficultyXPGainMul())
-			local better_knowledge_gain = killer:HasPerkActive("1_better_knowledge") and (self.EndlessMode and (infmath.ConvertInfNumberToNormalNumber(nonmoddiff) >= 6.50 and 1.55 or 1.3) or !self.EndlessMode and 1.25) or 1
-			local xpmul = gainfromdifficultymul * npckillxpmul * better_knowledge_gain
+			for attacker,dmg in pairs(npc.PlyAttackers) do
+				local mul = math.min(1, dmg/npc:GetMaxHealth())
 
-			if killer:GetSkillAmount("Knowledge") > 15 then
-				npckilldiffgainmul = npckilldiffgainmul * (1 + (killer:GetSkillAmount("Knowledge")-15)*0.02)
+				local gainfromdifficultymul = infmath.min(difficulty^0.8, attacker:GetMaxDifficultyXPGainMul())
+				local better_knowledge_gain = attacker:HasPerkActive("1_better_knowledge") and (self.EndlessMode and (infmath.ConvertInfNumberToNormalNumber(nonmoddiff) >= 6.50 and 1.55 or 1.3) or !self.EndlessMode and 1.25) or 1
+				local xpmul = gainfromdifficultymul * npckillxpmul * better_knowledge_gain
+				local diffmul = 1
+
+				if attacker:GetSkillAmount("Knowledge") > 15 then
+					diffmul = diffmul * (1 + (attacker:GetSkillAmount("Knowledge")-15)*0.02)
+				end
+				if self.EndlessMode then
+					if attacker:HasPerkActive("1_difficult_decision") then
+						diffmul = diffmul * 1.75
+					end
+
+					if attacker:HasPerkActive("1_aggressive_gameplay") then
+						diffmul = diffmul * 2.3
+					end
+
+					if attacker:HasPerkActive("2_difficult_decision") then
+						xpmul = xpmul * 1.45
+						diffmul = diffmul * 3.35
+					end
+
+					if attacker:HasPerkActive("3_difficult_decision") then
+						xpmul = xpmul * 1.25
+						diffmul = diffmul * difficulty:log10()*2.5
+					end
+
+					diffmul = diffmul * attacker:GetEternityUpgradeEffectValue("difficultygain_upgrader")
+				end
+				attacker:GiveXP(xp * xpmul * mul)
+				difficulty_gain = difficulty_gain + (diffgain*diffmul)*mul
 			end
-			if self.EndlessMode then
-				if killer:HasPerkActive("1_difficult_decision") then
-					npckilldiffgainmul = npckilldiffgainmul * 1.75
-				end
 
-				if killer:HasPerkActive("1_aggressive_gameplay") then
-					npckilldiffgainmul = npckilldiffgainmul * 2.3
-				end
-
-				if killer:HasPerkActive("2_difficult_decision") then
-					xpmul = xpmul * 1.45
-					npckilldiffgainmul = npckilldiffgainmul * 3.35
-				end
-
-				if killer:HasPerkActive("3_difficult_decision") then
-					xpmul = xpmul * 1.25
-					npckilldiffgainmul = npckilldiffgainmul * difficulty:log10()*2.5
-				end
-			end
-			killer:GiveXP(NPC_XP_VALUES[npcclass] * xpmul)
-			self:SetDifficulty(nonmoddiff + xp*diffgain*npckilldiffgainmul*killer:GetEternityUpgradeEffectValue("difficultygain_upgrader"))
+			self:SetDifficulty(nonmoddiff + xp*difficulty_gain)
 		end
 
-		if NPC_MONEYS_VALUES[npcclass] then
-			local moneys = NPC_MONEYS_VALUES[npcclass]
+		local moneys = NPC_MONEYS_VALUES[npcclass]
+		if moneys then
 			local npcmoneymul = npc.MoneyGainMult or 1
-			local moneygain = 1
 
-			if killer:HasPerkActive("2_difficult_decision") then
-				moneygain = moneygain * 1.85
+			for attacker,dmg in pairs(npc.PlyAttackers) do
+				local mul = math.min(1, dmg/npc:GetMaxHealth())
+				local moneygain = 1
+
+				if attacker:HasPerkActive("2_difficult_decision") then
+					moneygain = moneygain * 1.85
+				end
+
+				attacker:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*npcmoneymul*(infmath.min(attacker:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25)))
 			end
-
-			killer:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*npcmoneymul*(infmath.min(killer:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25)))
 		end
 
-		if killer:HasPerkActive("2_vampiric_killer") then
+		if killer:IsPlayer() and killer:HasPerkActive("2_vampiric_killer") then
 			if self.EndlessMode then
 				killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + math.min(50, killer:GetMaxHealth()*0.04)))
 			else
@@ -930,13 +954,12 @@ function GM:OnNPCKilled(npc, killer, weapon)
 
 	-- If the NPC is godlike and they die
 	if IsValid(npc) then
-		if npc:IsGodlikeNPC() then
-			if IsValid(killer) and killer:IsPlayer() then
+		if npc:IsGodlikeNPC() or npc:GetKeyValues().GameEndAlly == 1 then -- what?!
+			if !game.SinglePlayer() and IsValid(killer) and killer:IsPlayer() then
 				game.KickID(killer:UserID(), "You killed an important NPC actor!")
 			end
 
-			PrintMessage(HUD_PRINTTALK, "Important NPC actor died!")
-			gamemode.Call("FailMap", ply, "Important NPC died!")
+			gamemode.Call("FailMap", killer, "Important character has died!")
 		end
 	end
 
@@ -1162,7 +1185,7 @@ function GM:PlayerInitialSpawn(ply)
 
 	-- EP1 and EP2 maps might be buggy with npc spawns. By then, Restart Map upon starting the game.
 	if player.GetCount() == 1 and (self.WasForcedRestart or 0) < (FORCE_RESTART_COUNT or 1) and (string.find(game.GetMap(), "ep1_") or string.find(game.GetMap(), "ep2_")) and not NEVER_FORCE_RESTART then
-    	timer.Simple(1, function()
+    	timer.Simple(0.1, function()
     	    self.WasForcedRestart = (self.WasForcedRestart or 0) + 1
     	    GAMEMODE:RestartMap(0, true)
     	end)
@@ -1479,12 +1502,10 @@ end
 
 -- Called to control whether a player can enter the vehicle or not
 function GM:CanPlayerEnterVehicle(ply, vehicle, role)
-
 	-- Used for passenger seating
 	ply:SetAllowWeaponsInVehicle(vehicle.allowWeapons)
 
 	return true
-
 end
 
 

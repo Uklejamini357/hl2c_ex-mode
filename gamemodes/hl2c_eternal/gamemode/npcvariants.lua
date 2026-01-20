@@ -337,10 +337,12 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			ent.ent_Color = Color(127,255,127)
 			ent.ent_MaxHealthMul = 4.666
 			ent.ent_HealthMul = 4.666
+			ent.XPGainMult = 3.5
 		elseif ent.VariantType == 3 then -- "Hyper" Variant (???)
 			ent.ent_Color = Color(255,0,127)
 			ent.ent_MaxHealthMul = 1.5
 			ent.ent_HealthMul = 1.5
+			ent.XPGainMult = 1.3
 		end
 	elseif class == "npc_manhack" then
 	elseif class == "npc_zombie" then
@@ -369,7 +371,7 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			ent.ent_MaxHealthMul = 1.1
 			ent.ent_HealthMul = 1.1
 			ent.XPGainMult = 1.3
-	 else
+		else
 			ent.ent_MaxHealthMul = 1.3
 			ent.ent_HealthMul = 1.3
 			ent.XPGainMult = 1.4
