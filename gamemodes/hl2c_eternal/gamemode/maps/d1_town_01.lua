@@ -1,13 +1,13 @@
 NEXT_MAP = "d1_town_01a"
 
 
-
+local obj_amount = 404
 if CLIENT then
 	hook.Add("HUDPaint", "Hl2ce_HyperEX_Progress", function()
 		if !GAMEMODE.HyperEXMode then return end
 		if !GAMEMODE.MapVars.NoChaos then return end
 
-		draw.DrawText(string.format("Zombies killed: %d/%d", GAMEMODE.MapVars.ZombiesKilled, 250), "TargetIDSmall", 5, 5, GAMEMODE.MapVars.ZombiesKilled > 250 and Color(0,255,0) or Color(255,255,0), TEXT_ALIGN_LEFT)
+		draw.DrawText(string.format("Zombies killed: %d/%d", GAMEMODE.MapVars.ZombiesKilled, obj_amount), "TargetIDSmall", 5, 5, GAMEMODE.MapVars.ZombiesKilled > obj_amount and Color(0,255,0) or Color(255,255,0), TEXT_ALIGN_LEFT)
 	end)
 
 	net.Receive("hl2ce_map_event", function()
@@ -101,7 +101,7 @@ if CLIENT then
 
 					sound.PlayFile("sound/weapons/explode"..math.random(3,5)..".wav", "", function(station)
 						if station then
-							station:SetVolume(8)
+							station:SetVolume(GAMEMODE.NoEpilepsy and 1 or 8)
 						end
 					end)
 				end)
@@ -112,9 +112,9 @@ if CLIENT then
 			RunConsoleCommand("stopsound")
 		elseif event == "hl2c_hyperex_objective" then
 			GAMEMODE.MapVars.ZombiesKilled = 0
-			chat.AddText(Color(255,255,0), "Objective: Kill 250 zombies")
-			chat.AddText(Color(255,160,0), "The what?! 250 ZOMBIES?!")
-			chat.AddText(Color(255,60,0), "THIS MAP GOT ONLY LESS THAN 50 ZOMBIES!! HOW CAN WE KILL 250 ZOMBIES ON THIS MAP LIKE THAT?!?!?!?")
+			chat.AddText(Color(255,255,0), string.format("Objective: Kill %d zombies", obj_amount))
+			chat.AddText(Color(255,160,0), string.format("The what?! %d ZOMBIES?!", obj_amount))
+			chat.AddText(Color(255,60,0), string.format("THIS MAP GOT ONLY LESS THAN 50 ZOMBIES!! HOW CAN WE KILL %d ZOMBIES ON THIS MAP LIKE THAT?!?!?!?", obj_amount))
 		elseif event == "hl2c_hyperex_objectiveprogress" then
 			GAMEMODE.MapVars.ZombiesKilled = net.ReadUInt(16)
 		elseif event == "hl2c_ex_mapstart" then
@@ -170,7 +170,7 @@ local function hl2cHyperEXOnNPCKilled(ent)
 		net.WriteUInt(vars.ZombiesKilled, 16)
 		net.Broadcast()
 
-		if vars.ZombiesKilled >= 250 and prev < 250 then
+		if vars.ZombiesKilled >= obj_amount and prev < obj_amount then
 			BroadcastLua([[chat.AddText(Color(0,255,0), "Finally.. WE CAN GET OUT OF HERE!!")]])
 		end
 	end
@@ -440,7 +440,7 @@ hook.Add("CompleteMap", "hl2ce_hyperEX_", function(ply)
 	if !GAMEMODE.HyperEXMode then return end
 
 	local mapvars = GAMEMODE.MapVars
-	if mapvars and (mapvars.ZombiesKilled or 0) < 250 then
+	if mapvars and (mapvars.ZombiesKilled or 0) < obj_amount then
 		ply:SendLua([[chat.AddText(Color(255,0,0), "YOU DID NOT MEET THE REQUIREMENTS!")]])
 		ply:Kill()
 		local rag = ply:GetRagdollEntity()

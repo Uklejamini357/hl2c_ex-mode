@@ -33,9 +33,14 @@ function GM:MakeOptions()
 		return check
 	end
 
+	CreateCheck("Enable first person death view", "hl2ce_cl_firstpersondeath")
 	CreateCheck("Disable Tinnitus/Earringing", "hl2ce_cl_noearringing")
 	CreateCheck("Don't show Difficulty on HUD", "hl2ce_cl_nohuddifficulty")
 	CreateCheck("Shorten difficulty text display", "hl2ce_cl_nodifficultytext")
+	CreateCheck("Disable change of difficulty", "hl2ce_cl_noshowdifficultychange")
 	CreateCheck("Disable Custom HUD", "hl2ce_cl_nocustomhud")
 	CreateCheck("Draw XP gain text", "hl2ce_cl_drawxpgaintext")
+	CreateCheck("Disable player death sounds", "hl2ce_cl_noplrdeathsound")
+
+	CreateCheck("Disable flashing lights", "hl2ce_cl_noepilepsy")
 end

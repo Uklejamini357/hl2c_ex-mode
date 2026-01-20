@@ -30,84 +30,108 @@ SWEP.Secondary.Ammo = "none"
 SWEP.HealAmount = 3
 SWEP.MaxAmmo = 100 -- Max ammo
 
-local HealSound = Sound( "HealthKit.Touch" )
-local DenySound = Sound( "WallHealth.Deny" )
+local HealSound = Sound("HealthKit.Touch")
+local DenySound = Sound("WallHealth.Deny")
 
 function SWEP:Initialize()
-	self:SetHoldType( "slam" )
-
-	if CLIENT then return end
-
-	timer.Create("hl2ce_medkit_ammo"..self:EntIndex(), 1, 0, function()
-		if IsValid(self) && (self:Clip1() < self.MaxAmmo) then
-			local owner = self:GetOwner()
-			if not owner:IsValid() then return end
-			self:SetClip1(math.min(self:Clip1() + 1 + ((GAMEMODE.EndlessMode and 0.1 or 0.02) * owner:GetSkillAmount("Surgeon")), self.MaxAmmo + (self.MaxAmmo * ((GAMEMODE.EndlessMode and 0.1 or 0.02) * owner:GetSkillAmount("Surgeon")))))
-		end
-	end)
+	self:SetHoldType("slam")
 end
 
 function SWEP:PrimaryAttack()
-	if CLIENT then return end
-
-	if self.Owner:IsPlayer() then
-		self.Owner:LagCompensation(true)
+	local owner = self:GetOwner()
+	local compensated = SERVER and owner:IsLagCompensated()
+	if SERVER and owner:IsPlayer() and !compensated then
+		owner:LagCompensation(true)
 	end
 
 	local tr = util.TraceLine({
-		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * 64,
-		filter = self.Owner
+		start = owner:GetShootPos(),
+		endpos = owner:GetShootPos() + owner:GetAimVector() * 64,
+		filter = owner
 	})
 
-	if ( self.Owner:IsPlayer() ) then
-		self.Owner:LagCompensation( false )
+	if SERVER and owner:IsPlayer() and !compensated then
+		owner:LagCompensation(false)
 	end
 
 	local ent = tr.Entity
 
-	local need = self.HealAmount + (self.HealAmount * ((GAMEMODE.EndlessMode and 0.05 or 0.02) * self.Owner:GetSkillAmount("Medical")))
+	local need = self.HealAmount + (self.HealAmount * ((GAMEMODE.EndlessMode and 0.05 or 0.02) * owner:GetSkillAmount("Medical")))
 	if IsValid(ent) then
 		need = math.min(ent:GetMaxHealth() - ent:Health(), need)
 	end
 
 	if IsValid(ent) and self:Clip1() >= need and (ent:IsPlayer() or ent:IsNPC()) and ent:Health() < ent:GetMaxHealth() then
 		self:TakePrimaryAmmo(need)
-		ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + need))
-		if ent:IsPlayer() then
-			self.Owner:SetHealth(math.min(self.Owner:GetMaxHealth(), self.Owner:Health() + need * 0.25))
-			self.Owner:GiveXP(need * 0.35)
-		elseif ent:IsFriendlyNPC() then
-			self.Owner:SetHealth(math.min(self.Owner:GetMaxHealth(), self.Owner:Health() + need * 0.2))
-			self.Owner:GiveXP(need * 0.28)
+		if SERVER then
+			ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + need))
+			if ent:IsPlayer() then
+				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.25))
+				owner:GiveXP(need * 0.35)
+			elseif ent:IsFriendlyNPC() then
+				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.2))
+				owner:GiveXP(need * 0.28)
+			end
 		end
 
-		ent:EmitSound(HealSound)
+		self:EmitSound(HealSound)
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
 		self:SetNextPrimaryFire(CurTime() + 0.15)
-		self:SetNextSecondaryFire(CurTime() + 0.15)
-		self.Owner:SetAnimation(PLAYER_ATTACK1)
+		owner:SetAnimation(PLAYER_ATTACK1)
 
 		-- Even though the viewmodel has looping IDLE anim at all times, we need this to make fire animation work in multiplayer
+		self:SetNextIdle(CurTime() + 1.5)
 		timer.Create("weapon_idle"..self:EntIndex(), 1.5, 1, function() if IsValid(self) then self:SendWeaponAnim(ACT_VM_IDLE) end end)
 	else
-		self.Owner:EmitSound( DenySound )
-		self:SetNextPrimaryFire( CurTime() + 1 )
-		self:SetNextSecondaryFire( CurTime() + 1 )
+		owner:EmitSound(DenySound)
+		self:SetNextPrimaryFire(CurTime() + 0.5)
+		self:SetNextSecondaryFire(CurTime() + 0.5)
 	end
 end
 
 function SWEP:SecondaryAttack()
 end
 
+function SWEP:Think()
+	self:Regen(true)
+end
+
+function SWEP:Regen(keepaligned)
+	local curtime = CurTime()
+	local lastregen = self:GetLastAmmoRegen()
+	local timepassed = curtime - lastregen
+	local regenrate = 1
+	local owner = self:GetOwner()
+
+	if timepassed < regenrate then return false end
+
+	local ammo = self:Clip1()
+	local maxammo = self.MaxAmmo + (self.MaxAmmo * ((GAMEMODE.EndlessMode and 0.1 or 0.02) * owner:GetSkillAmount("Surgeon")))
+
+	if ammo >= maxammo then return false end
+
+	if regenrate > 0 then
+		local toregen = 1 + (GAMEMODE.EndlessMode and 0.1 or 0.02) * owner:GetSkillAmount("Surgeon")
+		self:SetClip1(math.min(self:Clip1() + toregen * math.floor(timepassed / regenrate), maxammo))
+
+		self:SetLastAmmoRegen(keepaligned and curtime + (timepassed % regenrate) or curtime)
+	else
+		self:SetClip1(maxammo)
+		self:SetLastAmmoRegen(curtime)
+	end
+
+	return true
+end
+
+
 function SWEP:OnRemove()
-	timer.Stop( "medkit_ammo" .. self:EntIndex() )
-	timer.Stop( "weapon_idle" .. self:EntIndex() )
+	timer.Stop("hl2ce_medkit_ammo"..self:EntIndex())
+	timer.Stop("weapon_idle"..self:EntIndex())
 end
 
 function SWEP:Holster()
-	timer.Stop( "weapon_idle" .. self:EntIndex() )
+	timer.Stop("weapon_idle" .. self:EntIndex())
 	return true
 end
 

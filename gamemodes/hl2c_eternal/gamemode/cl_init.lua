@@ -21,13 +21,12 @@ local hl2ce_cl_nodifficultytext = CreateClientConVar("hl2ce_cl_nodifficultytext"
 local hl2ce_cl_noshowdifficultychange = CreateClientConVar("hl2ce_cl_noshowdifficultychange", 0, true, false, "Displays when difficulty changed", 0, 1)
 local hl2ce_cl_nocustomhud = CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, false, "Disables the HL2 Health and Armor Bars", 0, 1)
 local hl2ce_cl_drawxpgaintext = CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)
+local hl2ce_cl_noplrdeathsound = CreateClientConVar("hl2ce_cl_noplrdeathsound", 0, true, false, "Disable player death sounds.", 0, 1)
 local hl2ce_cl_noepilepsy = CreateClientConVar("hl2ce_cl_noepilepsy", 1, true, false, "Greatly weakens violently flashing lights, or disables them.", 0, 1)
 GM.NoEpilepsy = hl2ce_cl_noepilepsy:GetBool()
 cvars.AddChangeCallback("hl2ce_cl_noepilepsy", function(cvar, old, new)
 	GAMEMODE.NoEpilepsy = tobool(new)
 end, "hl2ce_cl_noepilepsy")
-
-timeleft = timeleft or 0
 
 -- Create data folders
 if !file.IsDir(GM.VaultFolder, "DATA") then file.CreateDir(GM.VaultFolder) end
@@ -46,12 +45,6 @@ end
 
 function GM:HUDDrawScoreBoard()
 end
-
-net.Receive("ObjectiveTimer", function(length)
-	local net1 = net.ReadFloat()
-
-	timeleft = net1
-end)
 
 function EasyLabel(parent, text, font, textcolor)
 	local dpanel = vgui.Create("DLabel", parent)
@@ -114,13 +107,7 @@ local bosshp = 0
 -- Called every frame to draw the hud
 function GM:HUDPaint()
 	if !GetConVar("cl_drawhud"):GetBool() || (self.ShowScoreboard && IsValid(LocalPlayer()) && (LocalPlayer():Team() != TEAM_DEAD)) then return end
-	local timeleftmin = math.floor(timeleft / 60)
-	local timeleftsec = timeleft - (timeleftmin * 60)
 	local pl = LocalPlayer()
-
-	if timeleft != nil and timeleft > 0 then
-		draw.SimpleText(timeleftsec <= 0 and "Objective: Complete the map within "..timeleftmin.." minutes! (Time left: "..math.floor(timeleft - CurTime()).."s)" or "Objective: Complete the map within "..timeleftmin.." minutes and "..timeleftsec.." seconds! (Time left: "..math.floor(timeleft - CurTime()).."s)", "TargetIDSmall", 5, 22, Color(255,255,192,255))
-	end
 
 	if !showNav then hook.Run("HUDDrawTargetID") end
 	hook.Run("HUDDrawPickupHistory")

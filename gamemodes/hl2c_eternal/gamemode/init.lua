@@ -34,6 +34,7 @@ include("database_manager/server.lua")
 
 include("sv_netstuff.lua")
 include("sv_player.lua")
+include("sv_vote.lua")
 
 include("player_leveling.lua")
 
@@ -72,12 +73,10 @@ end
 -- Called when the player attempts to suicide
 function GM:CanPlayerSuicide(ply)
 	if ply:Team() == TEAM_COMPLETED_MAP then
-	
-		ply:ChatPrint("You cannot suicide once you've completed the map.")
+		-- ply:ChatPrint("You cannot suicide once you've completed the map.")
 		return false
 	elseif ply:Team() == TEAM_DEAD then
-	
-		ply:ChatPrint("This may come as a surprise, but you are already dead.")
+		-- ply:ChatPrint("This may come as a surprise, but you are already dead.")
 		return false
 	end
 
@@ -152,6 +151,7 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 
 	if attacker:IsNPC() then
 		net.Start("hl2ce_playerkilled")
+		net.WriteBit(0)
 		net.WriteString(attacker:GetClass())
 		net.Send(ply)
 	end
@@ -165,12 +165,10 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	)))
 
 
-	local lowermodelname = string.lower(ply:GetModel())
-
-	-- Cache the voice set.
-
-	ply:EmitSound("vo/npc/"..(string.find(lowermodelname, "female", 1, true) and "female01" or "male01").."/no0"..math.random(2)..".wav")
-
+	net.Start("hl2ce_playerkilled")
+	net.WriteBit(1)
+	net.WriteEntity(ply)
+	net.SendPVS(ply:GetPos())
 end
 
 
@@ -195,10 +193,9 @@ end
 
 -- Called when entities are created
 function GM:OnEntityCreated(ent)
-
 	-- NPC Lag Compensation
-	if self.LagCompensation and ent:IsNPC() or !table.HasValue(NPC_EXCLUDE_LAG_COMPENSATION, ent:GetClass()) then
-		ent:SetLagCompensated(true)
+	if self.LagCompensation and ent:IsNPC() and !table.HasValue(NPC_EXCLUDE_LAG_COMPENSATION, ent:GetClass()) then
+		ent:SetLagCompensated(true) -- caused all crowbars and stunsticks to not have swing animation. wow
 	end
 
 	-- Vehicle Passenger Seating
@@ -269,23 +266,6 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	if (IsValid(ent) and ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
 		return true
 	end
-
-	-- Gravity gun punt should kill NPC's (This isn't really needed anymore, as gmod has updated to be able to support Super Gravity Gun by itself)
-	-- if (IsValid(ent) && ent:IsNPC() && IsValid(attacker) && attacker:IsPlayer()) then
-		-- if (GetGlobalBool("SUPER_GRAVITY_GUN") && IsValid(attacker:GetActiveWeapon()) && (dmgInfo:GetInflictor():GetClass() == "weapon_physcannon")) then
-			-- dmgInfo:SetDamage(ent:Health())
-		-- end
-	-- end
-
-	-- Crowbar and Stunstick should follow skill level (Redundant)
-	--[[
-	if (IsValid(ent) && IsValid(attacker) && attacker:IsPlayer()) then
-		if (IsValid(attacker:GetActiveWeapon()) && ((attacker:GetActiveWeapon():GetClass() == "weapon_crowbar" && dmgInfo:GetDamageType() == DMG_CLUB))) then
-			damage = GetConVar("sk_plr_dmg_crowbar"):GetFloat()
-		elseif IsValid(attacker:GetActiveWeapon()) && attacker:GetActiveWeapon():GetClass() == "weapon_stunstick" && dmgInfo:GetDamageType() == DMG_CLUB then
-			damage = GetConVar("sk_plr_dmg_stunstick"):GetFloat()
-		end
-	end]]
 
 	if attacker.NextDamageMul and (ent:IsNPC() or ent:IsPlayer()) then
 		damage = damage * attacker.NextDamageMul
@@ -516,7 +496,6 @@ function GM:Initialize()
 	util.AddNetworkString("ShowHelp")
 	util.AddNetworkString("ShowTeam")
 	util.AddNetworkString("UpdatePlayerModel")
-	util.AddNetworkString("ObjectiveTimer")
 	
 	util.AddNetworkString("XPGain")
 	util.AddNetworkString("UpdateSkills")
@@ -1174,24 +1153,6 @@ function GM:PlayerInitialSpawn(ply)
 	self:LoadPlayer(ply)
 
 
-	-- Objective Timer (OUT OF DATE)
-	-- net.Start("ObjectiveTimer")
-	-- net.WriteFloat(self.ObjectiveTimer or 0)
-	-- net.Broadcast()
-	
-
-	-- Send initial player spawn to client
-	net.Start("PlayerInitialSpawn")
-	net.WriteBool(self.CustomPMs)
-	net.Send(ply)
-
-	-- Send current checkpoint position
-	if (#checkpointPositions > 0) then
-		net.Start("SetCheckpointPosition")
-		net.WriteVector(checkpointPositions[1])
-		net.Send(ply)
-	end
-
 	-- Prompt players that they can spawn vehicles
 	if ALLOWED_VEHICLE then
 		ply:ChatPrint("Vehicle spawning is allowed! Press F3 (Spare 1) to spawn it.")
@@ -1204,14 +1165,23 @@ function GM:PlayerInitialSpawn(ply)
     	timer.Simple(1, function()
     	    self.WasForcedRestart = (self.WasForcedRestart or 0) + 1
     	    GAMEMODE:RestartMap(0, true)
-    	    print("forced restart initiate")
     	end)
-
-    	print("force restart in 1 sec")
 	end
 end 
 
 function GM:PlayerReady(ply)
+	-- Send initial player spawn to client
+	net.Start("PlayerInitialSpawn")
+	net.WriteBool(self.CustomPMs)
+	net.Send(ply)
+
+	-- Send current checkpoint position
+	if #checkpointPositions > 0 then
+		net.Start("SetCheckpointPosition")
+		net.WriteVector(checkpointPositions[1])
+		net.Send(ply)
+	end
+
 	self:NetworkString_UpdateStats(ply)
 	self:NetworkString_UpdateSkills(ply)
 	self:NetworkString_UpdatePerks(ply)
@@ -1529,7 +1499,7 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 	net.WriteFloat(CurTime())
 	net.Broadcast()
 
-	timer.Create("hl2c_restart_map", overridetime, 1, function()
+	local restart = function()
 		if not noplayerdatasave then
 			for k,v in ipairs(player.GetAll()) do
 				self:SavePlayer(v)
@@ -1565,7 +1535,13 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 				end)
 			end
 		end)
-	end)
+	end
+
+	if overridetime == 0 then
+		restart()
+	else
+		timer.Create("hl2c_restart_map", overridetime, 1, restart)
+	end
 end
 concommand.Add("hl2ce_restart_map", function(ply) if (IsValid(ply) && ply:IsAdmin()) then gamemode.Call("RestartMap", 0); end end)
 
@@ -1909,12 +1885,31 @@ local function DynamicSkillToggleCallback(name, old, new)
 end
 cvars.AddChangeCallback("hl2c_server_dynamic_skill_level", DynamicSkillToggleCallback, "DynamicSkillToggleCallback")
 
-function GM:OnDamagedByExplosion(ply)
+local MIN_SHOCK_AND_CONFUSION_DAMAGE = 30
+local MIN_EAR_RINGING_DISTANCE = 240
+function GM:OnDamagedByExplosion(ply, dmginfo)
 	if ply:GetInfoNum("hl2ce_cl_noearringing", 0) >= 1 then
 		return
 	end
 
-	ply:SetDSP(35)
+	local ear_ringing = false
+	local inflictor = dmginfo:GetInflictor()
+	if IsValid(inflictor) then
+		local delta = ply:GetPos() - inflictor:GetPos()
+		ear_ringing = delta:Length() < MIN_EAR_RINGING_DISTANCE
+	end
+
+	local shock = dmginfo:GetDamage() >= MIN_SHOCK_AND_CONFUSION_DAMAGE
+
+	if !shock and !ear_ringing then return end
+
+	-- The effect names are actually backwards
+	if shock then
+		ply:SetDSP(math.random(35, 37), false)
+		return
+	end
+
+	ply:SetDSP(math.random(32, 34), false)
 end
 
 -- function GM:PlayerHurt(victim, attacker)

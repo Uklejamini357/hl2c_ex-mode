@@ -33,8 +33,8 @@ end, "hl2ce_debug_notranslate")
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^5" -- also known as 0.inf.inf.inf... you get it
-GM.DateVer = "19-01-12026" -- what?!
+GM.Version = "0.inf^6" -- also known as 0.inf.inf.inf... you get it
+GM.DateVer = "20-01-2026" -- ok...
 
 -- even crazier things inbound... beware!
 
@@ -64,13 +64,9 @@ GODLIKE_NPCS = {
 
 -- Create the teams that we are going to use throughout the game
 function GM:CreateTeams()
-
-	team.SetUp(TEAM_ALIVE, "ALIVE", Color(192, 192, 192, 255))
-
-	team.SetUp(TEAM_COMPLETED_MAP, "COMPLETED MAP", Color(255, 215, 0, 255))
-
-	team.SetUp(TEAM_DEAD, "DEAD", Color(128, 128, 128, 255))
-
+	team.SetUp(TEAM_ALIVE, "ALIVE", Color(192, 192, 192))
+	team.SetUp(TEAM_COMPLETED_MAP, "COMPLETED MAP", Color(255, 215, 0))
+	team.SetUp(TEAM_DEAD, "DEAD", Color(128, 128, 128))
 end
 
 function GM:CalculateXPNeededForLevels(lvl)
@@ -195,7 +191,27 @@ end
 
 -- Called when a player is being attacked
 function GM:PlayerShouldTakeDamage(ply, attacker)
-	if ((ply:Team() != TEAM_ALIVE) || !ply.vulnerable || (attacker:IsPlayer() && (attacker != ply)) || (attacker:IsVehicle() && IsValid(attacker:GetDriver()) && attacker:GetDriver():IsPlayer()) || attacker:IsGodlikeNPC() || attacker:IsFriendlyNPC()) then	
+	-- if ((ply:Team() ~= TEAM_ALIVE) or !ply.vulnerable or (attacker:IsPlayer() and (attacker ~= ply)) or (attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer()) or attacker:IsGodlikeNPC() or attacker:IsFriendlyNPC()) then	
+	-- 	return false
+	-- end
+
+	if !ply.vulnerable then
+		return false
+	end
+
+	if ply:Team() ~= TEAM_ALIVE then -- hmmm...
+		return false
+	end 
+
+	if attacker:IsPlayer() and attacker ~= ply then
+		return false
+	end
+
+	if attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer() then
+		return false
+	end
+
+	if attacker:IsGodlikeNPC() or attacker:IsFriendlyNPC() then
 		return false
 	end
 

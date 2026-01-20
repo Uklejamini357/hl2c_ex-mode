@@ -30,6 +30,16 @@ local function AntlionGuardAURA()
 	end
 end
 
+local function OnSpawnNewEnt(oldent, newent)
+	local enemy = oldent:GetEnemy()
+	if enemy and enemy:IsValid() then
+		newent:SetEnemy(enemy)
+		newent:UpdateEnemyMemory(enemy, oldent:GetEnemyLastKnownPos())
+	end
+	newent:SetLastPosition(oldent:GetLastPosition())
+	newent:SetSchedule(oldent:GetCurrentSchedule())
+end
+
 -- Priority hook function
 function HL2cEX_NPCVariantSpawn(ent)
 	if !GAMEMODE.EXMode or GAMEMODE.HyperEXMode or !ent:IsNPC() then return end
@@ -139,7 +149,7 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 		end
 	elseif ent:GetClass() == "npc_fastzombie" then
 		if ent.VariantType == 1 and math.random(1,100) < 15 then
@@ -147,7 +157,7 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 		end
 	elseif ent:GetClass() == "npc_metropolice" then
 		if ent.VariantType == 2 and math.random(1,100) < 45 then
@@ -158,7 +168,7 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 			ent2:SetAngles(ent:GetAngles())
 			ent2.ent_Color = Color(128,192,255)
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 			ent2:GetPhysicsObject():SetVelocityInstantaneous((attacker:GetPos() - ent2:GetPos()) * 2)
 		end
 	elseif ent:GetClass() == "npc_sniper" then
@@ -169,7 +179,7 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 			timer.Simple(0, function()
 				ent2:SetMaxHealth(ent2:Health() * 2)
 				ent2:SetHealth(ent2:Health() * 2)
@@ -410,7 +420,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:SetPos(ent:GetPos())
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 			ent2.XPGainMult = math.max(0.01, (ent.XPGainMult or 1) * 0.6)
 			ent2.DifficultyGainMult = math.max(0.01, (ent.DifficultyGainMult or 1) * 0.6)
 			ent2.VariantType = 2
@@ -425,7 +435,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 		end
 	elseif ent:GetClass() == "npc_combine_s" then
 		if ent.VariantType == 1 then
@@ -438,6 +448,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 				ent2:SetAngles(ent:GetAngles())
 				ent2:SetModel(ent.CSNovaProspektNPC and "models/combine_soldier_prisonguard.mdl" or "models/combine_soldier.mdl")
 				ent2:Spawn()
+				OnSpawnNewEnt(ent, ent2)
 
 				ent:Remove()
 			end
@@ -451,7 +462,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:SetAngles(ent:GetAngles())
 			ent2.ent_Color = Color(128,192,255)
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 			ent2:GetPhysicsObject():SetVelocityInstantaneous((attacker:GetPos() - ent2:GetPos()) * 2)
 		end
 	elseif ent:GetClass() == "npc_sniper" then
@@ -462,7 +473,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
-			ent2:Activate()
+			OnSpawnNewEnt(ent, ent2)
 			timer.Simple(0, function()
 				ent2:SetMaxHealth(ent2:Health() * 2)
 				ent2:SetHealth(ent2:Health() * 2)

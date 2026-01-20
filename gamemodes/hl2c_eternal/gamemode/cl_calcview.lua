@@ -6,12 +6,11 @@ local hl2ce_cl_firstpersondeath = CreateClientConVar("hl2ce_cl_firstpersondeath"
 
 
 -- Calculate the player's view (taken from Base)
-function GM:CalcView( ply, origin, angles, fov, znear, zfar )
+function GM:CalcView(ply, origin, angles, fov, znear, zfar)
 	fov = ply:GetFOV()
 
 	local Vehicle = ply:GetVehicle()
 	local Weapon = ply:GetActiveWeapon()
-
 	local view = {}
 	view.origin = origin
 	view.angles = angles

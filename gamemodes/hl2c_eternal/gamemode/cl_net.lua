@@ -119,6 +119,17 @@ net.Receive("hl2ce_fail", function(len)
 end)
 
 net.Receive("hl2ce_playerkilled", function(len)
-    chat.AddText("Killed by ", Color(255,0,0), language.GetPhrase(net.ReadString()))
+    local sound = net.ReadBit()
+
+    if sound == 1 then
+        local pl = net.ReadEntity()
+	
+        if !GetConVar("hl2ce_cl_noplrdeathsound"):GetBool() then
+            local lowermodelname = string.lower(pl:GetModel())
+            pl:EmitSound("vo/npc/"..(string.find(lowermodelname, "female", 1, true) and "female01" or "male01").."/no0"..math.random(2)..".wav")
+        end
+    else
+        chat.AddText("Killed by ", Color(255,0,0), language.GetPhrase(net.ReadString()))
+    end
 end)
 
