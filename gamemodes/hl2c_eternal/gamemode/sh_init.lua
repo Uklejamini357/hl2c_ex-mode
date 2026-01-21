@@ -33,8 +33,8 @@ end, "hl2ce_debug_notranslate")
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^6" -- also known as 0.inf.inf.inf... you get it
-GM.DateVer = "20-01-2026" -- ok...
+GM.Version = "0.inf^7" -- also known as 0.inf.inf.inf... you get it
+GM.DateVer = "21-01-2026"
 
 -- even crazier things inbound... beware!
 
@@ -184,6 +184,10 @@ function GM:ShouldCollide(entA, entB)
 			return false
 		end
 	end
+
+	if entA.DontCollide and entA.DontCollide == entB or entB.DontCollide and entB.DontCollide == entA then
+		return false
+	end
 	
 	return true
 end
@@ -195,7 +199,7 @@ function GM:PlayerShouldTakeDamage(ply, attacker)
 	-- 	return false
 	-- end
 
-	if !ply.vulnerable then
+	if ply.invulnerableTime and ply.invulnerableTime > CurTime() then
 		return false
 	end
 

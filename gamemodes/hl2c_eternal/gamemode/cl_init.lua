@@ -35,12 +35,12 @@ if !file.IsDir(GM.VaultFolder.."/client", "DATA") then file.CreateDir(GM.VaultFo
 
 -- Called by ShowScoreboard
 function GM:CreateScoreboard()
-	if scoreboard then
+	if scoreboard and scoreboard:IsValid() then
 		scoreboard:Remove()
 		scoreboard = nil
 	end
 
-	scoreboard = vgui.Create( "scoreboard" )
+	scoreboard = vgui.Create("scoreboard")
 end
 
 function GM:HUDDrawScoreBoard()
@@ -252,6 +252,21 @@ function GM:HUDPaint()
 	hook.Run("DrawDeathNotice", 0.85, 0.04)
 end
 
+function GM:HUDPaintBackground()
+	local pl = LocalPlayer()
+
+	if !self.PlayerDeadAlpha or pl:Alive() or pl:Health() > 0 or pl:GetObserverMode() ~= OBS_MODE_NONE then
+		self.PlayerDeadAlpha = 0
+	else
+		self.PlayerDeadAlpha = math.min(120, self.PlayerDeadAlpha+300*FrameTime())
+	end
+
+	if self.PlayerDeadAlpha > 0 then
+		surface.SetDrawColor(255, 0, 0, self.PlayerDeadAlpha)
+		surface.DrawRect(0, 0, ScrW(), ScrH())
+	end
+end
+
 
 function GM:PostDrawHUD()
 	cam.Start2D()
@@ -274,25 +289,42 @@ end
 
 
 -- Called every frame
-function GM:HUDShouldDraw( name )
-
-	if IsValid(LocalPlayer()) then
-		if self.ShowScoreboard && (LocalPlayer():Team() != TEAM_DEAD) then
+function GM:HUDShouldDraw(name)
+	local pl = LocalPlayer()
+	if IsValid(pl) then
+		if self.ShowScoreboard && (pl:Team() != TEAM_DEAD) then
 			return false
 		end
 	
-		local wep = LocalPlayer():GetActiveWeapon()
+		local wep = pl:GetActiveWeapon()
 		if IsValid(wep) && (wep.HUDShouldDraw != nil) then
 			return wep.HUDShouldDraw( wep, name )
+		end
+
+		if !pl:Alive() and name == "CHudDamageIndicator" then
+			return false
 		end
 
 		if (name == "CHudHealth" or name == "CHudBattery") and not hl2ce_cl_nocustomhud:GetBool() then
 			return false
 		end
 	end
+
 	return true
 end
 
+
+function GM:CreateFonts()
+	surface.CreateFont("Roboto16", {size = 16, weight = 700, antialias = true, additive = false, font = "Roboto Bold"})
+	surface.CreateFont("roboto32BlackItalic", {size = 32, weight = 900, antialias = true, additive = false, font = "Roboto Black Italic"})
+	surface.CreateFont("hl2ce_font", {size = 32, weight = 700, font = "Roboto Black"})
+	surface.CreateFont("hl2ce_font_big", {size = 48, weight = 900, font = "Roboto Black"})
+end
+
+function GM:CreateScoreboardFonts(large)
+	surface.CreateFont("hl2ce_font_sb", {size = large and 28 or 18, weight = 700, font = "Roboto Black"})
+	surface.CreateFont("hl2ce_font_sb_small", {size = large and 22 or 14, weight = 500, font = "Roboto Black"})
+end
 
 -- Called when we initialize
 function GM:Initialize()
@@ -313,10 +345,9 @@ function GM:Initialize()
 
 	-- Fonts we will need later
 	-- surface.CreateFont( "Roboto16", { size = 16, weight = 400, antialias = true, additive = false, font = "Roboto" } )
-	surface.CreateFont( "Roboto16", { size = 16, weight = 700, antialias = true, additive = false, font = "Roboto-Bold" } )
-	surface.CreateFont( "roboto32BlackItalic", { size = 32, weight = 900, antialias = true, additive = false, font = "Roboto Black Italic" } )
-	surface.CreateFont( "hl2ce_font", { size = 32, weight = 700, font = "Roboto Black" } )
-	surface.CreateFont( "hl2ce_font_big", { size = 48, weight = 900, font = "Roboto Black" } )
+	self:CreateFonts()
+	self:CreateScoreboardFonts(player.GetCount() >= 10)
+
 
 	-- Language
 	language.Add( "worldspawn", "World" )
@@ -776,7 +807,7 @@ end
 function GM:ScoreboardHide()
 	self.ShowScoreboard = false
 
-	if scoreboard then	
+	if scoreboard and scoreboard:IsValid() then	
 		scoreboard:SetVisible(false)
 	end
 
@@ -790,9 +821,13 @@ function GM:ScoreboardShow()
 
 	self.ShowScoreboard = true
 
-	if !scoreboard then
+	if !scoreboard or !scoreboard:IsValid() then
 		self:CreateScoreboard()
 	end
+	if scoreboard.CurPlayers ~= player.GetCount() then
+		self:CreateScoreboardFonts(player.GetCount() >= 10)
+	end
+	scoreboard.CurPlayers = player.GetCount()
 
 	scoreboard:SetVisible(true)
 	scoreboard:UpdateScoreboard(true)

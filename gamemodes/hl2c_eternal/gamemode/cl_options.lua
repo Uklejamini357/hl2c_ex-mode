@@ -33,7 +33,9 @@ function GM:MakeOptions()
 		return check
 	end
 
-	CreateCheck("Enable first person death view", "hl2ce_cl_firstpersondeath")
+	CreateCheck("Enable first person death view", "hl2ce_cl_fpdeath")
+	CreateCheck("Enable free view in first person death", "hl2ce_cl_fpdeath_freeview")
+	CreateCheck("Enable classic HL2 first person death", "hl2ce_cl_fpdeath_classic")
 	CreateCheck("Disable Tinnitus/Earringing", "hl2ce_cl_noearringing")
 	CreateCheck("Don't show Difficulty on HUD", "hl2ce_cl_nohuddifficulty")
 	CreateCheck("Shorten difficulty text display", "hl2ce_cl_nodifficultytext")

@@ -8,19 +8,16 @@ local PANEL = {}
 
 -- Apply the scheme of things
 function PANEL:ApplySchemeSettings()
-
-	self.hostnameLabel:SetFont( "Roboto16" )
+	self.hostnameLabel:SetFont("hl2ce_font_sb")
 	self.hostnameLabel:SetTextColor( Color( 255, 220, 0, 255 ) )
 
-	self.numPlayersLabel:SetFont( "Roboto16" )
+	self.numPlayersLabel:SetFont("hl2ce_font_sb")
 	self.numPlayersLabel:SetTextColor( Color( 255, 220, 0, 255 ) )
-
 end
 
 
 -- Called when our vgui element is created
 function PANEL:Init()
-
 	self.hostnameLabel = vgui.Create( "DLabel", self )
 
 	self.numPlayersLabel = vgui.Create( "DLabel", self )
@@ -28,16 +25,12 @@ function PANEL:Init()
 	self.playerList = vgui.Create( "scoreboard_playerlist", self )
 
 	self:UpdateScoreboard()
-	timer.Create( "hl2c_scoreboard_updater", 3, 0, function() self:UpdateScoreboard() end)
-
 end
 
 
 -- Called every frame
 function PANEL:Paint()
-
-	draw.RoundedBox( 10, 1, 1, self:GetWide() - 2, self:GetTall() - 2, Color( 0, 0, 0, 159 ) )
-
+	draw.RoundedBox(10, 1, 1, self:GetWide() - 2, self:GetTall() - 2, Color(0, 0, 0, 159))
 end
 
 
@@ -61,28 +54,20 @@ end
 
 -- Updates the scoreboard
 function PANEL:UpdateScoreboard( force )
-
-	if ( !force && !self:IsVisible() ) then return end
-
-	self.hostnameLabel:SetText( GetHostName().." ("..GAMEMODE.Name.." ["..GAMEMODE.Version.."])" )
+	if !force and !self:IsVisible() then return end
+	self.hostnameLabel:SetText(GetHostName().." ("..GAMEMODE.Name.." ["..GAMEMODE.Version.."])")
 
 	local numPlayers = player.GetCount()
-	if ( numPlayers == 1 ) then
-	
+	if numPlayers == 1 then
 		self.numPlayersLabel:SetText( "1 Player" )
-	
 	else
-	
 		self.numPlayersLabel:SetText( numPlayers.." Players" )
-	
 	end
 
 	self:InvalidateLayout()
-
 	self.playerList:UpdatePlayerList()
-
 end
 
 
 -- Register our scoreboard element
-vgui.Register( "scoreboard", PANEL, "DPanel" )
+vgui.Register("scoreboard", PANEL, "DPanel")

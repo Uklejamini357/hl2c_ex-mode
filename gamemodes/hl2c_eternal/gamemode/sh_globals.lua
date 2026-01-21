@@ -51,6 +51,10 @@ GM.NoProgressionAdvantage = false
 	-- Hellish: 1.5e5%-1e6%
 ]]
 
+NPC_NONPCKILL_HOOK = {
+	"npc_sniper"
+}
+
 GM.ConfigList = {
 	["auto_prestige_enabled"] = "number",
 }

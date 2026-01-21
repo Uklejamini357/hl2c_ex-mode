@@ -81,7 +81,7 @@ function GM:CanPlayerSuicide(ply)
 	end
 
 /*
-	if !ply.vulnerable then
+	if ply.invulnerableTime and ply.invulnerableTime > CurTime() then
 		ply:ChatPrint("You're currently invulnerable. Suicide attempt blocked!")
 		return false
 	end
@@ -368,6 +368,12 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		PrintMessage(3, tostring(attacker).." "..(ent:IsPlayer() and ent:Nick() or ent:GetClass()).." "..tostring(damage))
 	end
 
+	if ent:IsNPC() and NPC_NONPCKILL_HOOK[ent:GetClass()] then
+		ent.m_LastAttacker = attacker
+		ent.m_LastInflictor = inflictor
+		ent.m_LastAttackTime = CurTime()
+	end
+
 	local cantakedamage = ent:IsValid() and ent:IsPlayer() and not (ent:HasGodMode() or not gamemode.Call("PlayerShouldTakeDamage", ent, attacker)) or ent:IsValid() and !ent:IsPlayer()
 	if cantakedamage then
 		if ent.PlyAttackers and attacker:IsPlayer() then
@@ -459,9 +465,13 @@ function GM:GrabAndSwitch()
 		self:SavePlayer(ply)
 	end
 
-	timer.Simple(1, function()
+	if game.SinglePlayer() then
 		game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
-	end)
+	else
+		timer.Simple(1, function()
+			game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
+		end)
+	end
 end
 
 function GM:ShutDown()
@@ -554,58 +564,6 @@ function GM:Initialize()
 	-- Kill global states
 	-- Reasoning behind this is because changing levels would keep these known states and cause issues on other maps
 	gamemode.Call("KillAllGlobalStates")
-	
-	-- Jeep
-	local jeep = {
-		Name = "Jeep",
-		Class = "prop_vehicle_jeep_old",
-		Model = "models/buggy.mdl",
-		KeyValues = {
-			TargetName = "jeep",
-			vehiclescript =	"scripts/vehicles/jeep_test.txt"
-		}
-	}
-	list.Set("Vehicles", "Jeep", jeep)
-	
-	-- Airboat
-	local airboat = {
-		Name = "Airboat Gun",
-		Class = "prop_vehicle_airboat",
-		Category = Category,
-		Model = "models/airboat.mdl",
-		KeyValues = {
-			TargetName = "airboat",
-			vehiclescript = "scripts/vehicles/airboat.txt",
-			EnableGun = 0
-		}
-	}
-	list.Set("Vehicles", "Airboat", airboat)
-	
-	-- Airboat w/gun
-	local airboatGun = {
-		Name = "Airboat Gun",
-		Class = "prop_vehicle_airboat",
-		Category = Category,
-		Model = "models/airboat.mdl",
-		KeyValues = {
-			TargetName = "airboat",
-			vehiclescript = "scripts/vehicles/airboat.txt",
-			EnableGun = 1
-		}
-	}
-	list.Set("Vehicles", "Airboat Gun", airboatGun)
-	
-	-- Jalopy
-	local jalopy = {
-		Name = "Jalopy",
-		Class = "prop_vehicle_jeep",
-		Model = "models/vehicle.mdl",
-		KeyValues = {
-			TargetName = "jeep",
-			vehiclescript =	"scripts/vehicles/jalopy.txt"
-		}
-	}
-	list.Set("Vehicles", "Jalopy", jalopy)
 
 	self:AddResources()
 	self:LoadServerData()
@@ -639,8 +597,10 @@ function GM:CompleteMap(ply)
 	end
 
 	-- Freeze them and make sure they don't push people away (and also so they don't get targeted by NPC's)
-	ply:Spectate(OBS_MODE_ROAMING)
-	ply:StripWeapons()
+	if !game.SinglePlayer() then
+		ply:Spectate(OBS_MODE_ROAMING)
+		ply:StripWeapons()
+	end
 	ply:SetAvoidPlayers(false)
 	ply:SetNoTarget(true)
 
@@ -773,7 +733,7 @@ function GM:MapEntitiesSpawned()
 	end
 
 	-- Setup TRIGGER_CHECKPOINT
-	if (!game.SinglePlayer() && TRIGGER_CHECKPOINT) then
+	if !game.SinglePlayer() and TRIGGER_CHECKPOINT then
 		for _, tcpInfo in pairs(TRIGGER_CHECKPOINT) do
 			local tcp = ents.Create("trigger_checkpoint")
 			tcp.min = tcpInfo[1]
@@ -883,7 +843,7 @@ function GM:OnNPCKilled(npc, killer, weapon)
 		if NPC_XP_VALUES[npcclass] then
 			-- Too many local. this is fine.
 			local xp = NPC_XP_VALUES[npcclass]
-			local diffgain = 0.0005
+			local diffgain = 0.00026
 			local npckillxpmul = (self.XpGainOnNPCKillMul or 1) * (npc.XPGainMult or 1)
 			local npckilldiffgainmul = (self.DifficultyGainOnNPCKillMul or 1) * (npc.DifficultyGainMult or 1)
 			local difficulty_gain = IN(0)
@@ -892,14 +852,17 @@ function GM:OnNPCKilled(npc, killer, weapon)
 				local mul = math.min(1, dmg/npc:GetMaxHealth())
 
 				local gainfromdifficultymul = infmath.min(difficulty^0.8, attacker:GetMaxDifficultyXPGainMul())
-				local better_knowledge_gain = attacker:HasPerkActive("1_better_knowledge") and (self.EndlessMode and (infmath.ConvertInfNumberToNormalNumber(nonmoddiff) >= 6.50 and 1.55 or 1.3) or !self.EndlessMode and 1.25) or 1
-				local xpmul = gainfromdifficultymul * npckillxpmul * better_knowledge_gain
-				local diffmul = 1
+				local xpmul = gainfromdifficultymul * npckillxpmul
+				local diffmul = npckilldiffgainmul
 
 				if attacker:GetSkillAmount("Knowledge") > 15 then
 					diffmul = diffmul * (1 + (attacker:GetSkillAmount("Knowledge")-15)*0.02)
 				end
 				if self.EndlessMode then
+					if attacker:HasPerkActive("1_better_knowledge") then
+						xpmul = xpmul * (infmath.ConvertInfNumberToNormalNumber(nonmoddiff) >= 6.50 and 1.55 or 1.3)
+					end
+
 					if attacker:HasPerkActive("1_difficult_decision") then
 						diffmul = diffmul * 1.75
 					end
@@ -919,6 +882,10 @@ function GM:OnNPCKilled(npc, killer, weapon)
 					end
 
 					diffmul = diffmul * attacker:GetEternityUpgradeEffectValue("difficultygain_upgrader")
+				else
+					if attacker:HasPerkActive("1_better_knowledge") then
+						xpmul = xpmul * 1.25
+					end
 				end
 				attacker:GiveXP(xp * xpmul * mul)
 				difficulty_gain = difficulty_gain + (diffgain*diffmul)*mul
@@ -981,13 +948,17 @@ function GM:OnNPCKilled(npc, killer, weapon)
 
 	-- Send a message
 	if (IsValid(killer) && killer:IsPlayer()) then
-	
 		net.Start("PlayerKilledNPC")
 		net.WriteString(npc:GetClass())
 		net.WriteString(weaponClass)
 		net.WriteEntity(killer)
 		net.Broadcast()
-	
+	end
+end
+
+function GM:EntityRemoved(ent)
+	if ent:IsNPC() and NPC_NONPCKILL_HOOK[ent:GetClass()] and ent.m_LastAttacker and ent.m_LastAttackTime == CurTime() then
+		gamemode.Call("OnNPCKilled", ent, ent.m_LastAttacker, ent.m_LastInflictor)
 	end
 end
 
@@ -1379,14 +1350,12 @@ end
 function GM:PlayerSpawn(ply)
 	player_manager.SetPlayerClass(ply, "player_default")
 
-	if (((!self.PlayerRespawning && !FORCE_PLAYER_RESPAWNING) || OVERRIDE_PLAYER_RESPAWNING) && (ply:Team() == TEAM_DEAD)) then
-	
+	if (!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING or OVERRIDE_PLAYER_RESPAWNING) and ply:Team() == TEAM_DEAD then
 		ply:Spectate(OBS_MODE_ROAMING)
 		ply:SetPos(ply.deathPos)
 		ply:SetNoTarget(true)
-	
+
 		return
-	
 	end
 
 	-- If we made it this far we might might not even be dead
@@ -1394,8 +1363,7 @@ function GM:PlayerSpawn(ply)
 
 	-- Player vars
 	ply.givenWeapons = {}
-	ply.vulnerable = false
-	timer.Simple(VULNERABLE_TIME, function() if IsValid(ply) then ply.vulnerable = true; end end)
+	ply.invulnerableTime = CurTime() + VULNERABLE_TIME
 
 	-- Player statistics
 	ply:UnSpectate()
@@ -1549,6 +1517,7 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 						v:SetTeam(TEAM_ALIVE)
 						timer.Simple(0.05, function()
 							v:Spawn()
+							v.invulnerableTime = CurTime()
 						end)
 					end
 					changingLevel = false
@@ -1995,3 +1964,55 @@ end
 function GM:AddResources()
 	resource.AddFile("sound/hl2c_eternal/music/chopper_fight.wav")
 end
+
+-- Jeep
+local jeep = {
+	Name = "Jeep",
+	Class = "prop_vehicle_jeep_old",
+	Model = "models/buggy.mdl",
+	KeyValues = {
+		TargetName = "jeep",
+		vehiclescript =	"scripts/vehicles/jeep_test.txt"
+	}
+}
+list.Set("Vehicles", "Jeep", jeep)
+
+-- Airboat
+local airboat = {
+	Name = "Airboat Gun",
+	Class = "prop_vehicle_airboat",
+	Category = Category,
+	Model = "models/airboat.mdl",
+	KeyValues = {
+		TargetName = "airboat",
+		vehiclescript = "scripts/vehicles/airboat.txt",
+		EnableGun = 0
+	}
+}
+list.Set("Vehicles", "Airboat", airboat)
+
+-- Airboat w/gun
+local airboatGun = {
+	Name = "Airboat Gun",
+	Class = "prop_vehicle_airboat",
+	Category = Category,
+	Model = "models/airboat.mdl",
+	KeyValues = {
+		TargetName = "airboat",
+		vehiclescript = "scripts/vehicles/airboat.txt",
+		EnableGun = 1
+	}
+}
+list.Set("Vehicles", "Airboat Gun", airboatGun)
+
+-- Jalopy
+local jalopy = {
+	Name = "Jalopy",
+	Class = "prop_vehicle_jeep",
+	Model = "models/vehicle.mdl",
+	KeyValues = {
+		TargetName = "jeep",
+		vehiclescript =	"scripts/vehicles/jalopy.txt"
+	}
+}
+list.Set("Vehicles", "Jalopy", jalopy)

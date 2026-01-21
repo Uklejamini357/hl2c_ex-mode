@@ -2,7 +2,9 @@
 
 -- Console variables
 local hl2c_cl_thirdperson = CreateClientConVar("hl2c_cl_thirdperson", 0, true, false, "Enable thirdperson")
-local hl2ce_cl_firstpersondeath = CreateClientConVar("hl2ce_cl_firstpersondeath", 1, true, false, "Enable firstperson death")
+local hl2ce_cl_fpdeath = CreateClientConVar("hl2ce_cl_fpdeath", 0, true, false, "Enable firstperson death")
+local hl2ce_cl_fpdeath_freeview = CreateClientConVar("hl2ce_cl_fpdeath_freeview", 0, true, false, "Enable free view with first person death")
+local hl2ce_cl_fpdeath_classic = CreateClientConVar("hl2ce_cl_fpdeath_classic", 0, true, false, "Classic HL2 death view")
 
 
 -- Calculate the player's view (taken from Base)
@@ -80,7 +82,8 @@ end
 
 local function DeathView(pl, origin, angles, fov)
 	if pl:Alive() then return end
-	if hl2ce_cl_firstpersondeath:GetInt() ~= 1 then return end
+	if hl2ce_cl_fpdeath:GetInt() ~= 1 then return end
+	if hl2ce_cl_fpdeath_classic:GetBool() then return {origin = pl:GetPos() + Vector(0,0,8)} end
 
 	local View
 	local rag = pl:GetRagdollEntity()
@@ -88,7 +91,11 @@ local function DeathView(pl, origin, angles, fov)
 	if rag:IsValid() and pl:GetObserverMode() == OBS_MODE_NONE then
 		local Eyes = rag:GetAttachment(rag:LookupAttachment("Eyes"))
 		if Eyes then
-			View = {origin = Eyes.Pos, angles = Eyes.Ang, fov = 90}
+			View = {origin = Eyes.Pos, angles = Eyes.Ang}
+			if hl2ce_cl_fpdeath_freeview:GetBool() then
+				View.angles = angles
+			end
+
 			return View
 		end
 	else
@@ -96,4 +103,10 @@ local function DeathView(pl, origin, angles, fov)
 		return View
 	end
 end
-hook.Add("CalcView", "DeathView", DeathView, HOOK_LOW)
+hook.Add("CalcView", "_DeathView", DeathView, HOOK_LOW)
+
+hook.Add("CreateClientsideRagdoll", "hl2ce_classicdeathstyle", function(pl, ragdoll)
+	if pl == LocalPlayer() and hl2ce_cl_fpdeath_classic:GetBool() then
+		ragdoll:SetNoDraw(true)
+	end
+end)

@@ -47,7 +47,7 @@ function HL2cEX_NPCVariantSpawn(ent)
 	hook.Run("ApplyNPCVariant", ent)
 	if FORCE_NPCVARIANT then
 		ent.VariantType = FORCE_NPCVARIANT
-		FORCE_NPCVARIANT = nil
+		-- FORCE_NPCVARIANT = nil
 	elseif not ent.VariantType then
 		ent.VariantType = math.random(1,2)
 	end
@@ -62,8 +62,8 @@ function HL2cEX_NPCVariantSpawn(ent)
 			ent.ent_MaxHealthMul = 0.9
 			ent.ent_HealthMul = 0.9
 		end
-	elseif ent:GetClass() == "npc_combine_s" then -- Destructive variant - deals massive damage but is also more fragile. Shotgunner damage reduced.
-		if ent.VariantType == 1 then
+	elseif ent:GetClass() == "npc_combine_s" then
+		if ent.VariantType == 1 then -- Destructive variant - deals massive damage but is also more fragile. Shotgunner damage reduced.
 			ent.ent_Color = Color(255,128,128)
 			ent.ent_MaxHealthMul = 0.64
 			ent.ent_HealthMul = 0.64
@@ -71,6 +71,14 @@ function HL2cEX_NPCVariantSpawn(ent)
 		elseif ent.VariantType == 2 then -- Boost health for normal soldiers
 			ent.ent_MaxHealthMul = 1.2
 			ent.ent_HealthMul = 1.2
+		end
+	elseif ent:GetClass() == "npc_strider" then
+		if ent.VariantType == 1 then -- Furious variant - Always has aggressive behavior (Like in EP1)
+			ent.ent_Color = Color(255,128,128)
+
+			ent:Input("EnableAggressiveBehavior")
+		elseif ent.VariantType == 2 then -- Boost health for normal soldiers
+			ent.ent_Color = Color(128,128,255)
 		end
 	elseif ent:GetClass() == "npc_manhack" then
 	elseif ent:GetClass() == "npc_zombie" then
@@ -125,6 +133,10 @@ function HL2cEX_NPCVariantSpawn(ent)
 	end
 
 	hook.Run("PostApplyNPCVariant", ent, variant)
+	timer.Simple(0, function()
+		if !IsValid(ent) then return end
+		hook.Run("PostApplyNPCVariantDelayed", ent, variant)
+	end)
 end
 hook.Add("OnEntityCreated", "_HL2cEX_NPCVariantsSpawned", HL2cEX_NPCVariantSpawn)
 
@@ -273,8 +285,21 @@ timer.Create("NPC_ANTLIONGUARD_AURA", 1, 0, AntlionGuardAURA)
 -- HYPER EX
 
 
+local function StriderShootCannon(ent, target)
+	if !IsValid(ent.ShootingCannonInfoTarget) then
+		ent.ShootingCannonInfoTarget = ents.Create("info_target")
+		ent.ShootingCannonInfoTarget:SetPos(target:GetPos())
+		ent.ShootingCannonInfoTarget:Spawn()
 
+		ent:CallOnRemove("RemoveInfoTarget", function(ent)
+			ent.ShootingCannonInfoTarget:Remove()
+		end)
+	end
 
+	ent.ShootingCannonInfoTarget:SetPos(target:GetPos())
+	ent:SetSaveValue("m_hCannonTarget", ent.ShootingCannonInfoTarget)
+	ent.m_NextCannonShoot = CurTime() + math.Rand(5, 10)
+end
 
 -- Priority hook function
 function HL2cHyperEX_NPCVariantSpawn(ent)
@@ -303,7 +328,7 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			ent.ent_MaxHealthMul = 0.9
 			ent.ent_HealthMul = 0.9
 		end
-	elseif class == "npc_combine_s" then -- Destructive variant - deals massive damage but is also more fragile. Shotgunner damage reduced.
+	elseif class == "npc_combine_s" then
 		timer.Simple(0, function() -- below doesn't work without a timer, as it's just BEFORE it spawned. (don't i just love how gmod handles the hooks sometimes)
 			if !IsValid(ent) then return end
 			local model = ent:GetModel()
@@ -323,6 +348,10 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			elseif model == "models/combine_super_soldier.mdl" then -- Elite Soldier
 				ent.NPCStrengthTier = 3
 			end
+
+			if ent.VariantType == 3 then
+				ent:SetCurrentWeaponProficiency(WEAPON_PROFICIENCY_PERFECT)
+			end
 		end)
 
 		if ent.VariantType == 2 and math.random(3) == 1 then -- i find the tanky variant very annoying to deal with
@@ -333,16 +362,41 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			ent.ent_Color = Color(127,255,255)
 			ent.ent_MaxHealthMul = 1
 			ent.ent_HealthMul = 1
+
+			-- cuz we know it's easily grindable with it
+			ent.DifficultyGainMult = 0.2
+			ent.XPGainMult = 0.3
 		elseif ent.VariantType == 2 then -- Tanky Variant (yes :))
 			ent.ent_Color = Color(127,255,127)
-			ent.ent_MaxHealthMul = 4.666
-			ent.ent_HealthMul = 4.666
-			ent.XPGainMult = 3.5
-		elseif ent.VariantType == 3 then -- "Hyper" Variant (???)
+			ent.ent_MaxHealthMul = 2.666
+			ent.ent_HealthMul = 2.666
+			ent.DifficultyGainMult = 1.2
+			ent.XPGainMult = 1.9
+		elseif ent.VariantType == 3 then -- "Hyper" Variant - 1.5x health, with near-perfect weapon aim!
 			ent.ent_Color = Color(255,0,127)
 			ent.ent_MaxHealthMul = 1.5
 			ent.ent_HealthMul = 1.5
+
+			ent.DifficultyGainMult = math.Rand(1.1, 1.2)
 			ent.XPGainMult = 1.3
+		end
+	elseif class == "npc_strider" then
+		if ent.VariantType == 1 then -- Advanced Variant - Constantly uses strider cannon, every 5-10 seconds. Always sprints and has aggressive behavior like in episodic.
+			ent.ent_Color = Color(127,0,255)
+			ent.ent_MaxHealthMul = 1.3
+			ent.ent_HealthMul = 1.3
+
+			ent.DifficultyGainMult = math.Rand(1, 1.1)
+			ent.XPGainMult = 1.2
+			ent:Input("ActivateSpeedModifier")
+			ent:Input("EnableAggressiveBehavior")
+		elseif ent.VariantType == 2 then -- Hunter-Strider Variant - On death spawns in 3 hunters, or 10 manhacks. (Only if i somehow was able to make it shoot flechettes)
+			ent.ent_Color = Color(63,160,255)
+
+			ent.DifficultyGainMult = math.Rand(1, 1.1)
+			ent.XPGainMult = 1.2
+		elseif ent.VariantType == 3 then -- Exploder Variant - On death spawns 25 frag nades near it, exploding after only 25 seconds!
+			ent.ent_Color = Color(127,255,127)
 		end
 	elseif class == "npc_manhack" then
 	elseif class == "npc_zombie" then
@@ -351,7 +405,7 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			ent.ent_MaxHealthMul = 0.6
 			ent.ent_HealthMul = 0.6
 		end
-	elseif class == "npc_fastzombie" then -- Infective variant of Fast zombies can deal damage over time
+	elseif class == "npc_fastzombie" then -- 6.66x animation speed
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
 			ent.ent_MaxHealthMul = 0.7
@@ -397,6 +451,10 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 	end
 
 	hook.Run("PostApplyNPCVariant", ent, variant)
+	timer.Simple(0, function()
+		if !IsValid(ent) then return end
+		hook.Run("PostApplyNPCVariantDelayed", ent, variant)
+	end)
 end
 hook.Add("OnEntityCreated", "_HL2cHyperEX_NPCVariantsSpawned", HL2cHyperEX_NPCVariantSpawn)
 
@@ -466,6 +524,37 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:Spawn()
 			OnSpawnNewEnt(ent, ent2)
 			ent2:GetPhysicsObject():SetVelocityInstantaneous((attacker:GetPos() - ent2:GetPos()) * 2)
+		end
+	elseif ent:GetClass() == "npc_strider" then
+		if ent.VariantType == 2 then
+			local episodic = GetConVar("hl2_episodic"):GetBool()
+			for i=1,episodic and 3 or 10 do
+				local ent2 = ents.Create(episodic and "npc_hunter" or "npc_manhack")
+				ent2:SetPos(ent:GetPos() + Angle(0, ent:GetAngles().yaw, 0):Forward()*(i-2)*70)
+				ent2:SetAngles(ent:GetAngles())
+				ent2:Spawn()
+				OnSpawnNewEnt(ent, ent2)
+				if not episodic then
+					ent2.DontCollide = ent.RagdolledEntity
+					ent2:CollisionRulesChanged()
+					local a = attacker:GetPos() - ent:GetPos()
+					ent2:SetVelocity((a/a:Length()) * 1000)
+				end
+			end
+		elseif ent.VariantType == 3 then
+			for i=1,25 do
+				local ent2 = ents.Create("npc_grenade_frag")
+				ent2:SetPos(ent:GetPos() + Vector(-20 + ((i%5)*10), -20 + ((math.floor(i/5)%5)*10), -80))
+				ent2:SetOwner(ent)
+				ent2:Spawn()
+				local vel = VectorRand()*math.random(300, 500)
+				vel.z = -math.random(250,350)
+				local phys = ent2:GetPhysicsObject()
+				if phys and phys:IsValid() then
+					phys:SetVelocityInstantaneous(vel)
+				end
+				ent2:Input("SetTimer", nil, nil, 1.5)
+			end
 		end
 	elseif ent:GetClass() == "npc_sniper" then
 		PrintMessage(3, "WTF YOU KILLED HIM!")
@@ -566,13 +655,24 @@ local function HL2cHyperEX_NPCVariantTakeDamage(ent, dmginfo)
 				dmginfo:SetDamage(math.max(d, ent:Health()/4))
 			end
 		end
+	elseif class == "npc_strider" then
+		if ent.VariantType == 1 then
+			dmginfo:ScaleDamage(0.7)
+		end
 	end
 end
 hook.Add("EntityTakeDamage", "HL2cHyperEX_NPCVariantTakeDamage", HL2cHyperEX_NPCVariantTakeDamage)
 
 local function HL2cHyperEX_NPCVariantThink(ent, class)
 	if class == "npc_fastzombie" then
-		ent:SetPlaybackRate(6.8)
+		ent:SetPlaybackRate(6.66)
+	elseif class == "npc_strider" then
+		if ent.VariantType == 1 then
+			local enemy = ent:GetEnemy()
+			if enemy and IsValid(enemy) and enemy ~= ent and (ent.m_NextCannonShoot or 0) < CurTime() then
+				StriderShootCannon(ent, enemy)
+			end
+		end
 	end
 end
 
