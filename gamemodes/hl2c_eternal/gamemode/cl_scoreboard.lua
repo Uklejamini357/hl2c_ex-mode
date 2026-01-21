@@ -25,6 +25,10 @@ function PANEL:Init()
 	self.playerList = vgui.Create( "scoreboard_playerlist", self )
 
 	self:UpdateScoreboard()
+	timer.Create("hl2c_scoreboard_updater", 3, 0, function()
+		if !IsValid(self) then timer.Remove("hl2c_scoreboard_updater") return end
+		self:UpdateScoreboard()
+	end)
 end
 
 
@@ -59,9 +63,9 @@ function PANEL:UpdateScoreboard( force )
 
 	local numPlayers = player.GetCount()
 	if numPlayers == 1 then
-		self.numPlayersLabel:SetText( "1 Player" )
+		self.numPlayersLabel:SetText("1 Player")
 	else
-		self.numPlayersLabel:SetText( numPlayers.." Players" )
+		self.numPlayersLabel:SetText(numPlayers.." Players")
 	end
 
 	self:InvalidateLayout()

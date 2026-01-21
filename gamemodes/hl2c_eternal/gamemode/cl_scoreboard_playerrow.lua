@@ -113,7 +113,7 @@ function PANEL:PerformLayout()
 
 	self.pingLabel:SizeToContents()
 	self.pingLabel:SetPos(self:GetWide() - self.pingLabel:GetWide() - 5, self.posY)
-	self.pingLabel:SetTextColor(color)
+	self.pingLabel:SetTextColor(HSVToColor(math.max(0, 120 - self.ply:Ping()/2.5), 1, 1))
 end
 
 
@@ -145,6 +145,7 @@ function PANEL:UpdatePlayerRow()
 	self.scoreLabel:SetText(self.ply:Frags())
 	self.deathsLabel:SetText(self.ply:Deaths())
 	self.pingLabel:SetText(self.ply:Ping())
+	self.pingLabel:SetTextColor(HSVToColor(math.max(0, 120 - self.ply:Ping()/2.5), 1, 1))
 
 	self:InvalidateLayout()
 end

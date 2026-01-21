@@ -67,7 +67,7 @@ function PANEL:PerformLayout()
 
 	local y = 15
 	for _, row in ipairs(playerRowsSorted) do
-		if player.GetCount() <= 10 then
+		if player.GetCount() < 10 then
 			row:SetPos(0, y)
 			row:SetSize(self:GetWide(), 35)
 			row:UpdatePlayerRow()

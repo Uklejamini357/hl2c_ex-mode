@@ -224,6 +224,7 @@ end
 
 
 function GM:IsSpecialPerson(ply, image)
+	if !IsValid(ply) then return end
 	local img, tooltip
 --i know this was copied from zombiesurvival gamemode but i was too lazy to make one by myself anyway
 --you can add new special person table by yourself but you must keep the original ones and the new ones must be after steamid

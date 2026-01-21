@@ -322,8 +322,8 @@ function GM:CreateFonts()
 end
 
 function GM:CreateScoreboardFonts(large)
-	surface.CreateFont("hl2ce_font_sb", {size = large and 28 or 18, weight = 700, font = "Roboto Black"})
-	surface.CreateFont("hl2ce_font_sb_small", {size = large and 22 or 14, weight = 500, font = "Roboto Black"})
+	surface.CreateFont("hl2ce_font_sb", {size = large and 18 or 16, weight = 700, font = "Roboto Black"})
+	surface.CreateFont("hl2ce_font_sb_small", {size = large and 16 or 12, weight = 500, font = "Roboto Black"})
 end
 
 -- Called when we initialize
@@ -346,7 +346,7 @@ function GM:Initialize()
 	-- Fonts we will need later
 	-- surface.CreateFont( "Roboto16", { size = 16, weight = 400, antialias = true, additive = false, font = "Roboto" } )
 	self:CreateFonts()
-	self:CreateScoreboardFonts(player.GetCount() >= 10)
+	self:CreateScoreboardFonts(player.GetCount() < 10)
 
 
 	-- Language
@@ -825,9 +825,9 @@ function GM:ScoreboardShow()
 		self:CreateScoreboard()
 	end
 	if scoreboard.CurPlayers ~= player.GetCount() then
-		self:CreateScoreboardFonts(player.GetCount() >= 10)
+		self:CreateScoreboardFonts(player.GetCount() < 10)
+		scoreboard.CurPlayers = player.GetCount()
 	end
-	scoreboard.CurPlayers = player.GetCount()
 
 	scoreboard:SetVisible(true)
 	scoreboard:UpdateScoreboard(true)
