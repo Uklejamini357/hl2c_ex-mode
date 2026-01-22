@@ -452,7 +452,7 @@ end
 
 
 -- Called by GoToNextLevel
-function GM:GrabAndSwitch(insant)
+function GM:GrabAndSwitch(instant)
 	changingLevel = true
 	timer.Remove("hl2c_next_map")
 
