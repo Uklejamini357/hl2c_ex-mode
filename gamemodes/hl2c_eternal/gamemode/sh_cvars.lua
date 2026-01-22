@@ -1,45 +1,45 @@
 GM.AdminPhysgun = CreateConVar("hl2c_admin_physgun", ADMIN_PHYSGUN, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_admin_physgun", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_admin_physgun", function(convar, old, new)
 	GAMEMODE.AdminPhysgun = tobool(new)
 end, "hl2c_admin_physgun")
 
 GM.AdminNoclip = CreateConVar("hl2c_admin_noclip", ADMIN_NOCLIP, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_admin_noclip", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_admin_noclip", function(convar, old, new)
 	GAMEMODE.AdminNoclip = tobool(new)
 end, "hl2c_admin_noclip")
 
 GM.ForceGamerules = CreateConVar("hl2c_server_force_gamerules", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_force_gamerules", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_force_gamerules", function(convar, old, new)
 	GAMEMODE.ForceGamerules = tobool(new)
 end, "hl2c_server_force_gamerules")
 
 GM.CustomPMs = CreateConVar("hl2c_server_custom_playermodels", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_custom_playermodels", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_custom_playermodels", function(convar, old, new)
 	GAMEMODE.CustomPMs = tobool(new)
 end, "hl2c_server_custom_playermodels")
 
 GM.CheckpointRespawn = CreateConVar("hl2c_server_checkpoint_respawn", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_checkpoint_respawn", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_checkpoint_respawn", function(convar, old, new)
 	GAMEMODE.CheckpointRespawn = tobool(new)
 end, "hl2c_server_checkpoint_respawn")
 
 GM.DynamicSkillLevel = CreateConVar("hl2c_server_dynamic_skill_level", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_dynamic_skill_level", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_dynamic_skill_level", function(convar, old, new)
 	GAMEMODE.DynamicSkillLevel = tobool(new)
 end, "hl2c_server_dynamic_skill_level")
 
 GM.LagCompensation = CreateConVar("hl2c_server_lag_compensation", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_lag_compensation", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_lag_compensation", function(convar, old, new)
 	GAMEMODE.LagCompensation = tobool(new)
 end, "hl2c_server_lag_compensation")
 
 GM.PlayerRespawning = CreateConVar("hl2c_server_player_respawning", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_player_respawning", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_player_respawning", function(convar, old, new)
 	GAMEMODE.PlayerRespawning = tobool(new)
 end, "hl2c_server_player_respawning")
 
 GM.JeepPassengerSeat = CreateConVar("hl2c_server_jeep_passenger_seat", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2c_server_jeep_passenger_seat", function(cvar, old, new)
+cvars.AddChangeCallback("hl2c_server_jeep_passenger_seat", function(convar, old, new)
 	GAMEMODE.JeepPassengerSeat = tobool(new)
 end, "hl2c_server_jeep_passenger_seat")
 
@@ -47,7 +47,7 @@ end, "hl2c_server_jeep_passenger_seat")
 local cvar = CreateConVar("hl2ce_server_ex_mode_enabled", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE)
 GM.EnableEXMode = cvar:GetBool()
 GM.EnableHyperEXMode = cvar:GetInt() >= 2
-cvars.AddChangeCallback("hl2ce_server_ex_mode_enabled", function(cvar, old, new)
+cvars.AddChangeCallback("hl2ce_server_ex_mode_enabled", function(convar, old, new)
 	GAMEMODE.EnableEXMode = tobool(new)
 	GAMEMODE.EnableHyperEXMode = (tonumber(new) or 0) >= 2
 
@@ -55,18 +55,38 @@ cvars.AddChangeCallback("hl2ce_server_ex_mode_enabled", function(cvar, old, new)
 	BroadcastLua(string.format([[GAMEMODE.EnableHyperEXMode = %s]], GAMEMODE.EnableHyperEXMode))
 end, "hl2ce_server_ex_mode_enabled")
 
+local cvar = CreateConVar("hl2ce_server_hardcore_mode_enabled", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE)
+-- it ain't finished yet.
+if cvar:GetBool() then
+	cvar:SetFloat(0)
+end
+GM.EnableHardcoreMode = cvar:GetBool()
+cvars.AddChangeCallback("hl2ce_server_hardcore_mode_enabled", function(convar, old, new)
+	if tobool(new) then
+		PrintMessage(3, "NO")
+		cvar:SetFloat(0)
+	end
+	do return end
+
+	GAMEMODE.EnableHardcoreMode = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.EnableHardcoreMode = %s]], GAMEMODE.EnableHardcoreMode))
+
+	GAMEMODE:EnableHardcore(gamemode.Call("ShouldEnableHardcore"))
+end, "hl2ce_server_hardcore_mode_enabled")
+
 GM.ForceDifficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetString()
-cvars.AddChangeCallback("hl2ce_server_force_difficulty", function(cvar, old, new)
+cvars.AddChangeCallback("hl2ce_server_force_difficulty", function(convar, old, new)
 	GAMEMODE.ForceDifficulty = new
 end, "hl2ce_server_force_difficulty")
 
 GM.SkillsDisabled = CreateConVar("hl2ce_server_skills_disabled", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetBool()
-cvars.AddChangeCallback("hl2ce_server_skills_disabled", function(cvar, old, new)
+cvars.AddChangeCallback("hl2ce_server_skills_disabled", function(convar, old, new)
 	GAMEMODE.SkillsDisabled = tobool(new)
 end, "hl2ce_server_skills_disabled")
 
 GM.PlayerMedkitOnSpawn = CreateConVar("hl2ce_server_player_medkit", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE, "Give medkits for players on spawn"):GetBool()
-cvars.AddChangeCallback("hl2ce_server_player_medkit", function(cvar, old, new)
+cvars.AddChangeCallback("hl2ce_server_player_medkit", function(convar, old, new)
 	GAMEMODE.PlayerMedkitOnSpawn = tobool(new)
 end, "hl2ce_server_player_medkit")
 
@@ -104,7 +124,7 @@ local function callback()
 	bhop(tobool(GM.BHopEnabled))
 end
 GM.BHopEnabled = CreateConVar("hl2ce_server_bhop_enable", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE, "Enable bhop... for fun!"):GetBool()
-cvars.AddChangeCallback("hl2ce_server_bhop_enable", function(cvar, old, new)
+cvars.AddChangeCallback("hl2ce_server_bhop_enable", function(convar, old, new)
 	GAMEMODE.BHopEnabled = tobool(new)
 
 	callback()

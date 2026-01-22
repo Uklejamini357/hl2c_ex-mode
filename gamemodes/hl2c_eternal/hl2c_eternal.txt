@@ -42,6 +42,7 @@
 			"help"		"Allow usage of custom playermodels. Set variable to -1 to entirely disable it."
 			"type"		"CheckBox"
 			"default"	"0"
+			"singleplayer"	"1"
 		}
 	
 		5
@@ -74,7 +75,7 @@
 		8
 		{
 			"name"		"hl2c_server_player_respawning"
-			"text"		"playercanrespawn"
+			"text"		"Allow players respawning"
 			"help"		"Players can never permanently die"
 			"type"		"CheckBox"
 			"default"	"0"
@@ -83,7 +84,7 @@
 		9
 		{
 			"name"		"hl2c_server_jeep_passenger_seat"
-			"text"		"passengerseat"
+			"text"		"Enable Passenger seats"
 			"help"		"Give Jeeps a passenger seat"
 			"type"		"CheckBox"
 			"default"	"0"
@@ -92,10 +93,50 @@
 		10
 		{
 			"name"		"hl2ce_server_ex_mode_enabled"
-			"text"		"THE EX MODE - turns hl2c into rng manipulating simulator"
+			"text"		"EX Mode"
 			"help"		"Enable Half-Life 2 Campaign: EX Mode. If enabled, will make overall difficulty of HL2c even harder. Requires map change!"
 			"type"		"CheckBox"
 			"default"	"1"
+			"singleplayer"	"1"
+		}
+
+//		11
+//		{
+//			"name"		"hl2ce_server_hardcore_mode_enabled"
+//			"text"		"(BETA) Hardcore Mode"
+//			"help"		"Enables Hardcore Mode. You only have one life per each run. If the map is failed or all players are dead, the run is failed! Play carefully!"
+//			"type"		"CheckBox"
+//			"default"	"1"
+//			"singleplayer"	"1"
+//		}
+
+		12
+		{
+			"name"		"hl2ce_server_bhop_enable"
+			"text"		"Enable Bunnyhopping"
+			"help"		""
+			"type"		"CheckBox"
+			"default"	"0"
+			"singleplayer"	"1"
+		}
+
+		13
+		{
+			"name"		"hl2ce_server_player_medkit"
+			"text"		"Give medkits to players"
+			"help"		"Gives medkits to players. Players can heal other players with this!"
+			"type"		"CheckBox"
+			"default"	"0"
+		}
+
+		14
+		{
+			"name"		"hl2ce_server_skills_disabled"
+			"text"		"Disable skills and perks"
+			"help"		""
+			"type"		"CheckBox"
+			"default"	"0"
+			"singleplayer"	"1"
 		}
 	}
 }

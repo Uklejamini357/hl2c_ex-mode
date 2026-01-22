@@ -7,13 +7,12 @@ local disable_delayed_explode = false
 
 -- Initialize entities
 function hl2cMapEdit()
-
+	GAMEMODE.HardcoreModeEnabled = true
 	ents.FindByName("player_spawn_items_template")[1]:Remove()
 
 	if !game.SinglePlayer() then
-	
 		ents.FindByName("scriptcond_seebarney")[1]:Remove()
-	
+
 		-- Create a trigger to replace script conditions
 		local condition_trigger = ents.Create( "trigger_once" )
 		condition_trigger:SetPos( Vector( -9727, -3391, 390 ) )
@@ -31,7 +30,6 @@ function hl2cMapEdit()
 		condition_trigger:SetKeyValue( "OnTrigger", "citadel,SetAnimation,open,1.7,-1" )
 		condition_trigger:Spawn()
 		condition_trigger:Activate()
-	
 	end
 
 	disable_delayed_explode = false

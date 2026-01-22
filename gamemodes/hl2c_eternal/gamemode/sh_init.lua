@@ -33,8 +33,8 @@ end, "hl2ce_debug_notranslate")
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^7" -- also known as 0.inf.inf.inf... you get it
-GM.DateVer = "21-01-2026"
+GM.Version = "0.inf^8" -- also known as 0.inf.inf.inf... you get it
+GM.DateVer = "22-01-2026"
 
 -- even crazier things inbound... beware!
 
@@ -220,6 +220,36 @@ function GM:PlayerShouldTakeDamage(ply, attacker)
 	end
 
 	return true
+end
+
+function GM:CanPlayerRespawn(pl)
+	if OVERRIDE_PLAYER_RESPAWNING then return false end
+	if self:HardcoreEnabled() then return false end
+
+	return self.PlayerRespawning or FORCE_PLAYER_RESPAWNING
+end
+
+function GM:ShouldEnableHardcore()
+	if NOENABLE_HARDCORE_MODE then return false end
+	return self.EnableHardcoreMode
+end
+
+function GM:EnableHardcore(state)
+	if CLIENT then return end
+	if state == self:HardcoreEnabled() then return end
+
+	if state then
+		PrintMessage(3, "Hardcore mode enabled. Good luck...")
+	else
+		PrintMessage(3, "Hardcore mode disabled.")
+	end
+	SetGlobalBool("hl2ce_hardcore", state)
+	gamemode.Call("OnHardcoreEnabled", state)
+	return state
+end
+
+function GM:HardcoreEnabled()
+	return GetGlobalBool("hl2ce_hardcore", false)
 end
 
 

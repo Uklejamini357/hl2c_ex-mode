@@ -618,6 +618,46 @@ Once you're dead you cannot respawn until the next map.]])
 	text:SetWrap(true)
 	list:AddItem(text)
 
+	if GAMEMODE:HardcoreEnabled() then
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[Hardcore Mode has been enabled. You only have one life per run! Play carefully...]])
+		text:SetColor(Color(255,0,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[Hardcore Mode adds a new way of playing Half-Life 2 by restricting you to only having one life per run.
+This is similar to Roguelite/Roguelike games and Hardcore minecraft!]])
+		text:SetColor(Color(255,110,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[---- Rules of the run ----
+If you die, you cannot respawn anymore even on upcoming maps!
+If you fail the map, you must restart your run back at the first map.
+If you have joined late, you cannot participate in this run anymore.
+Dead players can still spectate.
+Connecting players are given 30 seconds to load in order to catch up before the run is failable by the lack of alive players.]])
+		text:SetColor(Color(255,170,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[As usual, this is in beta stage. Some things may not work correctly.]])
+		text:SetColor(Color(255,140,0))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+	end
+
 	if GAMEMODE.EXMode then
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[EX Mode has been enabled. Good luck.]])

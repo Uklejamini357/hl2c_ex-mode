@@ -11,6 +11,8 @@ TRIGGER_CHECKPOINT = {
 
 TRAINSTATION_LEAVEBARNEYDOOROPEN = false
 
+NOENABLE_HARDCORE_MODE = true
+
 table.RemoveByValue(GODLIKE_NPCS, "npc_barney")
 table.RemoveByValue(FRIENDLY_NPCS, "npc_citizen")
 if CLIENT then return end
@@ -50,7 +52,6 @@ function hl2cMapEdit()
 	respawning_crate = nil
 	respawning_crate_kill = nil
 	barney_killed_themselves = nil
-	
 
 	game.SetGlobalState("gordon_precriminal", GLOBAL_ON)
 	game.SetGlobalState("gordon_invulnerable", GLOBAL_ON)

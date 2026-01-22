@@ -129,7 +129,7 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	ply.deathPos = ply:EyePos()
 
 	-- Add to deadPlayers table to prevent respawning on re-connect
-	if ((!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING) and !table.HasValue(deadPlayers, ply:SteamID()) and !ply:IsBot() then
+	if !self:CanPlayerRespawn() and !table.HasValue(deadPlayers, ply:SteamID()) and !ply:IsBot() then
 		table.insert(deadPlayers, ply:SteamID())
 	end
 	
@@ -179,7 +179,7 @@ function GM:PlayerDeathThink(ply)
 	end
 
 	if ply:GetObserverMode() != OBS_MODE_ROAMING and (ply:IsBot() or ply:KeyPressed(IN_ATTACK) or ply:KeyPressed(IN_ATTACK2) or ply:KeyPressed(IN_JUMP)) then
-		if (!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING then
+		if !self:CanPlayerRespawn() then
 			ply:Spectate(OBS_MODE_ROAMING)
 			ply:SetPos(ply.deathPos)
 			ply:SetNoTarget(true)
@@ -452,20 +452,19 @@ end
 
 
 -- Called by GoToNextLevel
-function GM:GrabAndSwitch()
+function GM:GrabAndSwitch(insant)
 	changingLevel = true
 	timer.Remove("hl2c_next_map")
 
-	-- Since the file can build up with useless files we should clear it
 	gamemode.Call("ClearPlayerDataFolder")
 
-	-- Store player information
+	self:SaveCampaignData()
 	for _, ply in ipairs(player.GetAll()) do
 		self:WriteCampaignSaveData(ply, true)
 		self:SavePlayer(ply)
 	end
 
-	if game.SinglePlayer() then
+	if game.SinglePlayer() or instant then
 		game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
 	else
 		timer.Simple(1, function()
@@ -483,7 +482,6 @@ end
 
 -- Called immediately after starting the gamemode  
 function GM:Initialize()
-	-- Variables and stuff
 	deadPlayers = {}
 	changingLevel = false
 	checkpointPositions = {}
@@ -504,6 +502,11 @@ function GM:Initialize()
 	self:SetDifficulty(1)
 	self.EXMode = self.EnableEXMode
 	self.HyperEXMode = self.EnableHyperEXMode
+
+	self.CampaignMapVars = {}
+	self.HardcoreAlivePlayers = {}
+	self:LoadCampaignData()
+	self:EnableHardcore(gamemode.Call("ShouldEnableHardcore"))
 
 	-- Network strings
 	util.AddNetworkString("SetCheckpointPosition")
@@ -549,7 +552,7 @@ function GM:Initialize()
 	game.ConsoleCommand("physcannon_pullforce 4000\n")
 	
 	-- Episodic
-	if string.find(game.GetMap(), "ep1_") || string.find(game.GetMap(), "ep2_") then
+	if string.find(game.GetMap(), "ep1_") or string.find(game.GetMap(), "ep2_") then
 		game.ConsoleCommand("hl2_episodic 1\n")
 	else
 		game.ConsoleCommand("hl2_episodic 0\n")
@@ -557,7 +560,7 @@ function GM:Initialize()
 	
 	-- Force game rules such as aux power and max ammo
 	if self.ForceGamerules then
-		if !AUXPOW then game.ConsoleCommand("gmod_suit 1\n"); end
+		game.ConsoleCommand("gmod_suit 1\n")
 		game.ConsoleCommand("gmod_maxammo 0\n")	
 	end
 
@@ -567,7 +570,7 @@ function GM:Initialize()
 
 	self:AddResources()
 	self:LoadServerData()
-	
+
 	print(self.Name.." ("..self.Version..") gamemode loaded")
 end
 
@@ -682,6 +685,18 @@ function GM:PlayerCompletedCampaign(ply)
 	ply:PrintMessage(3, Format("You were awarded %s XP", ply:GiveXP(xp)))
 end
 
+function GM:OnHardcoreEnabled(state)
+	if state then
+		for _,pl in ipairs(player.GetLiving()) do
+			if table.HasValue(self.HardcoreAlivePlayers, pl:SteamID64()) then continue end
+			table.insert(self.HardcoreAlivePlayers, pl:SteamID64())
+		end
+	else
+		self.HardcoreAlivePlayers = {}
+	end
+end
+
+
 
 -- Function for spawn points
 local function MasterPlayerStartExists()
@@ -775,7 +790,7 @@ function GM:MapEntitiesSpawned()
 	end
 
 	-- Call a map edit (used by map lua hooks)
-	hook.Call("MapEdit", GAMEMODE, GAMEMODE)
+	hook.Run("MapEdit")
 end
 function GM:InitPostEntity()
 	RunConsoleCommand("sv_sticktoground", "0")
@@ -787,20 +802,31 @@ function GM:PostCleanupMap()
 end
 
 -- Called automatically or by the console command
-function GM:NextMap()
+function GM:NextMap(instant)
 	if changingLevel then return end
 
 	changingLevel = true
 
-	net.Start("NextMap")
-	net.WriteFloat(CurTime())
-	net.Broadcast()
+	if instant then
+		self:GrabAndSwitch(instant)
+	else
+		net.Start("NextMap")
+		net.WriteFloat(CurTime())
+		net.Broadcast()
 
-	timer.Create("hl2c_next_map", NEXT_MAP_TIME, 1, function()
-		self:GrabAndSwitch()
-	end)
+		timer.Create("hl2c_next_map", NEXT_MAP_TIME, 1, function()
+			self:GrabAndSwitch()
+		end)
+	end
 end
-concommand.Add("hl2ce_next_map", function(ply) if (IsValid(ply) && ply:IsAdmin()) then NEXT_MAP_TIME = 0; hook.Call("NextMap", GAMEMODE); else ply:PrintMessage(HUD_PRINTTALK, "You are not admin!") end end)
+concommand.Add("hl2ce_next_map", function(ply)
+	if (IsValid(ply) && ply:IsAdmin()) then
+		NEXT_MAP_TIME = 0
+		hook.Run("NextMap")
+	else
+		ply:PrintMessage(HUD_PRINTTALK, "You are not admin!")
+	end
+end)
 concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
 	if IsValid(ply) && ply:IsAdmin() && (!ply:Alive() || table.HasValue(deadPlayers, ply:SteamID()) or args[1] == "force") && !changingLevel then
 		table.RemoveByValue(deadPlayers, ply:SteamID())
@@ -1154,12 +1180,18 @@ function GM:PlayerInitialSpawn(ply)
 
 	self:NetworkString_UpdateStats(ply)
 
-	-- EP1 and EP2 maps might be buggy with npc spawns. By then, Restart Map upon starting the game.
-	if player.GetCount() == 1 and (self.WasForcedRestart or 0) < (FORCE_RESTART_COUNT or 1) and (string.find(game.GetMap(), "ep1_") or string.find(game.GetMap(), "ep2_")) and not NEVER_FORCE_RESTART then
-    	timer.Simple(0.1, function()
-    	    self.WasForcedRestart = (self.WasForcedRestart or 0) + 1
-    	    GAMEMODE:RestartMap(0, true)
-    	end)
+	if player.GetCount() == 1 then
+		if !self.GameStartedTime then
+			self.GameStartedTime = CurTime()
+		end
+
+		-- EP1 and EP2 maps might be buggy with npc spawns. If so, Restart Map upon starting the game.
+		if (self.WasForcedRestart or 0) < (FORCE_RESTART_COUNT or 1) and (string.find(game.GetMap(), "ep1_") or string.find(game.GetMap(), "ep2_")) and not NEVER_FORCE_RESTART then
+    		timer.Simple(0.1, function()
+    		    self.WasForcedRestart = (self.WasForcedRestart or 0) + 1
+    		    GAMEMODE:RestartMap(0, true)
+    		end)
+		end
 	end
 end 
 
@@ -1222,14 +1254,11 @@ function GM:PlayerLoadout(ply)
 		end
 	
 	elseif (startingWeapons && (#startingWeapons > 0)) then
-	
 		for _, wep in pairs(startingWeapons) do
 			if wep[WHITELISTED_WEAPONS] then
 				ply:Give(wep)
 			end
-		
 		end
-	
 	end
 
 	-- Lastly give physgun to admins
@@ -1241,8 +1270,7 @@ function GM:PlayerLoadout(ply)
 		ply:Give("weapon_hl2ce_medkit")
 	end
 
-	hook.Call("PostPlayerLoadout", GAMEMODE, ply)
-
+	hook.Run("PostPlayerLoadout", ply)
 end
 
 
@@ -1281,40 +1309,24 @@ hook.Add("PlayerSelectSpawn", "hl2cPlayerSelectSpawn", hl2cPlayerSelectSpawn)
 
 -- Set the player model
 function GM:PlayerSetModel(ply)
-
 	-- Stores the model as a variable part of the player
-	if (!self.CustomPMs && ply.info && ply.info.model) then
-	
+	if !self.CustomPMs && ply.info && ply.info.model then
 		ply.modelName = ply.info.model
-	
 	else
-	
 		local modelName = player_manager.TranslatePlayerModel(ply:GetInfo("cl_playermodel"))
-	
-		if (self.CustomPMs || (modelName && table.HasValue(PLAYER_MODELS, string.lower(modelName)))) then
-		
+		if self.CustomPMs || (modelName && table.HasValue(PLAYER_MODELS, string.lower(modelName))) then
 			ply.modelName = modelName
-		
 		else
-		
 			ply.modelName = table.Random(PLAYER_MODELS)
-		
 		end
-	
 	end
 
-	if (!self.CustomPMs) then
-	
-		if (ply:IsSuitEquipped()) then
-		
+	if !self.CustomPMs then
+		if ply:IsSuitEquipped() then
 			ply.modelName = string.gsub(string.lower(ply.modelName), "group01", "group03")
-		
 		else
-		
 			ply.modelName = string.gsub(string.lower(ply.modelName), "group03", "group01")
-		
 		end
-	
 	end
 
 	-- Precache and set the model
@@ -1323,26 +1335,21 @@ function GM:PlayerSetModel(ply)
 	ply:SetupHands()
 
 	-- Skin, modelgroups and player color are primarily a custom playermodel thing
-	if (self.CustomPMs) then
-	
+	if self.CustomPMs then
 		ply:SetSkin(ply:GetInfoNum("cl_playerskin", 0))
-	
+
 		ply.modelGroups = ply:GetInfo("cl_playerbodygroups")
 		if (ply.modelGroups == nil) then ply.modelGroups = "" end
 		ply.modelGroups = string.Explode(" ", ply.modelGroups)
 		for k = 0, (ply:GetNumBodyGroups() - 1) do
-		
 			ply:SetBodygroup(k, (tonumber(ply.modelGroups[ k + 1 ]) || 0))
-		
 		end
-	
+
 		ply:SetPlayerColor(Vector(ply:GetInfo("cl_playercolor")))
-	
 	end
 
 	-- A hook for those who want to call something after the player model is set
-	hook.Call("PostPlayerSetModel", GAMEMODE, ply)
-
+	hook.Run("PostPlayerSetModel", ply)
 end
 
 
@@ -1350,7 +1357,7 @@ end
 function GM:PlayerSpawn(ply)
 	player_manager.SetPlayerClass(ply, "player_default")
 
-	if (!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING or OVERRIDE_PLAYER_RESPAWNING) and ply:Team() == TEAM_DEAD then
+	if !self:CanPlayerRespawn() and ply:Team() == TEAM_DEAD then
 		ply:Spectate(OBS_MODE_ROAMING)
 		ply:SetPos(ply.deathPos)
 		ply:SetNoTarget(true)
@@ -1367,7 +1374,7 @@ function GM:PlayerSpawn(ply)
 
 	-- Player statistics
 	ply:UnSpectate()
-	ply:ShouldDropWeapon((!self.PlayerRespawning && !FORCE_PLAYER_RESPAWNING) || OVERRIDE_PLAYER_RESPAWNING)
+	ply:ShouldDropWeapon(!self:CanPlayerRespawn())
 	ply:AllowFlashlight(GetConVar("mp_flashlight"):GetBool())
 	ply:SetCrouchedWalkSpeed(0.3)
 	gamemode.Call("SetPlayerSpeed", ply, 190, 320)
@@ -1488,7 +1495,8 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 	net.WriteFloat(CurTime())
 	net.Broadcast()
 
-	local restart = function()
+	local restart, dorestart
+	function restart()
 		if not noplayerdatasave then
 			for k,v in ipairs(player.GetAll()) do
 				self:SavePlayer(v)
@@ -1497,34 +1505,40 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 			self:SaveServerData()
 		end
 
-		timer.Simple(1, function()
-			if MAP_FORCE_CHANGELEVEL_ON_MAPRESTART then
-				if noplayerdatasave then self.DisableDataSave = true end
-				RunConsoleCommand("changelevel", game.GetMap())
-			else
-				net.Start("RestartMap")
-				net.WriteFloat(-1)
-				net.Broadcast()
-				self:Initialize() -- why run GAMEMODE:Initialize() again? so that difficulty will also reset if noplayerdatasave is true
-				changingLevel = true
-				game.CleanUpMap(false, {"env_fire", "entityflame", "_firesmoke"}, function()
-					changingLevel = nil
-					local plyrespawn = FORCE_PLAYER_RESPAWNING
-					FORCE_PLAYER_RESPAWNING = true
-					for k,v in ipairs(player.GetAll()) do
-						self:PlayerInitialSpawn(v)
-						v:KillSilent()
-						v:SetTeam(TEAM_ALIVE)
-						timer.Simple(0.05, function()
-							v:Spawn()
-							v.invulnerableTime = CurTime()
-						end)
-					end
-					changingLevel = false
-					FORCE_PLAYER_RESPAWNING=plyrespawn
-				end)
-			end
-		end)
+		if overridetime == 0 then
+			dorestart()
+		else
+			timer.Simple(1, dorestart)
+		end
+	end
+
+	function dorestart()
+		if MAP_FORCE_CHANGELEVEL_ON_MAPRESTART then
+			if noplayerdatasave then self.DisableDataSave = true end
+			RunConsoleCommand("changelevel", game.GetMap())
+		else
+			net.Start("RestartMap")
+			net.WriteFloat(-1)
+			net.Broadcast()
+			self:Initialize() -- why run GAMEMODE:Initialize() again? so that difficulty will also reset if noplayerdatasave is true
+			changingLevel = true
+			game.CleanUpMap(false, {"env_fire", "entityflame", "_firesmoke"}, function()
+				changingLevel = nil
+				local plyrespawn = FORCE_PLAYER_RESPAWNING
+				FORCE_PLAYER_RESPAWNING = true
+				for k,v in ipairs(player.GetAll()) do
+					self:PlayerInitialSpawn(v)
+					v:KillSilent()
+					v:SetTeam(TEAM_ALIVE)
+					timer.Simple(0.05, function()
+						v:Spawn()
+						v.invulnerableTime = CurTime()
+					end)
+				end
+				changingLevel = false
+				FORCE_PLAYER_RESPAWNING=plyrespawn
+			end)
+		end
 	end
 
 	if overridetime == 0 then
@@ -1744,21 +1758,8 @@ function GM:Think()
 	end
 
 	-- Restart the map if all players are dead
-	if ((!self.PlayerRespawning and !FORCE_PLAYER_RESPAWNING) or OVERRIDE_PLAYER_RESPAWNING) and player.GetCount() > 0 and ((team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)) <= 0) then
-		if !changingLevel then
-			gamemode.Call("FailMap", nil, "all_players_died")
-
-			for _,ply in ipairs(player.GetAll()) do
-				if ply:Team() ~= TEAM_ALIVE and ply:Team() ~= TEAM_COMPLETED_MAP and ply:Team() ~= TEAM_DEAD then
-					PrintMessage(3, "One of the players are not on the invalid team!")
-					if ULib and ULib.isSandbox and ULib.isSandbox() then
-						PrintMessage(3, "ULX issue: It's likely it's due to a team being applied to one of the player's groups!")
-					end
-
-					break
-				end
-			end
-		end
+	if player.GetCount() > 0 and gamemode.Call("CheckAllPlayersDead") then
+		gamemode.Call("CheckAllPlayersDeadPass")
 	end
 
 	-- Change the difficulty according to number of players
@@ -1840,6 +1841,34 @@ function GM:Think()
 	end
 end
 
+function GM:CheckAllPlayersDead()
+	if !self.GameStartedTime then
+		self.GameStartedTime = CurTime()
+	end
+	if self:HardcoreEnabled() and (self.GameStartedTime+30 > CurTime()) then return false end
+
+	return !self:CanPlayerRespawn() and ((team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)) <= 0) and !changingLevel
+end
+
+function GM:CheckAllPlayersDeadPass()
+	gamemode.Call("FailMap", nil, "all_players_died")
+
+	if self:HardcoreEnabled() then
+		PrintMessage(3, "You're all dead...")
+	end
+
+	for _,ply in ipairs(player.GetAll()) do
+		if ply:Team() ~= TEAM_ALIVE and ply:Team() ~= TEAM_COMPLETED_MAP and ply:Team() ~= TEAM_DEAD then
+			PrintMessage(3, "One of the players are not on the invalid team!")
+			if ULib and ULib.isSandbox and ULib.isSandbox() then
+				PrintMessage(3, "ULX issue: It's likely it's due to a team being applied to one of the player's groups!")
+			end
+
+			break
+		end
+	end
+end
+
 
 -- Player just picked up or was given a weapon
 function GM:WeaponEquip(wep)
@@ -1852,7 +1881,7 @@ end
 -- Tell the game to update the player's playermodel
 local function UpdatePlayerModel(len, ply)
 	if IsValid(ply) and ply:Team() == TEAM_ALIVE then
-		hook.Call("PlayerSetModel", GAMEMODE, ply)
+		hook.Run("PlayerSetModel", ply)
 	end
 end
 net.Receive("UpdatePlayerModel", UpdatePlayerModel)
@@ -2016,3 +2045,40 @@ local jalopy = {
 	}
 }
 list.Set("Vehicles", "Jalopy", jalopy)
+
+--[[ maybe in the future
+
+gameevent.Listen("player_connect")
+hook.Add("player_connect", "ConnectionTableAdd", function(data)
+	if data.bot != 1 then
+		if !CONNECTING_PLAYERS_TABLE then
+			CONNECTING_PLAYERS_TABLE = {}
+		end
+		if CONNECTING_PLAYERS_TABLE then
+			table.insert(CONNECTING_PLAYERS_TABLE, {data.userid, data.name})			
+			UpdateConnectingTable()
+		end
+		--ChatMessage(data.name .. " ("..data.userid..") has connected to the server", 0)
+	end
+end)
+
+gameevent.Listen("player_disconnect")
+hook.Add("player_disconnect", "ConnectionTableRemove", function(data)
+	if data.bot != 1 then
+		if CONNECTING_PLAYERS_TABLE then
+			local hasUpdates = false
+			for k, v in ipairs(CONNECTING_PLAYERS_TABLE) do
+				if v[1] == data.userid then
+					table.remove(CONNECTING_PLAYERS_TABLE, k)
+					hasUpdates = true
+				end
+			end
+			if hasUpdates then			
+				UpdateConnectingTable()
+			end
+		end
+		--ChatMessage(data.name .. " ("..data.userid..") has left the server", 0)
+	end
+end)
+]]
+
