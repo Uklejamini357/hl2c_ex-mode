@@ -58,6 +58,7 @@ end, "hl2ce_server_ex_mode_enabled")
 local cvar = CreateConVar("hl2ce_server_hardcore_mode_enabled", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE)
 GM.EnableHardcoreMode = cvar:GetBool()
 cvars.AddChangeCallback("hl2ce_server_hardcore_mode_enabled", function(convar, old, new)
+	GAMEMODE.EnableHardcoreMode = tobool(new)
 
 	BroadcastLua(string.format([[GAMEMODE.EnableHardcoreMode = %s]], GAMEMODE.EnableHardcoreMode))
 
