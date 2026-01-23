@@ -495,42 +495,80 @@ function GM:GrabAndSwitch(instant)
 
 	local hardcore = self.EnableHardcoreMode and ENABLE_HARDCOREMODE_AFTER_THIS_MAP
 	if hardcore then
-		PrintMessage(3, "Hi.")
-		timer.Simple(1.5, function()
-			PrintMessage(3, "Welcome to hardcore mode.")
-		end)
-		timer.Simple(4, function()
-			for _,pl in player.Iterator() do
-				local run = pl.HardcoreModeAttempts + 1
-				local suffix = "th"
-				pl.HardcoreModeAttempts = run
+		local faststart = true
+		for _,pl in player.Iterator() do
+			local run = pl.HardcoreModeAttempts + 1
+			pl.HardcoreModeAttempts = run
 
-				if 1+(run-1%100) > 20 or 1+(run-1%100) < 4 then
-					if run%10 == 1 then
-						suffix = "st"
-					elseif run%10 == 2 then
-						suffix = "nd"
-					elseif run%10 == 3 then
-						suffix = "rd"
-					end
-				end
-
-				pl:PrintMessage(3, string.format("This is your %s run.", run..suffix))
+			if run == 1 then
+				faststart = false
 			end
-		end)
-		timer.Simple(6.9, function()
-			PrintMessage(3, "Past this point you may not respawn anymore.")
-		end)
-		timer.Simple(9.6, function()
-			PrintMessage(3, "")
-		end)
-		timer.Simple(12.3, function()
-			PrintMessage(3, "Good luck!")
-		end)
+		end
 
-		timer.Simple(15, function()
-			game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
-		end)
+
+		if faststart then
+			PrintMessage(3, "Ah shit, here we go again.")
+
+			timer.Simple(0.7, function()
+				for _,pl in player.Iterator() do
+					local run = pl.HardcoreModeAttempts
+					local suffix = "th"
+
+					if 1+(run-1%100) > 20 or 1+(run-1%100) < 4 then
+						if run%10 == 1 then
+							suffix = "st"
+						elseif run%10 == 2 then
+							suffix = "nd"
+						elseif run%10 == 3 then
+							suffix = "rd"
+						end
+					end
+
+					pl:PrintMessage(3, "This is your "..run..suffix.." run.")
+				end
+			end)
+
+			timer.Simple(3, function()
+				game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
+			end)
+
+		else
+			PrintMessage(3, "Hi.")
+			timer.Simple(1.5, function()
+				PrintMessage(3, "Welcome to hardcore mode.")
+			end)
+			timer.Simple(4, function()
+				for _,pl in player.Iterator() do
+					local run = pl.HardcoreModeAttempts
+					local suffix = "th"
+
+					if 1+(run-1%100) > 20 or 1+(run-1%100) < 4 then
+						if run%10 == 1 then
+							suffix = "st"
+						elseif run%10 == 2 then
+							suffix = "nd"
+						elseif run%10 == 3 then
+							suffix = "rd"
+						end
+					end
+
+					pl:PrintMessage(3, "This is your "..run..suffix.." run.")
+				end
+			end)
+			timer.Simple(6.9, function()
+				PrintMessage(3, "Past this point you may not respawn anymore.")
+			end)
+			timer.Simple(9.6, function()
+				PrintMessage(3, "If all players die, the run is over!")
+			end)
+			timer.Simple(12.8, function()
+				PrintMessage(3, "Good luck!")
+			end)
+		
+			timer.Simple(15, function()
+				game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
+			end)
+		end
 	end
 
 	self:SaveCampaignData()
@@ -1679,7 +1717,7 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 
 	if self:HardcoreEnabled() then
 		BroadcastLua([[
-			chat.AddText(Color(190,0,0), "You all have lost...")
+			chat.AddText(Color(190,0,0), "The run ends here, in ", game.GetMap(), "... Game over, man! It's game over!")
 		]])
 
 		for _,pl in player.Iterator() do

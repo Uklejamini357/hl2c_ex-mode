@@ -128,10 +128,10 @@ function hl2cAcceptInput(ent, input, activator)
 	if !game.SinglePlayer() and ent:GetName() == "logic_start_train" and inputlower == "trigger" then
 
 		if GAMEMODE.EXMode then
-			timer.Simple(3, function()
+			timer.Simple(2.5, function()
 				PrintMessage(3, "Chapter 1")
 			end)
-			timer.Simple(math.Rand(6.5,7.5), function()
+			timer.Simple(math.Rand(5,6), function()
 				PrintMessage(3, "The new beginnings")
 			end)
 		end
@@ -345,6 +345,7 @@ function hl2cOnNPCKilled(ent, attacker)
 			ents.FindByName("scene2_start")[1]:Fire("Kill")
 			ents.FindByName("scene3_start")[1]:Fire("Kill")
 			ents.FindByName("scene4_start")[1]:Fire("Kill")
+			ents.FindByName("starfield")[1]:Fire("Kill")
 
 			for _,ent in pairs(ents.FindByName("zoom_*")) do
 				ent:Remove()

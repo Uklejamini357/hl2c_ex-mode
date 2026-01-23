@@ -30,7 +30,7 @@ function hl2cAcceptInput(ent, input)
 		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Airboat (F3).")
 	end
 
-	if !game.SinglePlayer() and ent:GetName() == "scriptcond_pincher_cops" input:lower() == "enable" then
+	if !game.SinglePlayer() and ent:GetName() == "scriptcond_pincher_cops" and input:lower() == "enable" then
 		ents.FindByName("relay_pincher_startcops")[1]:Fire("Trigger")
 		ents.FindByName("relay_pincher_startmanhacks")[1]:Fire("Trigger")
 		ents.FindByName("trigger_pincher_failsafe_left")[1]:Fire("Kill")
