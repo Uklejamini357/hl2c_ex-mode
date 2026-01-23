@@ -131,13 +131,36 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	-- Add to deadPlayers table to prevent respawning on re-connect
 	if !self:CanPlayerRespawn() and !table.HasValue(deadPlayers, ply:SteamID()) and !ply:IsBot() then
 		table.insert(deadPlayers, ply:SteamID())
+		if self:HardcoreEnabled() then
+			table.RemoveByValue(self.HardcoreAlivePlayers, ply:SteamID64())
+		end
 	end
-	
+
 	ply:RemoveVehicle()
-	if (ply:FlashlightIsOn()) then ply:Flashlight(false); end
+	if ply:FlashlightIsOn() then
+		ply:Flashlight(false)
+	end
 	ply:CreateRagdoll()
 	ply:SetTeam(TEAM_DEAD)
 	ply:AddDeaths(1)
+
+	if GAMEMODE:HardcoreEnabled() then
+		local living,name = 0,""
+		for _,pl in pairs(player.GetLiving()) do
+			living = living + 1
+			name = pl:Nick()
+		end
+
+		if living == 1 then
+			BroadcastLua(string.format([[
+				chat.AddText(Color(255,0,0), "%s", Color(255,120,0), " has died! ", Color(190,0,0), "%s is the only one left alive!!")
+			]], ply:Nick(), name))
+		else
+			BroadcastLua(string.format([[
+				chat.AddText(Color(255,0,0), "%s", Color(255,120,0), " has died! ", Color(255,255,0), %d, Color(255,120,0), " players remain!")
+			]], ply:Nick(), living))
+		end
+	end
 
 	-- Clear player info
 	ply.info = nil
@@ -380,6 +403,13 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 			ent.PlyAttackers[attacker] = (ent.PlyAttackers[attacker] or 0) + damage 
 		end
 
+		if ent:IsPlayer() then
+			if !ent.SessionStats.DamageTaken then
+				ent.SessionStats.DamageTaken = 0
+			end
+			ent.SessionStats.DamageTaken = ent.SessionStats.DamageTaken + math.min(ent:Health(), damage)
+		end
+
 		if ent:Inf_Health() > 2e9 then
 			if damage < ent:Inf_Health() then
 				dmgInfo:SetDamage(math.min(damage, 2e9-1))
@@ -451,18 +481,65 @@ function GM:WriteCampaignSaveData(ply, save)
 end
 
 
+local blah
 -- Called by GoToNextLevel
 function GM:GrabAndSwitch(instant)
+	if blah then return end
+	blah = true
+
 	changingLevel = true
 	timer.Remove("hl2c_next_map")
 
 	gamemode.Call("ClearPlayerDataFolder")
+	self:HardcoreSaveAlivePlayers()
+
+	local hardcore = self.EnableHardcoreMode and ENABLE_HARDCOREMODE_AFTER_THIS_MAP
+	if hardcore then
+		PrintMessage(3, "Hi.")
+		timer.Simple(1.5, function()
+			PrintMessage(3, "Welcome to hardcore mode.")
+		end)
+		timer.Simple(4, function()
+			for _,pl in player.Iterator() do
+				local run = pl.HardcoreModeAttempts + 1
+				local suffix = "th"
+				pl.HardcoreModeAttempts = run
+
+				if 1+(run-1%100) > 20 or 1+(run-1%100) < 4 then
+					if run%10 == 1 then
+						suffix = "st"
+					elseif run%10 == 2 then
+						suffix = "nd"
+					elseif run%10 == 3 then
+						suffix = "rd"
+					end
+				end
+
+				pl:PrintMessage(3, string.format("This is your %s run.", run..suffix))
+			end
+		end)
+		timer.Simple(6.9, function()
+			PrintMessage(3, "Past this point you may not respawn anymore.")
+		end)
+		timer.Simple(9.6, function()
+			PrintMessage(3, "")
+		end)
+		timer.Simple(12.3, function()
+			PrintMessage(3, "Good luck!")
+		end)
+
+		timer.Simple(15, function()
+			game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
+		end)
+	end
 
 	self:SaveCampaignData()
 	for _, ply in ipairs(player.GetAll()) do
 		self:WriteCampaignSaveData(ply, true)
 		self:SavePlayer(ply)
 	end
+
+	if hardcore and not instant then return end
 
 	if game.SinglePlayer() or instant then
 		game.ConsoleCommand("changelevel "..NEXT_MAP.."\n")
@@ -685,13 +762,21 @@ function GM:PlayerCompletedCampaign(ply)
 	ply:PrintMessage(3, Format("You were awarded %s XP", ply:GiveXP(xp)))
 end
 
+function GM:HardcoreSaveAlivePlayers()
+	table.Empty(self.HardcoreAlivePlayers)
+
+	for _,pl in player.Iterator() do
+		if !pl:Alive() then return end
+		table.insert(self.HardcoreAlivePlayers, pl:SteamID64())
+	end
+end
+
 function GM:OnHardcoreEnabled(state)
 	if state then
-		for _,pl in ipairs(player.GetLiving()) do
-			if table.HasValue(self.HardcoreAlivePlayers, pl:SteamID64()) then continue end
-			table.insert(self.HardcoreAlivePlayers, pl:SteamID64())
-		end
+		PrintMessage(3, "Hardcore mode enabled. Good luck...")
+		self:HardcoreSaveAlivePlayers()
 	else
+		PrintMessage(3, "Hardcore mode disabled.")
 		self.HardcoreAlivePlayers = {}
 	end
 end
@@ -752,10 +837,10 @@ function GM:MapEntitiesSpawned()
 		for _, tcpInfo in pairs(TRIGGER_CHECKPOINT) do
 			local tcp = ents.Create("trigger_checkpoint")
 			tcp.min = tcpInfo[1]
-			tcp.max = tcpInfo[ 2 ]
+			tcp.max = tcpInfo[2]
 			tcp.pos = tcp.max - ((tcp.max - tcp.min) / 2)
-			tcp.skipSpawnpoint = tcpInfo[ 3 ]
-			tcp.OnTouchRun = tcpInfo[ 4 ]
+			tcp.skipSpawnpoint = tcpInfo[3]
+			tcp.OnTouchRun = tcpInfo[4]
 		
 			tcp:SetPos(tcp.pos)
 			tcp:Spawn()
@@ -1058,7 +1143,7 @@ function GM:PlayerDisconnected(ply)
 
 	ply:RemoveVehicle()
 
-	if game.IsDedicated() && player.GetCount() <= 1 then
+	if game.IsDedicated() and player.GetCount() <= 1 then
 		game.ConsoleCommand("changelevel "..game.GetMap().."\n")
 	end
 	self:SavePlayer(ply)
@@ -1069,6 +1154,8 @@ end
 function GM:PlayerInitialSpawn(ply)
 	ply.startTime = CurTime()
 	ply:SetTeam(TEAM_ALIVE)
+
+	ply.HardcoreModeAttempts = 0
 
 	ply.XP = InfNumber(0)
 	ply.Level = 0
@@ -1171,6 +1258,11 @@ function GM:PlayerInitialSpawn(ply)
 	ply:SetDeaths(0)
 
 	self:LoadPlayer(ply)
+	print(ply:SteamID64(), ply)
+	if self.HardcoreEnabled() and !table.HasValue(self.HardcoreAlivePlayers, ply:SteamID64()) then
+		ply:KillSilent()
+		ply:SetTeam(TEAM_DEAD)
+	end
 
 
 	-- Prompt players that they can spawn vehicles
@@ -1358,8 +1450,11 @@ function GM:PlayerSpawn(ply)
 	player_manager.SetPlayerClass(ply, "player_default")
 
 	if !self:CanPlayerRespawn() and ply:Team() == TEAM_DEAD then
+		ply:KillSilent()
 		ply:Spectate(OBS_MODE_ROAMING)
-		ply:SetPos(ply.deathPos)
+		if ply.deathPos then
+			ply:SetPos(ply.deathPos)
+		end
 		ply:SetNoTarget(true)
 
 		return
@@ -1433,8 +1528,8 @@ function GM:PlayerSpawn(ply)
 	ply:SetNoTarget(false)
 
 	-- If the player died before, kill them again
-	if table.HasValue(deadPlayers, ply:SteamID()) then
-		ply:PrintMessage(HUD_PRINTTALK, "You cannot respawn now.")
+	if table.HasValue(deadPlayers, ply:SteamID()) and !self:CanPlayerRespawn(ply) then
+		ply:PrintMessage(HUD_PRINTTALK, "You cannot respawn now. Sorry!")
 		ply.deathPos = ply:EyePos()
 	
 		ply:RemoveVehicle()
@@ -1515,7 +1610,11 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 	function dorestart()
 		if MAP_FORCE_CHANGELEVEL_ON_MAPRESTART then
 			if noplayerdatasave then self.DisableDataSave = true end
-			RunConsoleCommand("changelevel", game.GetMap())
+			if self:HardcoreEnabled() then
+				RunConsoleCommand("changelevel", "d1_trainstation_01") -- ain't got anything else for it for now
+			else
+				RunConsoleCommand("changelevel", game.GetMap())
+			end
 		else
 			net.Start("RestartMap")
 			net.WriteFloat(-1)
@@ -1527,6 +1626,8 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 				local plyrespawn = FORCE_PLAYER_RESPAWNING
 				FORCE_PLAYER_RESPAWNING = true
 				for k,v in ipairs(player.GetAll()) do
+					if self.HardcoreEnabled() and !table.HasValue(self.HardcoreAlivePlayers, v:SteamID64()) and v:Alive() then continue end
+
 					self:PlayerInitialSpawn(v)
 					v:KillSilent()
 					v:SetTeam(TEAM_ALIVE)
@@ -1576,6 +1677,21 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 	net.Broadcast()
 	OVERRIDE_FAIL_REASON = nil
 
+	if self:HardcoreEnabled() then
+		BroadcastLua([[
+			chat.AddText(Color(190,0,0), "You all have lost...")
+		]])
+
+		for _,pl in player.Iterator() do
+			pl:PrintMessage(3, "--- STATS FOR THIS RUN ---")
+			pl:PrintMessage(3, "Score gained: "..pl:Frags())
+			pl:PrintMessage(3, "Damage taken in total: "..(pl.SessionStats.DamageTaken or 0))
+		end
+
+		self:DeleteCampaignData()
+		MAP_FORCE_CHANGELEVEL_ON_MAPRESTART = true
+	end
+
 	self:RestartMap()
 
 	if ply and ply:IsValid() and ply:IsPlayer() then
@@ -1584,6 +1700,7 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 
 		ply.MapFailerCount = (ply.MapFailerCount or 0) + 1
 
+		
 		if ply.MapFailerCount >= 2 then
 			ply:Kick("Caused the map to fail too much!")
 		else
@@ -1852,10 +1969,6 @@ end
 
 function GM:CheckAllPlayersDeadPass()
 	gamemode.Call("FailMap", nil, "all_players_died")
-
-	if self:HardcoreEnabled() then
-		PrintMessage(3, "You're all dead...")
-	end
 
 	for _,ply in ipairs(player.GetAll()) do
 		if ply:Team() ~= TEAM_ALIVE and ply:Team() ~= TEAM_COMPLETED_MAP and ply:Team() ~= TEAM_DEAD then

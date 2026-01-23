@@ -55,24 +55,13 @@ cvars.AddChangeCallback("hl2ce_server_ex_mode_enabled", function(convar, old, ne
 	BroadcastLua(string.format([[GAMEMODE.EnableHyperEXMode = %s]], GAMEMODE.EnableHyperEXMode))
 end, "hl2ce_server_ex_mode_enabled")
 
-local cvar = CreateConVar("hl2ce_server_hardcore_mode_enabled", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE)
--- it ain't finished yet.
-if cvar:GetBool() then
-	cvar:SetFloat(0)
-end
+local cvar = CreateConVar("hl2ce_server_hardcore_mode_enabled", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE)
 GM.EnableHardcoreMode = cvar:GetBool()
 cvars.AddChangeCallback("hl2ce_server_hardcore_mode_enabled", function(convar, old, new)
-	if tobool(new) then
-		PrintMessage(3, "NO")
-		cvar:SetFloat(0)
-	end
-	do return end
-
-	GAMEMODE.EnableHardcoreMode = tobool(new)
 
 	BroadcastLua(string.format([[GAMEMODE.EnableHardcoreMode = %s]], GAMEMODE.EnableHardcoreMode))
 
-	GAMEMODE:EnableHardcore(gamemode.Call("ShouldEnableHardcore"))
+	GAMEMODE:EnableHardcore(gamemode.Call("ShouldEnableHardcore"), true)
 end, "hl2ce_server_hardcore_mode_enabled")
 
 GM.ForceDifficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetString()

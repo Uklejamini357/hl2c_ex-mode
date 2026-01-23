@@ -49,21 +49,22 @@ function GM:LoadCampaignData()
 
 
     local load = {
-        CampaignMapVars = function(v) self.CampaignMapVars = v end,
-        HardcoreAlivePlayers = function(v) self.HardcoreAlivePlayers = v end,
-        PrevMap = function(v) self.PrevMap = v end,
-        NextMap = function(v) self.NextMap = v end
+        CampaignMapVars = function(v) GAMEMODE.CampaignMapVars = v end,
+        HardcoreAlivePlayers = function(v) GAMEMODE.HardcoreAlivePlayers = v end,
+        -- PrevMap = function(v) GAMEMODE.PrevMap = v end,
+        -- NextMap = function(v) GAMEMODE.NextMap = v end
     }
+
     for variable, val in pairs(data) do
-        if variable == "CampaignMapVars" then
-            self.CampaignMapVars = val
-        elseif variable == "AlivePlayers" then
-            self.AlivePlayers = val
+        if load[variable] then
+            load[variable](val)
+            PrintTable(val)
         end
     end
 end
 
 function GM:SaveCampaignData()
+    if self.DisableDataSave then return end
     local Data = {}
     local function insertdata(key, value)
         Data[key] = value
@@ -74,15 +75,16 @@ function GM:SaveCampaignData()
 	insertdata("PrevMap", self.PrevMap)
 	insertdata("LastMap", self.LastMap)
 
-    local filedir = "hl2c_eternal/server/globaldata.txt"
+    local filedir = "hl2c_eternal/server/campaigndata.txt"
     local savedata = util.TableToJSON(Data, true)
 	file.Write(filedir, savedata)
 	print("Saved campaign data to file: "..filedir)
 end
 
 function GM:DeleteCampaignData()
-    local filedir = "hl2c_eternal/server/globaldata.txt"
-    if file.Exists(filedir) then
+    
+    local filedir = "hl2c_eternal/server/campaigndata.txt"
+    if file.Exists(filedir, "DATA") then
         file.Delete(filedir)
     end
 end

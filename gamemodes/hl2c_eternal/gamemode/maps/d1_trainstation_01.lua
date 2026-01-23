@@ -4,7 +4,6 @@ GM.XP_REWARD_ON_MAP_COMPLETION = 0
 RESET_PL_INFO = true
 
 TRIGGER_CHECKPOINT = {
-	{Vector( -9386, -2488, 24 ), Vector( -9264, -2367, 92 ), true},
 	{Vector( -5396, -1984, 16 ), Vector( -5310, -1932, 113 )},
 	{Vector( -3609, -338, -24 ), Vector( -3268, -141, 54 )}
 }
@@ -12,6 +11,7 @@ TRIGGER_CHECKPOINT = {
 TRAINSTATION_LEAVEBARNEYDOOROPEN = false
 
 NOENABLE_HARDCORE_MODE = true
+ENABLE_HARDCOREMODE_AFTER_THIS_MAP = true
 
 table.RemoveByValue(GODLIKE_NPCS, "npc_barney")
 table.RemoveByValue(FRIENDLY_NPCS, "npc_citizen")
@@ -25,7 +25,7 @@ local function getdiff()
 end
 
 -- Player initial spawn
-function hl2cPlayerInitialSpawn( ply )
+function hl2cPlayerInitialSpawn(ply)
 end
 hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 
@@ -125,6 +125,22 @@ function hl2cAcceptInput(ent, input, activator)
 		return true
 	end
 
+	if !game.SinglePlayer() and ent:GetName() == "logic_start_train" and inputlower == "trigger" then
+
+		if GAMEMODE.EXMode then
+			timer.Simple(3, function()
+				PrintMessage(3, "Chapter 1")
+			end)
+			timer.Simple(math.Rand(6.5,7.5), function()
+				PrintMessage(3, "The new beginnings")
+			end)
+		end
+
+		for _,pl in ipairs(player.GetLiving()) do
+			pl:SetPos(Vector(-9419, -2483, 22))
+		end
+	end
+
 	if GAMEMODE.EXMode then
 		if getdiff() > 15 and ent:GetName() == "scene2_flash_mode_2" and string.lower(input) == "enablerefire" then
 			if gman_killed then return true end
@@ -160,12 +176,6 @@ function hl2cAcceptInput(ent, input, activator)
 		end
 
 		if ent:GetName() == "scene4_start" and string.lower(input) == "enablerefire" then
-			timer.Simple(3, function()
-				PrintMessage(3, "Chapter 1")
-			end)
-			timer.Simple(math.Rand(6.5,7.5), function()
-				PrintMessage(3, "The new beginnings")
-			end)
 			ents.FindByName("scene2_flash_mode_2")[1]:Fire("kill")
 		end
 
@@ -298,7 +308,7 @@ end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 
 -- Accept input
-function hl2cOnNPCKilled( ent, attacker )
+function hl2cOnNPCKilled(ent, attacker)
 	if GAMEMODE.EXMode then
 		if ent:GetName() == "barney" then
 			if barney_killed_themselves or ent == attacker then
@@ -320,6 +330,25 @@ function hl2cOnNPCKilled( ent, attacker )
 
 		if ent:GetName() == "gman" then
 			gman_killed = true
+
+			ents.FindByName("viewcontrol_black")[1]:Fire("Kill")
+			ents.FindByName("viewcontrol_left_cheek")[1]:Fire("Kill")
+			ents.FindByName("viewcontrol_left_eye")[1]:Fire("Kill")
+			ents.FindByName("viewcontrol_mouth")[1]:Fire("Kill")
+			ents.FindByName("viewcontrol_final")[1]:Fire("Kill")
+
+			ents.FindByName("logic_start_train")[1]:Fire("Trigger")
+			ents.FindByName("logic_killme_1")[1]:Fire("Trigger")
+			ents.FindByName("logic_killme_2")[1]:Fire("Trigger")
+			ents.FindByName("logic_killme_3")[1]:Fire("Trigger")
+			ents.FindByName("scene1_start")[1]:Fire("Kill")
+			ents.FindByName("scene2_start")[1]:Fire("Kill")
+			ents.FindByName("scene3_start")[1]:Fire("Kill")
+			ents.FindByName("scene4_start")[1]:Fire("Kill")
+
+			for _,ent in pairs(ents.FindByName("zoom_*")) do
+				ent:Remove()
+			end
 		end
 	end
 end

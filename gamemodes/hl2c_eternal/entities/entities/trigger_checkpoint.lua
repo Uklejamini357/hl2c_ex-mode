@@ -34,10 +34,8 @@ function ENT:StartTouch( ent )
 		self.triggered = true
 	
 		-- Run on touch
-		if ( self.OnTouchRun ) then
-		
+		if self.OnTouchRun then
 			self:OnTouchRun()
-		
 		end
 	
 		-- Get the touching entity angles

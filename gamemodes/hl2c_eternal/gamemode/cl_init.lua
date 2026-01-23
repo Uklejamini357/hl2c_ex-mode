@@ -271,6 +271,9 @@ end
 function GM:PostDrawHUD()
 	cam.Start2D()
 	-- draw.SimpleText(self.Name.." "..self.Version, "TargetIDSmall", 5, 5, Color(255,255,192,25))
+	if self:HardcoreEnabled() then
+		draw.SimpleText("Hardcore enabled!", "TargetIDSmall", 5, 5, Color(255,0,0,150))
+	end
 	surface.SetDrawColor(0, 0, 0, 0)
 
 	if hl2ce_cl_drawxpgaintext:GetBool() and XPColor > 0 then
@@ -618,7 +621,7 @@ Once you're dead you cannot respawn until the next map.]])
 	text:SetWrap(true)
 	list:AddItem(text)
 
-	if GAMEMODE:HardcoreEnabled() then
+	if GAMEMODE.EnableHardcoreMode then
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[Hardcore Mode has been enabled. You only have one life per run! Play carefully...]])
 		text:SetColor(Color(255,0,0))

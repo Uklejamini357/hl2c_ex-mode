@@ -14,14 +14,9 @@ function GM:LoadPlayer(ply)
         file.CreateDir(self.VaultFolder.."/players/"..string.lower(string.gsub(ply:UniqueID(), ":", "_")))
     end
     if file.Exists(self.VaultFolder.."/players/".. string.lower(string.gsub(ply:UniqueID(), ":", "_") .."/profile.txt"), "DATA") then
-        local DataFile = file.Read(self.VaultFolder.."/players/".. string.lower(string.gsub(ply:UniqueID(), ":", "_") .."/profile.txt"), "DATA")
-
-        local DataPieces = util.JSONToTable(DataFile)
+        local data = util.JSONToTable(file.Read(self.VaultFolder.."/players/".. string.lower(string.gsub(ply:UniqueID(), ":", "_") .."/profile.txt"), "DATA"))
  
-        for k, v in pairs(DataPieces) do
-            local variable = k
-            local val = v
-
+        for variable, val in pairs(data) do
             local infnumber = isinfnumber(ply[variable])
             ply[variable] = tonumber(val) or val  -- dump all their stats into their player table
             
@@ -31,17 +26,7 @@ function GM:LoadPlayer(ply)
                 ply[variable] = InfNumber(ply[variable])
             end
         end
-  
     else
-        ply.XP = 0 
-        ply.Level = 1
-        ply.StatPoints = 0
-
-        ply.Skills = {}
-        for k, v in pairs(self.SkillsInfo) do
-            ply.Skills[k] = 0
-        end
- 
         print("Created a new profile for "..ply:Nick() .." (UniqueID: "..ply:UniqueID()..")")
 
         self:SavePlayer(ply)
@@ -87,6 +72,8 @@ function GM:SavePlayer(ply)
     
 	insertdata("UnlockedPerks", ply.UnlockedPerks)
 	insertdata("Skills", ply.Skills)
+
+    insertdata("HardcoreModeAttempts", ply.HardcoreModeAttempts)
 
     local savedata = util.TableToJSON(Data, true)
 

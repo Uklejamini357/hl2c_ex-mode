@@ -100,15 +100,15 @@
 			"singleplayer"	"1"
 		}
 
-//		11
-//		{
-//			"name"		"hl2ce_server_hardcore_mode_enabled"
-//			"text"		"(BETA) Hardcore Mode"
-//			"help"		"Enables Hardcore Mode. You only have one life per each run. If the map is failed or all players are dead, the run is failed! Play carefully!"
-//			"type"		"CheckBox"
-//			"default"	"1"
-//			"singleplayer"	"1"
-//		}
+		11
+		{
+			"name"		"hl2ce_server_hardcore_mode_enabled"
+			"text"		"(BETA) Hardcore Mode"
+			"help"		"Enables Hardcore Mode. You only have one life per each run. If the map is failed or all players are dead, the run is failed! Play carefully!"
+			"type"		"CheckBox"
+			"default"	"0"
+			"singleplayer"	"1"
+		}
 
 		12
 		{
