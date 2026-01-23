@@ -13,8 +13,13 @@ hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
 	local atk = dmginfo:GetAttacker()
 
 	if ent:GetName() == "train_2_ambush_zombine" and ent == atk then
-		print("kill")
 		dmginfo:SetDamage(math.huge) -- let the zombine die. no matter what
+		ent:SetHealth(0)
+	elseif GAMEMODE.EXMode and ent:GetName() == "alyx" and (atk:GetClass() == "npc_headcrab_poison" or atk:GetClass() == "npc_headcrab_black") then
+		PrintMessage(3, "OH, I HATE THESE THINGS!!!")
+		dmginfo:SetDamage(math.huge)
+		ent:SetHealth(0)
+		ent.allowDIE = true
 	end
 end)
 
@@ -42,11 +47,11 @@ function hl2cAcceptInput(ent, input)
 
 	if GAMEMODE.EXMode then
 		if ent:GetName() == "lcs_al_c17_00_posttrain2" and input:lower() == "start" then
-			timer.Simple(3, function()
+			timer.Simple(2, function()
 				PrintMessage(3, "Chapter A3")
 			end)
 
-			timer.Simple(math.Rand(4.5,5.5), function()
+			timer.Simple(math.Rand(3.5,4.5), function()
 				PrintMessage(3, "The dark fate")
 			end)
 		end

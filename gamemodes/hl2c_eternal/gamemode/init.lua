@@ -284,7 +284,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	local eff_difficulty = ent:IsPlayer() and self:GetEffectiveDifficulty(ent) or attacker:IsPlayer() and self:GetEffectiveDifficulty(attacker) or difficulty
 
 	-- Godlike NPCs take no damage ever
-	if IsValid(ent) and table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES then
+	if IsValid(ent) and table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
 		return true
 	end
 
