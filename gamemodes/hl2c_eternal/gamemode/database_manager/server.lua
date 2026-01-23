@@ -58,7 +58,6 @@ function GM:LoadCampaignData()
     for variable, val in pairs(data) do
         if load[variable] then
             load[variable](val)
-            PrintTable(val)
         end
     end
 end

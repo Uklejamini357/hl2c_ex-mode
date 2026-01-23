@@ -15,7 +15,10 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
 	local atk = dmginfo:GetAttacker()
-	if (ent:GetClass() == "npc_combine_s" or atk:GetClass() == "npc_rollermine" or atk:GetClass() == "npc_cscanner") and not (atk:IsPlayer() or ent:IsPlayer()) then
+	if atk:IsPlayer() or ent:IsPlayer() then return end
+
+	if (ent:GetClass() == "npc_combine_s" or atk:GetClass() == "npc_rollermine" or atk:GetClass() == "npc_cscanner") then
+		ent:SetHealth(0)
 		dmginfo:SetDamage(math.huge)
 	end
 end)
@@ -50,6 +53,11 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
     	return true
 	end
 
+	if GAMEMODE.EXMode then
+		if ent:GetName() == "punch_screeneffect" and input:lower() == "viewpunch" then
+			PrintMessage(3, "OW")
+		end
+	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 

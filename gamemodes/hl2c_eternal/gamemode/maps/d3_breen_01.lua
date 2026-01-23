@@ -151,7 +151,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 
-	game.SetGlobalState( "super_phys_gun", GLOBAL_ON )
+	game.SetGlobalState("super_phys_gun", GLOBAL_ON)
 
 	game.ConsoleCommand( "physcannon_tracelength 850\n" )
 	game.ConsoleCommand( "physcannon_maxmass 850\n" )

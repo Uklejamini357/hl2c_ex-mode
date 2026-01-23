@@ -36,8 +36,20 @@ local hastriggered
 -- Accept input
 function hl2cAcceptInput(ent, input)
 	if ent:GetName() == "train_2_ambush_zombine" and string.lower(input) == "pullgrenade" then
-		print("sethealth")
+		-- print("sethealth")
 		-- ent:SetHealth(1)
+	end
+
+	if GAMEMODE.EXMode then
+		if ent:GetName() == "lcs_al_c17_00_posttrain2" and input:lower() == "start" then
+			timer.Simple(3, function()
+				PrintMessage(3, "Chapter A3")
+			end)
+
+			timer.Simple(math.Rand(4.5,5.5), function()
+				PrintMessage(3, "The dark fate")
+			end)
+		end
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

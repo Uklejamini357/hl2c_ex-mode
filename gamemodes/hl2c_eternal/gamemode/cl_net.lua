@@ -79,7 +79,7 @@ net.Receive("hl2ce_fail", function(len)
     failtext:SetSize(x, y)
     failtext:Center()
     failtext.Think = function(self)
-        local str = utf8.sub(s1, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/1.5))))
+        local str = utf8.sub(s1, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/5, 1.5)))))
         if str == self:GetText() then return end
         self:SetText(str)
         surface.PlaySound("buttons/lightswitch2.wav")

@@ -1036,6 +1036,10 @@ function GM:OnNPCKilled(npc, killer, weapon)
 						xpmul = xpmul * 1.25
 					end
 				end
+
+				if self:HardcoreEnabled() then
+					xpmul = xpmul * 1.5
+				end
 				attacker:GiveXP(xp * xpmul * mul)
 				difficulty_gain = difficulty_gain + (diffgain*diffmul)*mul
 			end
@@ -1296,7 +1300,6 @@ function GM:PlayerInitialSpawn(ply)
 	ply:SetDeaths(0)
 
 	self:LoadPlayer(ply)
-	print(ply:SteamID64(), ply)
 	if self.HardcoreEnabled() and !table.HasValue(self.HardcoreAlivePlayers, ply:SteamID64()) then
 		ply:KillSilent()
 		ply:SetTeam(TEAM_DEAD)

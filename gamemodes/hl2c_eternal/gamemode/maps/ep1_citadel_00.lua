@@ -28,19 +28,21 @@ hook.Add("PlayerPostThink", "hl2cPlayerPostThink", hl2cPlayerPostThink)
 function hl2cMapEdit()
     GAMEMODE.MapVars.ShouldNotFreezePlayer = false
 
-    ents.FindByName("trigger_falldeath")[1]:Remove()
+    ents.FindByName("trigger_falldeath")[1]:Remove() -- can break script
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
-function hl2cAcceptInput(ent, input)
+function hl2cAcceptInput(ent, input, activator)
     if !game.SinglePlayer() and string.lower(input) == "scriptplayerdeath" then -- Can break the sequences
         return true
     end
 
     if ent:GetName() == "relay_givegravgun_1" and string.lower(input) == "trigger" then
-        for _,ply in ipairs(player.GetAll()) do
-            ply:Give("weapon_physcannon")
-        end
+        timer.Simple(1, function() -- maybe this will prevent alyx from constnatly repeating "TAKE DE GRAVITY GUN GORDON"
+            for _,ply in ipairs(player.GetAll()) do
+                ply:Give("weapon_physcannon")
+            end
+        end)
     end
 
     if ent:GetName() == "maker_template_gravgun" and string.lower(input) == "setparent" and not GAMEMODE.MapVars.ShouldNotFreezePlayer then
@@ -48,13 +50,24 @@ function hl2cAcceptInput(ent, input)
 
         for _,ply in ipairs(player.GetAll()) do
             ply:Freeze(false)
-            ply:SetHealth(ply:GetMaxHealth())
+            ply:SetHealth(ply:GetMaxHealth()*0.47)
+        end
+    end
+
+    if !game.SinglePlayer() and ent:GetName() == "ss_dog_gunship_down" and string.lower(input) == "beginsequence" then
+        GAMEMODE.MapVars.GunshipDone = true
+
+        for _,ply in ipairs(player.GetLiving()) do
+            -- if activator == ply then continue end
+            ply:SetPos(Vector(-7936, 5490, 32))
+            ply:SetEyeAngles(Angle(0, -90, 0))
         end
     end
 
     if !game.SinglePlayer() and ent:GetName() == "lcs_al_vanride_end01" and string.lower(input) == "start" then
-        for _,ply in ipairs(player.GetAll()) do
+        for _,ply in ipairs(player.GetLiving()) do
             -- ply:ExitVehicle()
+			GAMEMODE:ReplaceSpawnPoint(Vector(4624, 4116, -6342), -90 )
             if not ply:InVehicle() then
                 ply:SetPos(Vector(4624, 4116, -6342))
                 ply:SetEyeAngles(Angle(0, -90, 0))
@@ -77,6 +90,26 @@ function hl2cAcceptInput(ent, input)
             if ply:InVehicle() then
                 ply:ExitVehicle()
             end
+        end
+    end
+
+    if GAMEMODE.EXMode then
+        -- if ent:GetName() == "trigger_falldeath" then
+        --     PrintMessage(3, "GORDON!!")
+        --     print(input)
+        -- end
+
+        if ent:GetName() == "message_chapter_title1" and input:lower() == "showmessage" then
+            timer.Simple(1.5, function()
+                PrintMessage(3, "Chapter A1")
+            end)
+            timer.Simple(math.Rand(3, 3.5), function()
+                PrintMessage(3, "Is this the end of the world?")
+            end)
+            timer.Simple(10, function()
+                PrintMessage(3, "[Alert] While EX mode still has NPC variant on, it will not affect maps experience a lot. It's work in progress. Apologies!")
+            end)
+            return true
         end
     end
 end

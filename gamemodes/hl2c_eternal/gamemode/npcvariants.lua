@@ -173,6 +173,7 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 		end
 	elseif ent:GetClass() == "npc_metropolice" then
 		if ent.VariantType == 2 and math.random(1,100) < 45 then
+			FORCE_NPCVARIANT = 3
 			local ent2 = ents.Create("npc_manhack")
 			ent2.VariantType = 3 -- Spawn in a special manhack variant - Damage increased up to 5.5x on first hit but next hit will deal a weaker attack down to 0.5x damage
 			ent2.NextDamageMul = 5.5
@@ -313,7 +314,6 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 	elseif not ent.VariantType then
 		ent.VariantType = math.random(1,3)
 	end
-	-- ent.VariantType = 1
 	if not ent.NPCStrengthTier then
 		ent.NPCStrengthTier = 1 -- mostly, just keep it at 1
 	end
@@ -476,6 +476,7 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			util.Effect("zw_master_strike", effectdata)
 			ent:EmitSound("ambient/machines/thumper_hit.wav", 120, 70)
 		elseif ent.VariantType == 2 and math.random(1,100) <= 95 then
+			FORCE_NPCVARIANT = 2
 			local ent2 = ents.Create("npc_zombie")
 			ent2:SetPos(ent:GetPos())
 			ent2:SetAngles(ent:GetAngles())
@@ -483,7 +484,6 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			OnSpawnNewEnt(ent, ent2)
 			ent2.XPGainMult = math.max(0.01, (ent.XPGainMult or 1) * 0.6)
 			ent2.DifficultyGainMult = math.max(0.01, (ent.DifficultyGainMult or 1) * 0.6)
-			ent2.VariantType = 2
 			ent2.ent_MaxHealthMul = math.min(1e10, infmath.ConvertInfNumberToNormalNumber(ent.ent_MaxHealthMul or 1)*1.01 + 0.05)
 			ent2.ent_HealthMul = math.min(1e10, infmath.ConvertInfNumberToNormalNumber(ent.ent_HealthMul or 1)*1.01 + 0.05)
 
@@ -515,8 +515,8 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 		end
 	elseif ent:GetClass() == "npc_metropolice" then
 		if ent.VariantType == 2 and math.random(1,100) < 45 then
-			local ent2 = ents.Create("npc_manhack")
-			ent2.VariantType = 3 -- Spawn in a special manhack variant - Damage increased up to 5.5x on first hit but next hit will deal a weaker attack down to 0.5x damage
+			FORCE_NPCVARIANT = 3
+			local ent2 = ents.Create("npc_manhack") -- Spawn in a special manhack variant - Damage increased up to 5.5x on first hit but next hit will deal a weaker attack down to 0.5x damage
 			ent2.NextDamageMul = 5.5
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 50))
 			ent2:SetAngles(ent:GetAngles())

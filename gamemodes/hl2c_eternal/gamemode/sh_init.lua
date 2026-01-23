@@ -33,7 +33,7 @@ end, "hl2ce_debug_notranslate")
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^8.88" -- also known as 0.inf.inf.inf... you get it
+GM.Version = "0.inf^9" -- also known as 0.inf.inf.inf... you get it
 GM.DateVer = "23-01-2026"
 
 -- even crazier things inbound... beware!
