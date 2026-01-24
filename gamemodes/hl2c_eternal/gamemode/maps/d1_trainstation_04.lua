@@ -1,9 +1,9 @@
 NEXT_MAP = "d1_trainstation_05"
-GM.XP_REWARD_ON_MAP_COMPLETION = 0
+GM.XP_REWARD_ON_MAP_COMPLETION = 1
 
 TRIGGER_CHECKPOINT = {
-	{ Vector( -7075, -4259, 539 ), Vector( -6873, -4241, 649 ) },
-	{ Vector( -7665, -4041, -257 ), Vector( -7653, -3879, -143 ) }
+	{Vector(-7075, -4259, 539), Vector(-6873, -4241, 649)},
+	{Vector(-7665, -4041, -257), Vector(-7653, -3879, -143)}
 }
 
 if CLIENT then return end
@@ -14,7 +14,7 @@ hook.Add("PlayerReady", "hl2cPlayerReady", function(ply)
 	if !GAMEMODE.EXMode then return end
 	timer.Simple(1, function()
 		-- ply:SendLua([[chat.AddText("You take greatly increased damage to bullets up to 6x more on this map.") chat.AddText("Take shelter!")]])
-		ply:PrintMessage(3, "You take greatly increased damage to bullets up to 13x more on this map.")
+		ply:PrintMessage(3, "You take greatly increased damage to bullets up to 6.66x more on this map.")
 		ply:PrintMessage(3, "Take shelter!")
 	end)
 end)
@@ -94,7 +94,7 @@ function hl2cEntityTakeDamage(ent, dmginfo)
 	if !GAMEMODE.EXMode then return end
 	local attacker = dmginfo:GetAttacker()
 	if attacker:IsValid() and attacker:IsNPC() and ent:IsPlayer() and dmginfo:IsBulletDamage() then
-		dmginfo:ScaleDamage(13)
+		dmginfo:ScaleDamage(6.66)
 	end
 end
 hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage)

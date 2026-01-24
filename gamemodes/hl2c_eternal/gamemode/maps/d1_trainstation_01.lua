@@ -70,74 +70,76 @@ function hl2cAcceptInput(ent, input, activator)
 	local entname = ent:GetName()
 	local inputlower = input:lower()
 
-	if !game.SinglePlayer() and ent:GetClass() == "point_viewcontrol" then
-		if inputlower == "enable" then
-			PLAYER_VIEWCONTROL = ent
+	if !game.SinglePlayer() then
+		if ent:GetClass() == "point_viewcontrol" then
+			if inputlower == "enable" then
+				PLAYER_VIEWCONTROL = ent
 
-			for _, ply in ipairs(player.GetAll()) do
-				ply:SetViewEntity(ent)
-				ply:Freeze(true)
+				for _, ply in ipairs(player.GetAll()) do
+					ply:SetViewEntity(ent)
+					ply:Freeze(true)
+				end
+
+				if !ent.doubleEnabled then
+					ent.doubleEnabled = true
+					ent:Fire("Enable")
+				end
+
+			elseif inputlower == "disable" then
+				PLAYER_VIEWCONTROL = nil
+
+				for _, ply in ipairs(player.GetAll()) do
+					ply:SetViewEntity(ply)
+					ply:Freeze(false)
+				end
+
+				return true
 			end
+		end
 
-			if !ent.doubleEnabled then
-				ent.doubleEnabled = true
-				ent:Fire("Enable")
-			end
-
-		elseif inputlower == "disable" then
-			PLAYER_VIEWCONTROL = nil
-
+		if ent:GetClass() == "env_zoom" and inputlower == "zoom"  then
 			for _, ply in ipairs(player.GetAll()) do
-				ply:SetViewEntity(ply)
-				ply:Freeze(false)
+				local keyValues = ent:GetKeyValues()
+				ply:SetFOV(tonumber(keyValues.FOV), tonumber(keyValues.Rate))
 			end
 
 			return true
 		end
-	end
 
-	if !game.SinglePlayer() and ent:GetClass() == "env_zoom" and inputlower == "zoom"  then
-		for _, ply in ipairs(player.GetAll()) do
-			local keyValues = ent:GetKeyValues()
-			ply:SetFOV(tonumber(keyValues.FOV), tonumber(keyValues.Rate))
+		if ent:GetName() == "point_teleport_destination" and inputlower == "teleport" then
+			for _, ply in ipairs(player.GetAll()) do
+				ply:SetVelocity(Vector(0, 0, 0))
+				ply:SetPos(ent:GetPos())
+				ply:SetFOV(0, 0)
+			end
 		end
 
-		return true
-	end
-
-	if !game.SinglePlayer() and ent:GetName() == "point_teleport_destination" and inputlower == "teleport" then
-		for _, ply in ipairs(player.GetAll()) do
-			ply:SetVelocity(Vector(0, 0, 0))
-			ply:SetPos(ent:GetPos())
-			ply:SetFOV(0, 0)
-		end
-	end
-
-	if !game.SinglePlayer() and ent:GetName() == "storage_room_door" and inputlower == "close" then
-		return true
-	end
-
-	if !game.SinglePlayer() and ent:GetName() == "razor_train_gate_2" and inputlower == "close" then
-		TRAINSTATION_LEAVEBARNEYDOOROPEN = true
-	end
-
-	if !game.SinglePlayer() and TRAINSTATION_LEAVEBARNEYDOOROPEN and ent:GetName() == "barney_door_1" and inputlower == "close" then
-		return true
-	end
-
-	if !game.SinglePlayer() and ent:GetName() == "logic_start_train" and inputlower == "trigger" then
-
-		if GAMEMODE.EXMode then
-			timer.Simple(2.5, function()
-				PrintMessage(3, "Chapter 1")
-			end)
-			timer.Simple(math.Rand(5,6), function()
-				PrintMessage(3, "The new beginnings")
-			end)
+		if ent:GetName() == "storage_room_door" and inputlower == "close" then
+			return true
 		end
 
-		for _,pl in ipairs(player.GetLiving()) do
-			pl:SetPos(Vector(-9419, -2483, 22))
+		if ent:GetName() == "razor_train_gate_2" and inputlower == "close" then
+			TRAINSTATION_LEAVEBARNEYDOOROPEN = true
+		end
+
+		if TRAINSTATION_LEAVEBARNEYDOOROPEN and ent:GetName() == "barney_door_1" and inputlower == "close" then
+			return true
+		end
+
+		if ent:GetName() == "logic_start_train" and inputlower == "trigger" then
+
+			if GAMEMODE.EXMode then
+				timer.Simple(2.5, function()
+					PrintMessage(3, "Chapter 1")
+				end)
+				timer.Simple(math.Rand(5,6), function()
+					PrintMessage(3, "The new beginnings")
+				end)
+			end
+
+			for _,pl in ipairs(player.GetLiving()) do
+				pl:SetPos(Vector(-9419, -2483, 22))
+			end
 		end
 	end
 
@@ -346,6 +348,7 @@ function hl2cOnNPCKilled(ent, attacker)
 			ents.FindByName("scene3_start")[1]:Fire("Kill")
 			ents.FindByName("scene4_start")[1]:Fire("Kill")
 			ents.FindByName("starfield")[1]:Fire("Kill")
+			ents.FindByName("scene2_flash_mode_2")[1]:Fire("kill")
 
 			for _,ent in pairs(ents.FindByName("zoom_*")) do
 				ent:Remove()

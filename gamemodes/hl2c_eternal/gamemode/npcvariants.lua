@@ -47,7 +47,7 @@ function HL2cEX_NPCVariantSpawn(ent)
 	hook.Run("ApplyNPCVariant", ent)
 	if FORCE_NPCVARIANT then
 		ent.VariantType = FORCE_NPCVARIANT
-		-- FORCE_NPCVARIANT = nil
+		FORCE_NPCVARIANT = nil
 	elseif not ent.VariantType then
 		ent.VariantType = math.random(1,2)
 	end

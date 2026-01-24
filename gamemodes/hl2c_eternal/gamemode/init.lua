@@ -912,6 +912,10 @@ function GM:MapEntitiesSpawned()
 		end
 	end
 
+	for _, fap in ipairs(ents.FindByClass("func_areaportal")) do
+		fap:Fire("Open")
+	end
+
 	-- Call a map edit (used by map lua hooks)
 	hook.Run("MapEdit")
 end
@@ -1949,14 +1953,6 @@ function GM:Think()
 		end
 	end
 
-	-- Open area portals
-	if nextAreaOpenTime <= CurTime() then
-		for _, fap in ipairs(ents.FindByClass("func_areaportal")) do
-			fap:Fire("Open")
-		end
-		nextAreaOpenTime = CurTime() + 1
-	end
-
 	/*
 	for _,ent in pairs(ents.FindByClass("npc_*")) do
 		if ent.IsPet then
@@ -2089,6 +2085,11 @@ end
 -- end
 
 function GM:AcceptInput(ent, input, activator, caller, value)
+	if ent:GetClass() == "func_areaportal" and (input:lower() == "close" and input:lower() == "toggle") then
+		ent:Fire("Open")
+		return true
+	end
+
 	if string.lower(input) == "sethealth" then
 		if value == "0" and (ent:IsPlayer() or ent:IsNPC()) then
 			ent:SetHealth(0)
