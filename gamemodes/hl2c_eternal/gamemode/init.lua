@@ -1309,6 +1309,30 @@ function GM:PlayerInitialSpawn(ply)
 		ply:KillSilent()
 		ply:SetTeam(TEAM_DEAD)
 	end
+	if !self:CanPlayerRespawn() and ply:Team() == TEAM_DEAD then
+		ply:KillSilent()
+		ply:Spectate(OBS_MODE_ROAMING)
+		if ply.deathPos then
+			ply:SetPos(ply.deathPos)
+		end
+		ply:SetNoTarget(true)
+	end
+	
+	-- If the player died before, kill them again
+	if table.HasValue(deadPlayers, ply:SteamID()) and !self:CanPlayerRespawn(ply) then
+		ply:PrintMessage(HUD_PRINTTALK, "You cannot respawn now. Sorry!")
+		ply.deathPos = ply:EyePos()
+	
+		ply:RemoveVehicle()
+		ply:Flashlight(false)
+		ply:SetTeam(TEAM_DEAD)
+		ply:KillSilent()
+	end
+
+	if !ply:Alive() then
+		ply.consideredDead = true
+	end
+
 
 
 	-- Prompt players that they can spawn vehicles
@@ -1334,6 +1358,86 @@ function GM:PlayerInitialSpawn(ply)
 		end
 	end
 end 
+
+-- Called when a player spawns 
+function GM:PlayerSpawn(ply)
+	player_manager.SetPlayerClass(ply, "player_default")
+
+	local alive = true
+	if ply.consideredDead then
+		ply:KillSilent()
+		ply.consideredDead = nil
+		alive = false
+	else
+		ply:SetTeam(TEAM_ALIVE)
+		ply:UnSpectate()
+	end
+
+	-- Player vars
+	ply.givenWeapons = {}
+	ply.invulnerableTime = CurTime() + VULNERABLE_TIME
+
+	-- Player statistics
+	ply:ShouldDropWeapon(!self:CanPlayerRespawn())
+	ply:AllowFlashlight(GetConVar("mp_flashlight"):GetBool())
+	ply:SetCrouchedWalkSpeed(0.3)
+	gamemode.Call("SetPlayerSpeed", ply, 190, 320)
+	gamemode.Call("PlayerSetModel", ply)
+	gamemode.Call("PlayerLoadout", ply)
+
+	-- perks stuff
+	ply.HyperArmorCharge = 0
+	ply.UnoReverseTimesActivated = 0
+
+	-- Set stuff from last level
+
+	local maxhp = ply:GetOriginalMaxHealth()
+	local maxap = 100 -- calculate their max armor
+	if ply:HasPerkActive("1_super_armor") then
+		maxap = maxap + (self.EndlessMode and 30 or 5)
+	end
+	if self.EndlessMode then
+		if ply:HasPerkActive("2_hyper_armor") then
+			maxap = maxap + 100
+		end
+		if ply:HasPerkActive("3_celestial") then
+			maxap = maxap + 80
+		end
+	end
+	maxap = math.min(1e9, maxap)
+
+
+	if ply.info then
+		if ply.info.health > 0 then
+			ply:SetHealth(ply.info.health)
+		end
+	
+		if ply.info.armor > 0 then
+			ply:SetArmor(ply.info.armor)
+		end
+
+		if ply.info.Stats then
+			
+		end
+	
+		ply:SetFrags(ply.info.score)
+		ply:SetDeaths(ply.info.deaths)
+		ply.SessionStats = ply.info.SessionStats
+
+		if ply.info.EternityUpgradeValues then
+			ply.EternityUpgradeValues = ply.info.EternityUpgradeValues
+		end
+	else
+		ply:SetHealth(maxhp)
+	end
+	ply:SetMaxHealth(maxhp)
+	ply:SetMaxArmor(maxap)
+
+	-- Players should avoid players
+	ply:SetCustomCollisionCheck(!game.SinglePlayer())
+	ply:SetAvoidPlayers(false)
+	ply:SetNoTarget(false)
+end
 
 -- like the one below except it's also called each time map restarts
 function GM:PlayerSpawnReady(ply)
@@ -1497,102 +1601,6 @@ function GM:PlayerSetModel(ply)
 
 	-- A hook for those who want to call something after the player model is set
 	hook.Run("PostPlayerSetModel", ply)
-end
-
-
--- Called when a player spawns 
-function GM:PlayerSpawn(ply)
-	player_manager.SetPlayerClass(ply, "player_default")
-
-	if !self:CanPlayerRespawn() and ply:Team() == TEAM_DEAD then
-		ply:KillSilent()
-		ply:Spectate(OBS_MODE_ROAMING)
-		if ply.deathPos then
-			ply:SetPos(ply.deathPos)
-		end
-		ply:SetNoTarget(true)
-
-		return
-	end
-
-	-- If we made it this far we might might not even be dead
-	ply:SetTeam(TEAM_ALIVE)
-
-	-- Player vars
-	ply.givenWeapons = {}
-	ply.invulnerableTime = CurTime() + VULNERABLE_TIME
-
-	-- Player statistics
-	ply:UnSpectate()
-	ply:ShouldDropWeapon(!self:CanPlayerRespawn())
-	ply:AllowFlashlight(GetConVar("mp_flashlight"):GetBool())
-	ply:SetCrouchedWalkSpeed(0.3)
-	gamemode.Call("SetPlayerSpeed", ply, 190, 320)
-	gamemode.Call("PlayerSetModel", ply)
-	gamemode.Call("PlayerLoadout", ply)
-
-	ply.HyperArmorCharge = 0
-	ply.UnoReverseTimesActivated = 0
-
-	-- Set stuff from last level
-
-	local maxhp = ply:GetOriginalMaxHealth()
-	local maxap = 100 -- calculate their max armor
-	if ply:HasPerkActive("1_super_armor") then
-		maxap = maxap + (self.EndlessMode and 30 or 5)
-	end
-	if self.EndlessMode then
-		if ply:HasPerkActive("2_hyper_armor") then
-			maxap = maxap + 100
-		end
-		if ply:HasPerkActive("3_celestial") then
-			maxap = maxap + 80
-		end
-	end
-	maxap = math.min(1e9, maxap)
-
-
-	if ply.info then
-		if ply.info.health > 0 then
-			ply:SetHealth(ply.info.health)
-		end
-	
-		if ply.info.armor > 0 then
-			ply:SetArmor(ply.info.armor)
-		end
-
-		if ply.info.Stats then
-			
-		end
-	
-		ply:SetFrags(ply.info.score)
-		ply:SetDeaths(ply.info.deaths)
-		ply.SessionStats = ply.info.SessionStats
-
-		if ply.info.EternityUpgradeValues then
-			ply.EternityUpgradeValues = ply.info.EternityUpgradeValues
-		end
-	else
-		ply:SetHealth(maxhp)
-	end
-	ply:SetMaxHealth(maxhp)
-	ply:SetMaxArmor(maxap)
-
-	-- Players should avoid players
-	ply:SetCustomCollisionCheck(!game.SinglePlayer())
-	ply:SetAvoidPlayers(false)
-	ply:SetNoTarget(false)
-
-	-- If the player died before, kill them again
-	if table.HasValue(deadPlayers, ply:SteamID()) and !self:CanPlayerRespawn(ply) then
-		ply:PrintMessage(HUD_PRINTTALK, "You cannot respawn now. Sorry!")
-		ply.deathPos = ply:EyePos()
-	
-		ply:RemoveVehicle()
-		ply:Flashlight(false)
-		ply:SetTeam(TEAM_DEAD)
-		ply:KillSilent()
-	end
 end
 
 
@@ -1834,13 +1842,16 @@ end
 
 -- Called when player wants a vehicle
 function GM:ShowSpare1(ply)
+	if !ply:Alive() or ply:InVehicle() then return end
 
-	if ((ply:Team() != TEAM_ALIVE) || ply:InVehicle()) then
+	if !ALLOWED_VEHICLE then
+		ply:PrintMessage(HUD_PRINTTALK, "You may not spawn a vehicle at this time.")
 		return
 	end
 
-	if (!ALLOWED_VEHICLE) then
-		ply:PrintMessage(HUD_PRINTTALK, "You may not spawn a vehicle at this time.")
+	local cooldown = ply.vehicleLastSpawned and ply.vehicleLastSpawned+10
+	if cooldown and cooldown > CurTime() then
+		ply:PrintMessage(HUD_PRINTTALK, string.format("You've already spawned a vehicle! Try again in %d seconds!", math.ceil(cooldown - CurTime())))
 		return
 	end
 
@@ -1853,7 +1864,6 @@ function GM:ShowSpare1(ply)
 
 	-- Spawn the vehicle
 	if ALLOWED_VEHICLE then
-	
 		local vehicleList = list.Get("Vehicles")
 		local vehicle = vehicleList[ ALLOWED_VEHICLE ]
 	
@@ -1890,14 +1900,17 @@ function GM:ShowSpare1(ply)
 		if ALLOWED_VEHICLE == "Jeep" then
 			ply.vehicle:Fire("EnableGun", "1")
 		end
+		ply.vehicleLastSpawned = CurTime()
 	
 		-- Set pos/angle and spawn
-		ply.vehicle:SetPos(spawnpos)
+		ply.vehicle:SetPos(ply:GetPos())
+		-- ply.vehicle:SetPos(spawnpos)
 		ply.vehicle:SetAngles(Angle(0, plyAngle.y - 90, 0))
 		ply.vehicle:Spawn()
 		ply.vehicle:Activate()
 		if ALLOWED_VEHICLE == "Jeep" then ply.vehicle:SetBodygroup(1, 1) end
 		ply.vehicle.creator = ply
+		ply:EnterVehicle(ply.vehicle)
 	end
 end
 

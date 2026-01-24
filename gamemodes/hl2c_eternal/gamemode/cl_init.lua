@@ -200,7 +200,7 @@ function GM:HUDPaint()
 	end
 	if !ContextMenu or !ContextMenu:IsVisible() then
 		if hl2ce_cl_showmaptimer:GetBool() then
-			draw.DrawText(string.format("Time spent on this map: %s", string.ToMinutesSeconds(CurTime() - (pl.startTime or 0))), "hl2ce_font_small", ScrW()/2, ScrH()*0.1, Color(255,255,100), TEXT_ALIGN_CENTER)
+			draw.DrawText(string.format("Time spent: %s", string.ToMinutesSeconds(CurTime() - (pl.startTime or 0))), "hl2ce_font_small", ScrW()/2, ScrH()*0.1, Color(255,255,100), TEXT_ALIGN_CENTER)
 		end
 	end
 
@@ -208,13 +208,13 @@ function GM:HUDPaint()
 		local hp,ap = pl:Health(),pl:Armor()
 		local mhp,map = pl:GetMaxHealth(), pl:GetMaxArmor()
 
-		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Health(), pl:GetMaxHealth(), hp/mhp*100), "TargetIDSmall", 16, ScrH()-100, Color(255,155,155,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Health(), pl:GetMaxHealth(), 100 * hp/mhp), "TargetIDSmall", 16, ScrH()-100, Color(255,155,155,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 80, 200, 10)
 		surface.SetDrawColor(205, 25, 25, 255)
 		surface.DrawRect(16, ScrH() - 79, 198*math.Clamp(hp/mhp,0,1), 10)
 
-		draw.DrawText(translate_Get("armor")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), ap/map*100), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("armor")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), 100 * ap/map), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 40, 200, 10)
 		surface.SetDrawColor(25, 25, 205, 255)

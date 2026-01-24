@@ -121,7 +121,7 @@ function hl2cAcceptInput(ent, input, activator)
 		if entname == "lcs_dog_intro" and inputlower == "start" then
 			local function func()
 				if !IsValid(ent) then return end
-				for i=1,16 do
+				for i=1,math.min(16, 6+player.GetCount()*2) do
 					SpawnNPC("npc_fastzombie", Vector(-1400-(i-1)*75, 1200, -2812), Angle(0,-90,0))
 				end
 			end

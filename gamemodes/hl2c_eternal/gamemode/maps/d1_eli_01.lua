@@ -236,6 +236,8 @@ local function SpawnNPC(class, pos, ang, func)
 	if func then
 		func(ent)
 	end
+	ent.XPGainMult = (ent.XPGainMult or 1) * 0.3
+	ent.DifficultyGainMult = (ent.DifficultyGainMult or 1) * 0.3
 	ent:Spawn()
 
 	return ent

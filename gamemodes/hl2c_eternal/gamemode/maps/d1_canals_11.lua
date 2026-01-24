@@ -33,12 +33,13 @@ function hl2cAcceptInput(ent, input, activator, caller)
 		ALLOWED_VEHICLE = nil
 
 		for _, ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
 			if IsValid(ply.vehicle) then
 				if ply:InVehicle() then ply:ExitVehicle() end
 				ply:RemoveVehicle()
 			end
 
-			ply:SetVelocity(Vector(0,0,0))
+			ply:SetVelocity(-ply:GetVelocity())
 			ply:SetPos(Vector(6367, 5408, -895))
 			ply:SetEyeAngles(Angle(0, -45, 0))
 		end
