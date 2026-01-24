@@ -38,8 +38,6 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 hook.Add("AcceptInput", "hl2cAcceptInput", function(ent, input)
 	if GAMEMODE.EXMode then
 		if ent:GetName() == "door_warehouse_basement" and input:lower() == "unlock" then
-			PrintMessage(3, "You prefer going the hard way? Alright.")
-
 			local ang = Angle(0, 90, 0)
 			CreateMetropolice(Vector(-756, -860, -576), ang, "weapon_smg1")
 			CreateMetropolice(Vector(-836, -860, -576), ang, "weapon_smg1")

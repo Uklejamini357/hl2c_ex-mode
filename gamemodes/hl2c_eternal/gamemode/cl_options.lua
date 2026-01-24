@@ -43,6 +43,7 @@ function GM:MakeOptions()
 	CreateCheck("Disable Custom HUD", "hl2ce_cl_nocustomhud")
 	CreateCheck("Draw XP gain text", "hl2ce_cl_drawxpgaintext")
 	CreateCheck("Disable player death sounds", "hl2ce_cl_noplrdeathsound")
+	CreateCheck("Show time spent on map", "hl2ce_cl_showmaptimer")
 
 	CreateCheck("Disable flashing lights", "hl2ce_cl_noepilepsy")
 end

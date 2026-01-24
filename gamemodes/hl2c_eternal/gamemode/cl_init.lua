@@ -22,6 +22,7 @@ local hl2ce_cl_noshowdifficultychange = CreateClientConVar("hl2ce_cl_noshowdiffi
 local hl2ce_cl_nocustomhud = CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, false, "Disables the HL2 Health and Armor Bars", 0, 1)
 local hl2ce_cl_drawxpgaintext = CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)
 local hl2ce_cl_noplrdeathsound = CreateClientConVar("hl2ce_cl_noplrdeathsound", 0, true, false, "Disable player death sounds.", 0, 1)
+local hl2ce_cl_showmaptimer = CreateClientConVar("hl2ce_cl_showmaptimer", 0, true, false, "Show how much time you spent on this map.", 0, 1)
 local hl2ce_cl_noepilepsy = CreateClientConVar("hl2ce_cl_noepilepsy", 1, true, false, "Greatly weakens violently flashing lights, or disables them.", 0, 1)
 GM.NoEpilepsy = hl2ce_cl_noepilepsy:GetBool()
 cvars.AddChangeCallback("hl2ce_cl_noepilepsy", function(cvar, old, new)
@@ -106,8 +107,8 @@ end)
 local bosshp = 0
 -- Called every frame to draw the hud
 function GM:HUDPaint()
-	if !GetConVar("cl_drawhud"):GetBool() || (self.ShowScoreboard && IsValid(LocalPlayer()) && (LocalPlayer():Team() != TEAM_DEAD)) then return end
 	local pl = LocalPlayer()
+	if !GetConVar("cl_drawhud"):GetBool() || (self.ShowScoreboard && IsValid(pl) && (pl:Team() != TEAM_DEAD)) then return end
 
 	if !showNav then hook.Run("HUDDrawTargetID") end
 	hook.Run("HUDDrawPickupHistory")
@@ -118,8 +119,8 @@ function GM:HUDPaint()
 	centerY = h / 2
 
 	-- Draw nav marker/point
-	if showNav && checkpointPosition && (LocalPlayer():Team() == TEAM_ALIVE) then
-		local checkpointDistance = math.Round(LocalPlayer():GetPos():Distance(checkpointPosition) / 39)
+	if showNav && checkpointPosition && (pl:Team() == TEAM_ALIVE) then
+		local checkpointDistance = math.Round(pl:GetPos():Distance(checkpointPosition) / 39)
 		local checkpointPositionScreen = checkpointPosition:ToScreen()
 		surface.SetDrawColor(255, 255, 255, 255)
 	
@@ -197,6 +198,11 @@ function GM:HUDPaint()
 			end
 		end
 	end
+	if !ContextMenu or !ContextMenu:IsVisible() then
+		if hl2ce_cl_showmaptimer:GetBool() then
+			draw.DrawText(string.format("Time spent on this map: %s", string.ToMinutesSeconds(CurTime() - (pl.startTime or 0))), "hl2ce_font_small", ScrW()/2, ScrH()*0.1, Color(255,255,100), TEXT_ALIGN_CENTER)
+		end
+	end
 
 	if pl:Alive() and pl:IsSuitEquipped() and not hl2ce_cl_nocustomhud:GetBool() then
 		local hp,ap = pl:Health(),pl:Armor()
@@ -208,7 +214,7 @@ function GM:HUDPaint()
 		surface.SetDrawColor(205, 25, 25, 255)
 		surface.DrawRect(16, ScrH() - 79, 198*math.Clamp(hp/mhp,0,1), 10)
 
-		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), ap/map*100), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("armor")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), ap/map*100), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 40, 200, 10)
 		surface.SetDrawColor(25, 25, 205, 255)
@@ -320,6 +326,7 @@ end
 function GM:CreateFonts()
 	surface.CreateFont("Roboto16", {size = 16, weight = 700, antialias = true, additive = false, font = "Roboto Bold"})
 	surface.CreateFont("roboto32BlackItalic", {size = 32, weight = 900, antialias = true, additive = false, font = "Roboto Black Italic"})
+	surface.CreateFont("hl2ce_font_small", {size = 20, weight = 0, font = "Roboto Black"})
 	surface.CreateFont("hl2ce_font", {size = 32, weight = 700, font = "Roboto Black"})
 	surface.CreateFont("hl2ce_font_big", {size = 48, weight = 900, font = "Roboto Black"})
 end

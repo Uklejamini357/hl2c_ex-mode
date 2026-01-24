@@ -54,7 +54,7 @@ function hl2cAcceptInput(ent, input, activator, caller)
 		return true
 	end
 
-	if !game.SinglePlayer() and ent:GetName() == "door_guncave_exit" input:lower() == "close" then
+	if !game.SinglePlayer() and ent:GetName() == "door_guncave_exit" and input:lower() == "close" then
 		return true
 	end
 end

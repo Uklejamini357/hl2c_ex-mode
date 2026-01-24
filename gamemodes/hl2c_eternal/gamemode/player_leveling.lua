@@ -52,6 +52,9 @@ function meta:GiveXP(xp, nomul)
     if self.MapStats then
         self.MapStats.GainedXP = (self.MapStats.GainedXP or 0) + xpgain
     end
+    if self.SessionStats then
+        self.SessionStats.GainedXP = (self.SessionStats.GainedXP or 0) + xpgain
+    end
     if self.XP >= GAMEMODE:GetReqXP(self) and infmath.ConvertInfNumberToNormalNumber(self.Level) < self:GetMaxLevel() and canlevel(self) then
         self:GainLevel()
     end

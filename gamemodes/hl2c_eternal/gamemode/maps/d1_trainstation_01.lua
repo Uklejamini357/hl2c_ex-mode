@@ -14,7 +14,6 @@ NOENABLE_HARDCORE_MODE = true
 ENABLE_HARDCOREMODE_AFTER_THIS_MAP = true
 
 table.RemoveByValue(GODLIKE_NPCS, "npc_barney")
-table.RemoveByValue(FRIENDLY_NPCS, "npc_citizen")
 if CLIENT then return end
 
 local gman_killed, respawning_crate, respawning_crate_kill
@@ -66,7 +65,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput(ent, input, activator)
+function hl2cAcceptInput(ent, input, activator, _, value)
 	local entname = ent:GetName()
 	local inputlower = input:lower()
 
@@ -127,7 +126,6 @@ function hl2cAcceptInput(ent, input, activator)
 		end
 
 		if ent:GetName() == "logic_start_train" and inputlower == "trigger" then
-
 			if GAMEMODE.EXMode then
 				timer.Simple(2.5, function()
 					PrintMessage(3, "Chapter 1")
@@ -135,6 +133,10 @@ function hl2cAcceptInput(ent, input, activator)
 				timer.Simple(math.Rand(5,6), function()
 					PrintMessage(3, "The new beginnings")
 				end)
+
+				ents.FindByName("intro_train_1")[1]:Fire("SetSpeed", 1)
+				ents.FindByName("intro_train_2")[1]:Fire("SetSpeed", 1)
+				ents.FindByName("intro_train_3")[1]:Fire("SetSpeed", 1)
 			end
 
 			for _,pl in ipairs(player.GetLiving()) do
@@ -144,6 +146,10 @@ function hl2cAcceptInput(ent, input, activator)
 	end
 
 	if GAMEMODE.EXMode then
+		if string.sub(ent:GetName(), 1, 12) == "intro_train_" and input:lower() == "setspeed" and tonumber(value or 0) < 1 then
+			return true
+		end
+
 		if getdiff() > 15 and ent:GetName() == "scene2_flash_mode_2" and string.lower(input) == "enablerefire" then
 			if gman_killed then return true end
 
@@ -263,6 +269,17 @@ function hl2cAcceptInput(ent, input, activator)
 			end
 		end
 
+		if ent:GetName() == "security_freeze" and input:lower() == "start" then
+			ents.FindByName("barney_door_1")[1]:Fire("Unlock")
+			ents.FindByName("barney_door_1")[1]:Fire("Open")
+			ents.FindByName("barney_door_1")[1]:Fire("Lock")
+		end
+
+		if ent:GetName() == "lcs_cop_introom" and input:lower() == "start" then
+			ents.FindByName("storage_room_door")[1]:Fire("Unlock")
+			ents.FindByName("storage_room_door")[1]:Fire("Open")
+		end
+
 		if ent:GetName() == "luggage_push_explosion1" and string.lower(input) == "explode" then
 			activator:SetHealth(0)
 			activator:TakeDamage(1) -- kill it
@@ -327,6 +344,13 @@ function hl2cOnNPCKilled(ent, attacker)
 					"Did you softlocked? Congrats.",
 					"You just killed barney on your own.",
 				}))
+
+				local door = ents.FindByName("storage_room_door")[1]
+				timer.Simple(2, function()
+					if !IsValid(door) then return end
+					door:Fire("Unlock")
+					door:Fire("Open")
+				end)
 			end
 		end
 

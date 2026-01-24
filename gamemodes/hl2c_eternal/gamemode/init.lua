@@ -650,6 +650,7 @@ function GM:Initialize()
 	util.AddNetworkString("hl2ce_fail")
 	util.AddNetworkString("hl2ce_map_event")
 	util.AddNetworkString("hl2ce_playerkilled")
+	util.AddNetworkString("hl2ce_playertimer")
 
 	-- We want regular fall damage and the ai to attack players and stuff
 	game.ConsoleCommand("ai_disabled 0\n")
@@ -1315,7 +1316,9 @@ function GM:PlayerInitialSpawn(ply)
 		ply:ChatPrint("Vehicle spawning is allowed! Press F3 (Spare 1) to spawn it.")
 	end
 
-	self:NetworkString_UpdateStats(ply)
+	if ply.PlayerReady then
+		gamemode.Call("PlayerSpawnReady", ply)
+	end
 
 	if player.GetCount() == 1 then
 		if !self.GameStartedTime then
@@ -1332,12 +1335,8 @@ function GM:PlayerInitialSpawn(ply)
 	end
 end 
 
-function GM:PlayerReady(ply)
-	-- Send initial player spawn to client
-	net.Start("PlayerInitialSpawn")
-	net.WriteBool(self.CustomPMs)
-	net.Send(ply)
-
+-- like the one below except it's also called each time map restarts
+function GM:PlayerSpawnReady(ply)
 	-- Send current checkpoint position
 	if #checkpointPositions > 0 then
 		net.Start("SetCheckpointPosition")
@@ -1345,10 +1344,21 @@ function GM:PlayerReady(ply)
 		net.Send(ply)
 	end
 
+	net.Start("hl2ce_playertimer")
+	net.WriteFloat(ply.startTime)
+	net.Send(ply)
+
 	self:NetworkString_UpdateStats(ply)
 	self:NetworkString_UpdateSkills(ply)
 	self:NetworkString_UpdatePerks(ply)
 	self:NetworkString_UpdateEternityUpgrades(ply)
+end
+
+function GM:PlayerReady(ply)
+	-- Send initial player spawn to client
+	net.Start("PlayerInitialSpawn")
+	net.WriteBool(self.CustomPMs)
+	net.Send(ply)
 end
 
 function GM:ReachedCheckpoint(ply) -- ply is activator, not working yet
@@ -1557,6 +1567,7 @@ function GM:PlayerSpawn(ply)
 	
 		ply:SetFrags(ply.info.score)
 		ply:SetDeaths(ply.info.deaths)
+		ply.SessionStats = ply.info.SessionStats
 
 		if ply.info.EternityUpgradeValues then
 			ply.EternityUpgradeValues = ply.info.EternityUpgradeValues
@@ -1730,7 +1741,7 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 		for _,pl in player.Iterator() do
 			pl:PrintMessage(3, "--- STATS FOR THIS RUN ---")
 			pl:PrintMessage(3, "Score gained: "..pl:Frags())
-			pl:PrintMessage(3, "Damage taken in total: "..(pl.SessionStats.DamageTaken or 0))
+			pl:PrintMessage(3, "Damage taken in total: "..math.Round(pl.SessionStats.DamageTaken or 0))
 		end
 
 		self:DeleteCampaignData()
@@ -2037,7 +2048,10 @@ end
 net.Receive("UpdatePlayerModel", UpdatePlayerModel)
 
 net.Receive("hl2c_playerready", function(len, ply)
+	if ply.PlayerReady then return end
+	ply.PlayerReady = true
 	gamemode.Call("PlayerReady", ply)
+	gamemode.Call("PlayerSpawnReady", ply)
 end)
 
 
