@@ -92,6 +92,7 @@ if file.Exists("hl2c_eternal/d1_town_03.txt", "DATA") then
 
 		local function func(ent)
 			local pl = table.Random(player.GetLiving())
+			if !IsValid(pl) then return end
 			ent:SetEnemy(pl)
 			ent:UpdateEnemyMemory(pl, pl:GetPos())
 		end

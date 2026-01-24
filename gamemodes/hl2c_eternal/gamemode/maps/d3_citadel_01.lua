@@ -231,7 +231,9 @@ function hl2cMapEdit()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
+	NEXT_MAP_INSTANT_PERCENT = 1
 	if GAMEMODE.HyperEXMode then
+		NEXT_MAP_INSTANT_PERCENT = 100
 		for _,npc in ipairs(ents.FindByClass("npc_*")) do
 			npc:Remove() -- we never had a lifeless map didn't we?
 		end

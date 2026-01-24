@@ -77,17 +77,17 @@ function HL2cEX_NPCVariantSpawn(ent)
 			ent.ent_Color = Color(255,128,128)
 
 			ent:Input("EnableAggressiveBehavior")
-		elseif ent.VariantType == 2 then -- Boost health for normal soldiers
+		elseif ent.VariantType == 2 then
 			ent.ent_Color = Color(128,128,255)
 		end
-	elseif ent:GetClass() == "npc_manhack" then
+	-- elseif ent:GetClass() == "npc_manhack" then
 	elseif ent:GetClass() == "npc_zombie" then
-		if ent.VariantType == 1 then -- Explosive variant of regular zombies that explodes upon its' death (Explosions can be chained)
+		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
 			ent.ent_MaxHealthMul = 0.6
 			ent.ent_HealthMul = 0.6
 		end
-	elseif ent:GetClass() == "npc_fastzombie" then -- Infective variant of Fast zombies can deal damage over time
+	elseif ent:GetClass() == "npc_fastzombie" then -- Bloodly variant of Fast zombies can deal damage over time
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
 			ent.ent_MaxHealthMul = 0.7

@@ -12,26 +12,22 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:Give("weapon_physcannon")
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	game.SetGlobalState("super_phys_gun", GLOBAL_ON)
 
-	game.ConsoleCommand( "physcannon_tracelength 850\n" )
-	game.ConsoleCommand( "physcannon_maxmass 850\n" )
-	game.ConsoleCommand( "physcannon_pullforce 8000\n" )
+	game.ConsoleCommand("physcannon_tracelength 850\n")
+	game.ConsoleCommand("physcannon_maxmass 850\n")
+	game.ConsoleCommand("physcannon_pullforce 8000\n")
 
 	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
-
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
@@ -43,36 +39,28 @@ hook.Add("ApplyNPCVariant", "hl2ce_HyperEX_ApplyVariant", function(ent, class)
 end)
 
 -- Accept input
-function hl2cAcceptInput(ent, input)
-
-	if ( !game.SinglePlayer() && !CITADEL_ELEVATOR_CHECKPOINT1 && ( ent:GetName() == "citadel_brush_elevcage1_1" ) && string.lower(input) == "enable" ) then
-	
+function hl2cAcceptInput(ent, input, activator)
+	if !game.SinglePlayer() and !CITADEL_ELEVATOR_CHECKPOINT1 and ent:GetName() == "citadel_brush_elevcage1_1" and string.lower(input) == "enable" then
 		CITADEL_ELEVATOR_CHECKPOINT1 = true
 		CITADEL_ELEVATOR_CHECKPOINT2 = false
 		for _, ply in ipairs(player.GetAll()) do
-		
+			if ply == activator then continue end
 			ply:SetVelocity( Vector( 0, 0, 0 ) )
 			ply:SetPos( Vector( 256, 832, 2320 ) )
 			ply:SetEyeAngles( Angle( 0, -90, 0 ) )
-		
 		end
-	
 	end
 
-	if ( !game.SinglePlayer() && !CITADEL_ELEVATOR_CHECKPOINT2 && ( ent:GetName() == "citadel_path_lift01_1" ) && ( string.lower(input) == "inpass" ) ) then
-	
+	if !game.SinglePlayer() and !CITADEL_ELEVATOR_CHECKPOINT2 and ent:GetName() == "citadel_path_lift01_1" and string.lower(input) == "inpass" then
 		CITADEL_ELEVATOR_CHECKPOINT2 = true
 		for _, ply in ipairs(player.GetAll()) do
-		
-			ply:SetVelocity( Vector( 0, 0, 0 ) )
-			ply:SetPos( Vector( 256, 832, 6420 ) )
-			ply:SetEyeAngles( Angle( 0, -90, 0 ) )
-		
+			if ply == activator then continue end
+			ply:SetVelocity(Vector(0, 0, 0))
+			ply:SetPos(Vector(256, 832, 6420))
+			ply:SetEyeAngles(Angle(0, -90, 0))
 		end
-		GAMEMODE:CreateSpawnPoint( Vector( 256, 832, 6420 ), -90 )
-	
+		GAMEMODE:CreateSpawnPoint(Vector(256, 832, 6420), -90)
 	end
-
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 

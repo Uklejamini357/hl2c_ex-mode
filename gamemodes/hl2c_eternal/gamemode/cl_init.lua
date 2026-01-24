@@ -810,7 +810,7 @@ function GM:ShowSkills()
 			local d = translate_Get(v.Description)
 			local de = translate_Get(v.DescriptionEndless)
 
-			local formatted = name.."\n\n"..translate_Get("in_ne_mode").."\n"..d..(de and "\n\n"..translate_Get("in_e_mode")..":\n"..de or "")
+			local formatted = name.."\n\n"..translate_Get("in_ne_mode").."\n"..d..(de and "\n\n"..translate_Get("in_e_mode").."\n"..de or "")
 			local LabelDefense = vgui.Create("DLabel")
 			LabelDefense:SetPos(50, 50)
 			LabelDefense:SetText(name..": "..tostring(pl.Skills[k]))

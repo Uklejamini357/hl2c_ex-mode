@@ -99,7 +99,6 @@ function hl2cAcceptInput(ent, input, activator)
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "basement_gordon_first_entered" ) && ( string.lower(input) == "trigger" ) ) then
-	
 		ALLOWED_VEHICLE = nil
 		PrintMessage( HUD_PRINTTALK, "Vehicle spawning has been disabled." )
 	

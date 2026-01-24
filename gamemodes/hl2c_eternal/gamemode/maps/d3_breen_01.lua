@@ -266,35 +266,26 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		end
 
 		if ent:GetName() == "relay_portalfinalexplodeshake" and string.lower(input) == "trigger" then
-		
 			game.SetGlobalState("super_phys_gun", GLOBAL_OFF)
 
-			game.ConsoleCommand( "physcannon_tracelength 250\n" )
-			game.ConsoleCommand( "physcannon_maxmass 250\n" )
-			game.ConsoleCommand( "physcannon_pullforce 4000\n" )
-		
+			game.ConsoleCommand("physcannon_tracelength 250\n")
+			game.ConsoleCommand("physcannon_maxmass 250\n")
+			game.ConsoleCommand("physcannon_pullforce 4000\n")
 		end
 
 		if ent:GetName() == "relay_breenwins" and string.lower(input) == "trigger" then
-		
-			gamemode.Call("RestartMap")
-			PrintMessage(3, "You failed to complete this map. (Dr. Breen has escaped)")
-		
+			gamemode.Call("FailMap", nil, "breen_escaped")
 		end
 
 		if ent:GetName() == "teleport_player_gman_1" and string.lower(input) == "teleport" then
-		
 			CITADEL_ENDING = true
-		
+
 			for _, ply in ipairs(player.GetAll()) do
-			
 				ply:RemoveAllItems()
 				ply:SetNoDraw(true)
-				ply:SetPos( ent:GetPos() )
+				ply:SetPos(ent:GetPos())
 				ply:Freeze(true)
-			
 			end
-		
 		end
 
 		if ent:GetName() == "view_gman_end_1" and string.lower(input) == "enable" then
@@ -312,15 +303,11 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		end
 
 		if ent:GetClass() == "player_speedmod" and string.lower(input) == "modifyspeed" then
-		
 			for _, ply in ipairs(player.GetAll()) do
-			
-				ply:SetLaggedMovementValue( tonumber( value ) )
-			
+				ply:SetLaggedMovementValue(tonumber(value))
 			end
 		
 			return true
-		
 		end
 
 		if ent:GetName() == "pod" and input:lower() == "entervehicleimmediate" then
@@ -339,7 +326,6 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 	end
 
 	if GAMEMODE.EXMode then
-
 		if ent:GetName() == "lcs_BreenOffice02" and input:lower() == "start" then
 			timer.Simple(2.5, function()
 				if !IsValid(ent) then return end

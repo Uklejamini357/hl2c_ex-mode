@@ -204,7 +204,9 @@ function GM:PlayerDeathThink(ply)
 	if ply:GetObserverMode() != OBS_MODE_ROAMING and (ply:IsBot() or ply:KeyPressed(IN_ATTACK) or ply:KeyPressed(IN_ATTACK2) or ply:KeyPressed(IN_JUMP)) then
 		if !self:CanPlayerRespawn() then
 			ply:Spectate(OBS_MODE_ROAMING)
-			ply:SetPos(ply.deathPos)
+			if ply.deathPos then
+				ply:SetPos(ply.deathPos)
+			end
 			ply:SetNoTarget(true)
 		else
 			ply:SetTeam(TEAM_ALIVE)
@@ -293,6 +295,13 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		return true
 	end
 
+	-- Vehicle driver isn't accounted for any damage, so fix it
+	if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer() then
+		dmgInfo:SetAttacker(attacker:GetDriver())
+		dmgInfo:SetInflictor(attacker)
+		attacker = attacker:GetDriver()
+	end
+
 	if attacker.NextDamageMul and (ent:IsNPC() or ent:IsPlayer()) then
 		damage = damage * attacker.NextDamageMul
 		attacker.NextDamageMul = nil
@@ -316,9 +325,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		damage = damage * math.max(1, ent:GetMaxHealth()*0.01) * eff_difficulty^0.2
 	end
 
-	-- if (ent:IsPlayer() or ent:IsNPC() and ent:IsFriendlyNPC()) and attacker:IsNPC() then
 	if (ent:IsPlayer() or ent:IsNPC() and ent:IsFriendlyNPC()) and attacker:IsNPC() and not attacker:IsFriendlyNPC() then
-		-- print("increase damage", ent:IsFriendlyNPC(), attacker:IsFriendlyNPC())
 		if not ispoisonheadcrab then
 			damage = damage * eff_difficulty^0.7
 		elseif ent:IsPlayer() and ent:HasPerkActive("1_antipoison") then
@@ -326,9 +333,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		end
 	end
 
-	-- if ent:IsNPC() and not ent:IsFriendlyNPC() then
 	if ent:IsNPC() and not ent:IsFriendlyNPC() and (attacker:IsFriendlyNPC() or attacker:IsPlayer()) then
-		-- print("decrease damage", ent:IsFriendlyNPC())
 		if ent:GetClass() ~= "npc_combinegunship" then
 			damage = damage / eff_difficulty^0.55
 		end
@@ -382,10 +387,6 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 
 	damage = infmath.ConvertInfNumberToNormalNumber(damage)
 	dmgInfo:SetDamage(damage)
-
-	-- if attacker:IsPlayer() then
-		-- attacker:PrintMessage(3, tostring(damage))
-	-- end
 
 	if self.EXMode and attacker:GetClass() == "npc_sniper" and attacker.VariantType == 1 then
 		PrintMessage(3, tostring(attacker).." "..(ent:IsPlayer() and ent:Nick() or ent:GetClass()).." "..tostring(damage))
@@ -1684,18 +1685,27 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 			net.WriteFloat(-1)
 			net.Broadcast()
 			self:Initialize() -- why run GAMEMODE:Initialize() again? so that difficulty will also reset if noplayerdatasave is true
+			self.GameStartedTime = CurTime()
 			changingLevel = true
 			game.CleanUpMap(false, {"env_fire", "entityflame", "_firesmoke"}, function()
 				changingLevel = nil
 				local plyrespawn = FORCE_PLAYER_RESPAWNING
 				FORCE_PLAYER_RESPAWNING = true
 				for k,v in ipairs(player.GetAll()) do
-					if self.HardcoreEnabled() and !table.HasValue(self.HardcoreAlivePlayers, v:SteamID64()) and v:Alive() then continue end
-
 					self:PlayerInitialSpawn(v)
+					v.consideredDead = nil
+
+					if self.HardcoreEnabled() and !table.HasValue(self.HardcoreAlivePlayers, v:SteamID64()) then
+						if v:Alive() then
+							v:KillSilent()
+							v:SetTeam(TEAM_DEAD)
+						end
+						continue
+					end
+
 					v:KillSilent()
 					v:SetTeam(TEAM_ALIVE)
-					timer.Simple(0.05, function()
+					timer.Simple(engine.TickInterval()*2, function()
 						v:Spawn()
 						v.invulnerableTime = CurTime()
 					end)
@@ -1849,7 +1859,7 @@ function GM:ShowSpare1(ply)
 		return
 	end
 
-	local cooldown = ply.vehicleLastSpawned and ply.vehicleLastSpawned+10
+	local cooldown = ply.vehicleLastSpawned and ply.vehicleLastSpawned+5
 	if cooldown and cooldown > CurTime() then
 		ply:PrintMessage(HUD_PRINTTALK, string.format("You've already spawned a vehicle! Try again in %d seconds!", math.ceil(cooldown - CurTime())))
 		return
@@ -2115,6 +2125,16 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 	if ent:GetClass() == "func_areaportal" and (input:lower() == "close" and input:lower() == "toggle") then
 		ent:Fire("Open")
 		return true
+	end
+
+	if ent:GetClass() == "player_loadsaved" and input:lower() == "reload" then
+		if self.EXMode then
+			PrintMessage(3, "uh oh, you fucked up")
+		end
+
+		if !game.SinglePlayer() then
+			return true
+		end
 	end
 
 	if string.lower(input) == "sethealth" then
