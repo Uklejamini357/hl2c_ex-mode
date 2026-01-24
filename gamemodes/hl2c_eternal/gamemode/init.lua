@@ -1201,7 +1201,6 @@ end
 -- Called just before the player's first spawn 
 function GM:PlayerInitialSpawn(ply)
 	ply.startTime = CurTime()
-	ply:SetTeam(TEAM_ALIVE)
 
 	ply.HardcoreModeAttempts = 0
 
@@ -1290,22 +1289,24 @@ function GM:PlayerInitialSpawn(ply)
 		ply.EternityUpgradeValues[upgrade] = 0
 	end
 
+	ply:SetTeam(TEAM_ALIVE)
+	ply:SetFrags(0)
+	ply:SetDeaths(0)
+
 	-- Grab previous map info
-	local plyID = ply:SteamID64() || ply:UniqueID()
-	if (file.Exists(self.VaultFolder.."/players/"..plyID..".txt", "DATA")) then
+	local plyID = ply:SteamID64() or ply:UniqueID()
+	if file.Exists(self.VaultFolder.."/players/"..plyID..".txt", "DATA") then
 		ply.info = util.JSONToTable(file.Read(self.VaultFolder.."/players/"..plyID..".txt", "DATA"))
-		if ((ply.info.predicted_map != game.GetMap()) || RESET_PL_INFO) then
+		if ply.info.predicted_map != game.GetMap() or RESET_PL_INFO then
 			file.Delete(self.VaultFolder.."/players/"..plyID..".txt")
 			ply.info = nil
-		elseif (RESET_WEAPONS) then
+		elseif RESET_WEAPONS then
 			ply.info.loadout = nil
 		end
 	end
 
-	ply:SetFrags(0)
-	ply:SetDeaths(0)
-
 	self:LoadPlayer(ply)
+
 	if self.HardcoreEnabled() and !table.HasValue(self.HardcoreAlivePlayers, ply:SteamID64()) then
 		ply:KillSilent()
 		ply:SetTeam(TEAM_DEAD)
@@ -1332,13 +1333,6 @@ function GM:PlayerInitialSpawn(ply)
 
 	if !ply:Alive() then
 		ply.consideredDead = true
-	end
-
-
-
-	-- Prompt players that they can spawn vehicles
-	if ALLOWED_VEHICLE then
-		ply:ChatPrint("Vehicle spawning is allowed! Press F3 (Spare 1) to spawn it.")
 	end
 
 	if ply.PlayerReady then
@@ -1417,10 +1411,6 @@ function GM:PlayerSpawn(ply)
 			ply:SetArmor(ply.info.armor)
 		end
 
-		if ply.info.Stats then
-			
-		end
-	
 		ply:SetFrags(ply.info.score)
 		ply:SetDeaths(ply.info.deaths)
 		ply.SessionStats = ply.info.SessionStats
@@ -1442,6 +1432,11 @@ end
 
 -- like the one below except it's also called each time map restarts
 function GM:PlayerSpawnReady(ply)
+	-- Prompt players that they can spawn vehicles
+	if ALLOWED_VEHICLE then
+		ply:ChatPrint("Vehicle spawning is allowed! Press F3 (Spare 1) to spawn it.")
+	end
+
 	-- Send current checkpoint position
 	if #checkpointPositions > 0 then
 		net.Start("SetCheckpointPosition")
@@ -1855,19 +1850,19 @@ function GM:ShowSpare1(ply)
 	if !ply:Alive() or ply:InVehicle() then return end
 
 	if !ALLOWED_VEHICLE then
-		ply:PrintMessage(HUD_PRINTTALK, "You may not spawn a vehicle at this time.")
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle")
 		return
 	end
 
 	local cooldown = ply.vehicleLastSpawned and ply.vehicleLastSpawned+5
 	if cooldown and cooldown > CurTime() then
-		ply:PrintMessage(HUD_PRINTTALK, string.format("You've already spawned a vehicle! Try again in %d seconds!", math.ceil(cooldown - CurTime())))
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle_cooldown", math.ceil(cooldown - CurTime()))
 		return
 	end
 
 	for _, ent in ipairs(ents.FindInSphere(ply:GetPos(), 256)) do
 		if IsValid(ent) and ent:IsPlayer() and ent:Alive() and ent != ply then
-			ply:PrintMessage(HUD_PRINTTALK, "There are players around you! Find an open space to spawn your vehicle.")
+			ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle_nearby_plrs")
 			return
 		end
 	end
@@ -1882,18 +1877,18 @@ function GM:ShowSpare1(ply)
 		end
 	
 		local plyAngle = ply:EyeAngles()
-		local startpos = ply:GetPos() + Vector(0, 0, 48)
-		local spawnpos = startpos + plyAngle:Forward() * 160
+		-- local startpos = ply:GetPos() + Vector(0, 0, 48)
+		-- local spawnpos = startpos + plyAngle:Forward() * 160
 
-		local tr = {}
-		local trace = util.TraceLine({
-			start = startpos,
-			endpos = spawnpos
-		})
-		if trace.HitWorld or not util.IsInWorld(spawnpos) then
-			ply:ChatPrint("Insufficient space for spawning in a vehicle!")
-			return
-		end
+		-- local tr = {}
+		-- local trace = util.TraceLine({
+		-- 	start = startpos,
+		-- 	endpos = spawnpos
+		-- })
+		-- if trace and trace.HitWorld or not util.IsInWorld(spawnpos) then
+		-- 	ply:ChatPrint(translate.ClientGet(ply, "cant_spawn_vehicle_no_space"))
+		-- 	return
+		-- end
 
 		ply:RemoveVehicle()
 
@@ -1932,7 +1927,7 @@ function GM:ShowSpare2(ply)
 	end
 
 	if !ALLOWED_VEHICLE then
-		ply:PrintMessage(HUD_PRINTTALK, "You may not remove your vehicle at this time.")
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_remove_vehicle")
 		return
 	end
 

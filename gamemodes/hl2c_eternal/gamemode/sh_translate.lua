@@ -118,13 +118,14 @@ translate_ClientFormat = translate.ClientFormat
 local function AddLanguages(late)
 	local GM = GM or GAMEMODE
 	for i, filename in pairs(file.Find(GM.FolderName.."/gamemode/"..(late and "late_languages" or "languages").."/*.lua", "LUA")) do
+		local _LANG = LANG
 		LANG = {}
 		AddCSLuaFile((late and "late_languages" or "languages").."/"..filename)
 		include((late and "late_languages" or "languages").."/"..filename)
 		for k, v in pairs(LANG) do
 			translate_AddTranslation(k, v)
 		end
-		LANG = nil
+		LANG = _LANG
 	end
 end
 

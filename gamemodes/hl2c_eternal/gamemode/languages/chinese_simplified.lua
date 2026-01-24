@@ -19,6 +19,15 @@ translate.AddLanguage("zh-cn", "简体中文") -- Chinese (Simplified)
 LANG.health = "健康:"
 LANG.armor = "盔甲:"
 
+
+LANG.options = "Options"
+LANG.pms = "Playermodels"
+LANG.refreshstats = "Refresh Stats"
+LANG.skills = "Skills"
+LANG.prestige = "Prestige"
+LANG.perks = "Perks"
+LANG.upgrades = "Upgrades"
+
 -- d - description
 -- de - description, endless
 -- All of this below: (TDL)
@@ -46,6 +55,12 @@ LANG.inc_sks = "Increase %s by %d points"
 
 LANG.in_e_mode = "在无限模式中：" -- (TDL)
 LANG.in_ne_mode = "非无限模式：" -- (TDL,I)
+
+LANG.cant_spawn_vehicle = "You may not spawn a vehicle at this time."
+LANG.cant_spawn_vehicle_cooldown = "You've already spawned a vehicle! Try again in %d seconds!"
+LANG.cant_spawn_vehicle_nearby_plrs = "There are players around you! Find an open space to spawn your vehicle."
+LANG.cant_spawn_vehicle_no_space = "Insufficient space for spawning in a vehicle!"
+LANG.cant_remove_vehicle = "You may not remove your vehicle at this time."
 
 -- Gamemode, and Maps
 LANG.x_completed_map = "%s 完成了地图。(%s) [%i of %i]"

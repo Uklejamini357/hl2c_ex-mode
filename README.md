@@ -1,4 +1,4 @@
-Does this have a readme? Doesn't seem like it, so I thought to add it. Though it's still 
+Does this have a readme? Doesn't seem like it, so I thought to add it. Though it's still quite unfinished
 
 # Half-Life 2 Campaign: Eternal
 ### A fork of Half-life 2 campaign by Uklejamini, original by AMT
@@ -12,4 +12,5 @@ Does this have a readme? Doesn't seem like it, so I thought to add it. Though it
 - Leveling and skills system - One of the RPG elements which allow you to upgrade your character to be more efficient!
 - Prestige system! Unleash your truer potential with powerful perks.
 - ^ With up to 3 prestige layers! This is for only if you feel like just having 1 prestige layer is not enough... (Endless mode only)
+- Break Infinity! (Currently used for Difficulty and XP)
 - And much more...
