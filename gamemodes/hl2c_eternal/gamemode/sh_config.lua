@@ -598,6 +598,168 @@ GM.UpgradesEternity = {
 	},
 }
 
+GM.DeathVoicelineModels = {
+	["models/player/police.mdl"] = "Metrocop",
+	["models/player/police_fem.mdl"] = "Metrocop",
+
+	["models/player/combine_soldier.mdl"] = "Combine",
+	["models/player/combine_super_soldier.mdl"] = "Combine",
+	["models/player/combine_soldier_prisonguard.mdl"] = "Combine",
+	["models/player/soldier_stripped.mdl"] = "Combine",
+
+	["models/player/arctic.mdl"] = "CSS",
+	["models/player/guerilla.mdl"] = "CSS",
+	["models/player/leet.mdl"] = "CSS",
+	["models/player/phoenix.mdl"] = "CSS",
+	["models/player/gasmask.mdl"] = "CSS",
+	["models/player/riot.mdl"] = "CSS",
+	["models/player/swat.mdl"] = "CSS",
+	["models/player/urban.mdl"] = "CSS",
+
+	["models/player/alyx.mdl"] = "Alyx",
+	["models/player/barney.mdl"] = "Barney",
+	["models/player/breen.mdl"] = "Male",
+	["models/player/p2_chell.mdl"] = "Female",
+
+	["models/player/hostage/hostage_01.mdl"] = "Male",
+	["models/player/hostage/hostage_02.mdl"] = "Male",
+	["models/player/hostage/hostage_03.mdl"] = "Male",
+	["models/player/hostage/hostage_04.mdl"] = "Male",
+	["models/player/odessa.mdl"] = "Male",
+
+	["models/player/Group01/male_01.mdl"] = "Male",
+	["models/player/Group01/male_02.mdl"] = "Male",
+	["models/player/Group01/male_03.mdl"] = "Male",
+	["models/player/Group01/male_04.mdl"] = "Male",
+	["models/player/Group01/male_05.mdl"] = "Male",
+	["models/player/Group01/male_06.mdl"] = "Male",
+	["models/player/Group01/male_07.mdl"] = "Male",
+	["models/player/Group01/male_08.mdl"] = "Male",
+	["models/player/Group01/male_09.mdl"] = "Male",
+
+	["models/player/Group02/male_02.mdl"] = "Male",
+	["models/player/Group02/male_04.mdl"] = "Male",
+	["models/player/Group02/male_06.mdl"] = "Male",
+	["models/player/Group02/male_08.mdl"] = "Male",
+
+	["models/player/Group03/male_01.mdl"] = "Male",
+	["models/player/Group03/male_02.mdl"] = "Male",
+	["models/player/Group03/male_03.mdl"] = "Male",
+	["models/player/Group03/male_04.mdl"] = "Male",
+	["models/player/Group03/male_05.mdl"] = "Male",
+	["models/player/Group03/male_06.mdl"] = "Male",
+	["models/player/Group03/male_07.mdl"] = "Male",
+	["models/player/Group03/male_08.mdl"] = "Male",
+	["models/player/Group03/male_09.mdl"] = "Male",
+
+	["models/player/Group03m/male_01.mdl"] = "Male",
+	["models/player/Group03m/male_02.mdl"] = "Male",
+	["models/player/Group03m/male_03.mdl"] = "Male",
+	["models/player/Group03m/male_04.mdl"] = "Male",
+	["models/player/Group03m/male_05.mdl"] = "Male",
+	["models/player/Group03m/male_06.mdl"] = "Male",
+	["models/player/Group03m/male_07.mdl"] = "Male",
+	["models/player/Group03m/male_08.mdl"] = "Male",
+	["models/player/Group03m/male_09.mdl"] = "Male",
+
+	["models/player/Group01/female_01.mdl"] = "Female",
+	["models/player/Group01/female_02.mdl"] = "Female",
+	["models/player/Group01/female_03.mdl"] = "Female",
+	["models/player/Group01/female_04.mdl"] = "Female",
+	["models/player/Group01/female_05.mdl"] = "Female",
+	["models/player/Group01/female_06.mdl"] = "Female",
+
+	["models/player/Group03/female_01.mdl"] = "Female",
+	["models/player/Group03/female_02.mdl"] = "Female",
+	["models/player/Group03/female_03.mdl"] = "Female",
+	["models/player/Group03/female_04.mdl"] = "Female",
+	["models/player/Group03/female_05.mdl"] = "Female",
+	["models/player/Group03/female_06.mdl"] = "Female",
+
+	["models/player/Group03m/female_01.mdl"] = "Female",
+	["models/player/Group03m/female_02.mdl"] = "Female",
+	["models/player/Group03m/female_03.mdl"] = "Female",
+	["models/player/Group03m/female_04.mdl"] = "Female",
+	["models/player/Group03m/female_05.mdl"] = "Female",
+	["models/player/Group03m/female_06.mdl"] = "Female",
+
+	["models/player/monk.mdl"] = "Monk",
+}
+-- maybe, just maybe?
+for mdl,id in pairs(GM.DeathVoicelineModels) do
+	GM.DeathVoicelineModels[string.lower(mdl)] = id
+	if mdl == string.lower(mdl) then continue end
+end
+
+GM.DeathVoicelines = {
+	CSS = {
+		"bot/pain10.wav",
+		"bot/pain2.wav",
+		"bot/pain4.wav",
+		"bot/pain5.wav",
+		"bot/pain8.wav",
+		"bot/pain9.wav"
+	},
+
+	Metrocop = {
+		"npc/metropolice/die1.wav",
+		"npc/metropolice/die2.wav",
+		"npc/metropolice/die3.wav",
+		"npc/metropolice/die4.wav"
+	},
+
+	Combine = {
+		"npc/combine_soldier/die1.wav",
+		"npc/combine_soldier/die2.wav",
+		"npc/combine_soldier/die3.wav"
+	},
+
+	Alyx = {
+		"vo/npc/alyx/no01.wav",
+		"vo/npc/alyx/no02.wav",
+		"vo/npc/alyx/no03.wav",
+		"vo/npc/alyx/uggh02.wav",
+		"vo/npc/alyx/ohgod01.wav",
+		"vo/npc/alyx/ohno_startle03.wav",
+	},
+
+	Barney = {
+		"vo/npc/barney/ba_pain10.wav",
+		"vo/npc/barney/ba_ohshit03.wav",
+	},
+
+	Male = {
+		"vo/npc/male01/no01.wav",
+		"vo/npc/male01/no02.wav",
+
+		"vo/npc/male01/pain01.wav",
+		"vo/npc/male01/pain02.wav",
+		"vo/npc/male01/pain03.wav",
+		"vo/npc/male01/pain04.wav",
+		"vo/npc/male01/pain05.wav",
+		"vo/npc/male01/pain06.wav",
+		"vo/npc/male01/pain07.wav",
+		"vo/npc/male01/pain08.wav",
+		"vo/npc/male01/pain09.wav",
+	},
+
+	Female = {
+		"vo/npc/female01/no01.wav",
+		"vo/npc/female01/no02.wav",
+
+		"vo/npc/female01/pain01.wav",
+		"vo/npc/female01/pain02.wav",
+		"vo/npc/female01/pain03.wav",
+		"vo/npc/female01/pain04.wav",
+		"vo/npc/female01/pain05.wav",
+		"vo/npc/female01/pain06.wav",
+		"vo/npc/female01/pain07.wav",
+		"vo/npc/female01/pain08.wav",
+		"vo/npc/female01/pain09.wav",
+	},
+	
+	Monk = "vo/ravenholm/monk_death07.wav"
+}
 
 GM.PlayerConfigurables = {
 	["AutoPrestige"] = {"number", 0, "AutoPrestige", "When to prestige?", 0, function(ply) return 1e6 end}, -- #1 type, #2 default, #3 name, #4 description, #5 min (func), #6 max (func)

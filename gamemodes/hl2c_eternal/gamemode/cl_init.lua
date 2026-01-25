@@ -323,17 +323,31 @@ function GM:HUDShouldDraw(name)
 end
 
 
+local function BetterScreenScale()
+	return ScrH()/1080
+end
+
+local function CreateFont(id, size, tbl)
+	tbl = tbl or {}
+	tbl.size = size*BetterScreenScale()
+	surface.CreateFont(id, tbl)
+end
 function GM:CreateFonts()
-	surface.CreateFont("Roboto16", {size = 16, weight = 700, antialias = true, additive = false, font = "Roboto Bold"})
-	surface.CreateFont("roboto32BlackItalic", {size = 32, weight = 900, antialias = true, additive = false, font = "Roboto Black Italic"})
-	surface.CreateFont("hl2ce_font_small", {size = 20, weight = 0, font = "Roboto Black"})
-	surface.CreateFont("hl2ce_font", {size = 32, weight = 700, font = "Roboto Black"})
-	surface.CreateFont("hl2ce_font_big", {size = 48, weight = 900, font = "Roboto Black"})
+	CreateFont("Roboto16", 16, {weight = 700, antialias = true, additive = false, font = "Roboto Bold"})
+	CreateFont("roboto32BlackItalic", 32, {weight = 900, antialias = true, additive = false, font = "Roboto Black Italic"})
+	CreateFont("hl2ce_font_small", 20, {weight = 0, font = "Roboto Black"})
+	CreateFont("hl2ce_font", 32, {weight = 700, font = "Roboto Black"})
+	CreateFont("hl2ce_font_big", 48, {weight = 900, font = "Roboto Black"})
 end
 
 function GM:CreateScoreboardFonts(large)
-	surface.CreateFont("hl2ce_font_sb", {size = large and 18 or 16, weight = 700, font = "Roboto Black"})
-	surface.CreateFont("hl2ce_font_sb_small", {size = large and 16 or 12, weight = 500, font = "Roboto Black"})
+	CreateFont("hl2ce_font_sb", large and 18 or 16, {weight = 700, font = "Roboto Black"})
+	CreateFont("hl2ce_font_sb_small", large and 16 or 12, {weight = 500, font = "Roboto Black"})
+end
+
+function GM:OnScreenSizeChanged(oldw, oldh, neww, newh)
+	self:CreateFonts()
+	self:CreateScoreboardFonts(player.GetCount() < 10)
 end
 
 -- Called when we initialize
@@ -446,11 +460,17 @@ function GM:ContextMenuOpen()
 end
 
 -- Called when a bind is pressed
-function GM:PlayerBindPress( ply, bind, down )
-	-- if bind == "+menu" && down then
-		-- RunConsoleCommand( "lastinv" )
-		-- return true
-	-- end
+function GM:PlayerBindPress(ply, bind, down)
+	if !GAMEMODE.AdminMode and bind == "+menu" and down then
+		RunConsoleCommand("lastinv")
+		return true
+	end
+
+	if bind == "gm_showhelp" then
+		ShowHelp()
+	elseif bind == "gm_showteam" then
+		ShowTeam()
+	end
 
 	return false
 end
@@ -573,7 +593,7 @@ if file.Exists(GM.VaultFolder.."/gamemode/maps/"..game.GetMap()..".lua", "LUA") 
 end
 
 -- Called by show help
-function ShowHelp(len)
+function ShowHelp()
 	local pl = LocalPlayer()
 
 	local helpMenu = vgui.Create("DFrame")
@@ -749,7 +769,6 @@ It's much more insane than the regular EX mode.]])
 	end
 
 end
-net.Receive("ShowHelp", ShowHelp)
 
 function GM:ShowSkills()
 	local pl = LocalPlayer()
@@ -909,12 +928,9 @@ end
 
 
 -- Called by ShowTeam
-function ShowTeam( len )
-
+function ShowTeam()
 	showNav = !showNav
-
 end
-net.Receive( "ShowTeam", ShowTeam )
 
 
 -- Called by server

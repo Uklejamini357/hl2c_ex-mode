@@ -45,8 +45,19 @@ function GM:OpenPlayerModelMenu()
 	mdl:SetDirectionalLight( BOX_LEFT, Color( 80, 160, 255, 255 ) )
 	mdl:SetAmbientLight( Vector( -64, -64, -64 ) )
 	mdl:SetAnimated( true )
-	mdl.Angles = Angle( 0, 0, 0 )
-	mdl:SetLookAt( Vector( -100, 0, -22 ) )
+	mdl.Angles = Angle(0, 0, 0)
+	mdl:SetLookAt(Vector(-100, 0, -22))
+
+	local mdlhide = vgui.Create("DButton", window)
+	mdlhide:SetText("Hide")
+	mdlhide:SizeToContents()
+	mdlhide:SetPos(mdl:GetWide(), mdl:GetWide())
+	mdlhide.DoClick = function()
+		mdl:SetVisible(!mdl:IsVisible())
+		mdlhide:SetText(mdl:IsVisible() and "Hide" or "Show")
+		mdlhide:SizeToContents()
+	end
+
 
 	-- Property sheet
 	local sheet = window:Add("DPropertySheet")
@@ -58,15 +69,19 @@ function GM:OpenPlayerModelMenu()
 
 	-- Fill the panel select
 	for name, model in SortedPairs(player_manager.AllValidModels()) do
-	
 		local icon = vgui.Create( "SpawnIcon" )
-		icon:SetModel( model )
-		icon:SetSize( 64, 64 )
-		icon:SetTooltip( name )
+		icon:SetModel(model)
+		icon:SetSize(64, 64)
+		icon:SetTooltip(name)
 		icon.playermodel = name
-	
+		icon.DoRightClick = function()
+			local derma = DermaMenu()
+			derma:AddOption("Copy ID to clipboard", function() SetClipboardText(name) end)
+			derma:AddOption("Copy model to clipboard", function() SetClipboardText(model) end)
+			derma:Open()
+		end
+
 		PanelSelect:AddPanel( icon, { cl_playermodel = name } )
-	
 	end
 
 	-- Add Model to the property sheet
@@ -112,18 +127,12 @@ function GM:OpenPlayerModelMenu()
 
 	-- Make names nicer, the ugly way
 	local function MakeNiceName( str )
-	
 		local newname = {}
-	
 		for _, s in pairs( string.Explode( "_", str ) ) do
-		
 			if ( string.len( s ) == 1 ) then table.insert( newname, string.upper( s ) ); continue; end
 			table.insert( newname, string.upper( string.Left( s, 1 ) ) .. string.Right( s, string.len( s ) - 1 ) )
-		
 		end
-
 		return string.Implode( " ", newname )
-	
 	end
 
 	-- Plays the preview animation
@@ -148,23 +157,16 @@ function GM:OpenPlayerModelMenu()
 
 	-- Update body groups
 	local function UpdateBodyGroups( pnl, val )
-	
 		if ( pnl.type == "bgroup" ) then
-		
 			mdl.Entity:SetBodygroup( pnl.typenum, math.Round( val ) )
-		
 			local str = string.Explode( " ", GetConVarString( "cl_playerbodygroups" ) )
 			if ( #str < pnl.typenum + 1 ) then for i = 1, ( pnl.typenum + 1 ) do str[ i ] = str[ i ] || 0; end; end
 			str[ pnl.typenum + 1 ] = math.Round( val )
 			RunConsoleCommand( "cl_playerbodygroups", table.concat( str, " " ) )
-		
 		elseif ( pnl.type == "skin" ) then
-		
 			mdl.Entity:SetSkin( math.Round( val ) )
 			RunConsoleCommand( "cl_playerskin", math.Round( val ) )
-		
 		end
-	
 	end
 
 	-- Rebuilds the body group tab
@@ -225,7 +227,6 @@ function GM:OpenPlayerModelMenu()
 
 	-- Update from Console Variables
 	local function UpdateFromConvars()
-	
 		local model = LocalPlayer():GetInfo( "cl_playermodel" )
 		local modelname = player_manager.TranslatePlayerModel( model )
 		util.PrecacheModel( modelname )
@@ -237,7 +238,6 @@ function GM:OpenPlayerModelMenu()
 	
 		PlayPreviewAnimation( mdl, model )
 		RebuildBodygroupTab()
-	
 	end
 
 	-- Update from Controls
@@ -254,25 +254,21 @@ function GM:OpenPlayerModelMenu()
 	UpdateFromConvars()
 
 	-- The active panel was changed
-	function PanelSelect:OnActivePanelChanged( old, new )
-	
-		if ( old != new ) then
-		
+	function PanelSelect:OnActivePanelChanged(old, new)
+		if old != new then
 			RunConsoleCommand( "cl_playerbodygroups", "0" )
 			RunConsoleCommand( "cl_playerskin", "0" )
-		
 		end
-	
-		timer.Simple( 0.1, function() UpdateFromConvars(); end)
-	
+
+		timer.Simple(0.1, function()
+			UpdateFromConvars()
+		end)
 	end
 
 	-- Mouse is pressed
 	function mdl:DragMousePress()
-	
 		self.PressX, self.PressY = gui.MousePos()
 		self.Pressed = true
-	
 	end
 
 	-- Mouse was released

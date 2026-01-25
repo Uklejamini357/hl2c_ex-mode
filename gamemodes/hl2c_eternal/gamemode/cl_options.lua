@@ -33,6 +33,46 @@ function GM:MakeOptions()
 		return check
 	end
 
+	local function CreateDropdown(name, cvar, tbl)
+		local convar = GetConVar(cvar)
+
+		local label = vgui.Create("DLabel", Window)
+		label:SetText(name)
+		label:SetTextColor(Color(190,255,220))
+		label:SizeToContents()
+		list:AddItem(label)
+
+		local dropdown = vgui.Create("DComboBox", Window)
+		local var = convar:GetString()
+		local name = tbl[var]
+		dropdown:SetText(var == "default" and "Default" or name or "???")
+		dropdown.OnSelect = function(_, _, value)
+			if value == "Default" then
+				value = "default"
+			elseif value == "Override current language" then
+				value = "override"
+			else
+				for id,var in pairs(tbl) do
+					if var == value then
+						value = id
+						break
+					end
+				end
+			end
+
+			RunConsoleCommand(cvar, value)
+		end
+		list:AddItem(dropdown)
+
+		dropdown:AddChoice("Default")
+		dropdown:AddChoice("Override current language")
+		for id, var in pairs(tbl) do
+			dropdown:AddChoice(var)
+		end
+
+		return label, dropdown
+	end
+
 	CreateCheck("Enable first person death view", "hl2ce_cl_fpdeath")
 	CreateCheck("Enable free view in first person death", "hl2ce_cl_fpdeath_freeview")
 	CreateCheck("Enable classic HL2 first person death", "hl2ce_cl_fpdeath_classic")
@@ -46,4 +86,6 @@ function GM:MakeOptions()
 	CreateCheck("Show time spent on map", "hl2ce_cl_showmaptimer")
 
 	CreateCheck("Disable flashing lights", "hl2ce_cl_noepilepsy")
+
+	CreateDropdown("Override current language", "hl2ce_cl_langaugeoverride", translate.Languages)
 end

@@ -24,11 +24,11 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 -- Accept input
 function hl2cAcceptInput( ent, input, activator, caller, value )
-    if string.lower(input) == "scriptplayerdeath" then -- Can break the sequences, again
+    if !game.SinglePlayer() and string.lower(input) == "scriptplayerdeath" then -- Can break the sequences, again
         return true
     end
 
-	if ent:GetName() == "relay.alyx.spawn" and input:lower() == "trigger" then
+	if !game.SinglePlayer() and ent:GetName() == "relay.alyx.spawn" and input:lower() == "trigger" then
 		for _,ply in ipairs(player.GetLiving()) do
 			if ply == activator then continue end
 
@@ -49,6 +49,10 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		for _,ply in ipairs(player.GetLiving()) do
 			ply:Give("weapon_physcannon")
 		end
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "mine_pit_clip_brush" and input:lower() == "enable" then
+		return true
 	end
 
 	if GAMEMODE.EXMode then

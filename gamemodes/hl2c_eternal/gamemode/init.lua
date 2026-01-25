@@ -1832,21 +1832,11 @@ function GM:ScalePlayerDamage(ply, hitGroup, dmgInfo)
 end 
 
 
--- Called when player presses their help key
+-- who the hell does this code?
 function GM:ShowHelp(ply)
-
-	net.Start("ShowHelp")
-	net.Send(ply)
-
 end
 
-
--- Called when a player presses their show team key
 function GM:ShowTeam(ply)
-
-	net.Start("ShowTeam")
-	net.Send(ply)
-
 end
 
 
@@ -2122,8 +2112,8 @@ end
 -- end
 
 function GM:AcceptInput(ent, input, activator, caller, value)
-	if ent:GetClass() == "func_areaportal" and (input:lower() == "close" and input:lower() == "toggle") then
-		ent:Fire("Open")
+	if ent:GetClass() == "func_areaportal" and (input:lower() == "close" or input:lower() == "toggle") then
+		ent:Fire("Open", nil, 0.01)
 		return true
 	end
 

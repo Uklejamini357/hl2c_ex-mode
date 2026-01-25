@@ -2,7 +2,7 @@
 -- Feel free to use this in your own addons.
 -- See the languages folder to add your own languages.
 
---[[Copied from ZS because was too lazy to add one by myself, anyways it was edited a bit for file reduce]]
+--[[Copied from ZS because was too lazy to add one by myself]]
 
 translate = {}
 local translate = translate
@@ -13,30 +13,7 @@ local AddingLanguage
 local DefaultLanguage = "en"
 local CurrentLanguage = DefaultLanguage
 
-if CLIENT then
-	-- Need to make a new convar since gmod_language isn't sent to server.
-	CreateClientConVar("gmod_language_rep", "en", false, true)
-
-	timer.Create("checklanguagechange", 1, 0, function()
-		CurrentLanguage = GetConVar("gmod_language"):GetString()
-		if CurrentLanguage ~= GetConVar("gmod_language_rep"):GetString() then
-			-- Let server know our language changed.
-			RunConsoleCommand("gmod_language_rep", CurrentLanguage)
-		end
-	end)
-end
-
-local translate_GetLanguages
-local translate_GetLanguageName
-local translate_GetTranslations
-local translate_AddLanguage
-local translate_AddTranslation
-local translate_Get
-local translate_Format
-local translate_ClientGet
-local translate_ClientFormat
-local plPrintMessage
-
+translate.Languages = Languages
 -- DEBUG.
 local hl2ce_debug_translate = CreateConVar("hl2ce_debug_translate", 0, FCVAR_ARCHIVE + FCVAR_REPLICATED, "Debug the translated text")
 GM.DebugTranslate = hl2ce_debug_translate:GetBool()
@@ -51,6 +28,43 @@ cvars.AddChangeCallback("hl2ce_debug_notranslate", function(cvar, old, new)
 	GAMEMODE.DebugNoTranslate = tobool(new)
 	BroadcastLua(string.format([[GAMEMODE.DebugNoTranslate = %s]], tobool(new)))
 end, "hl2ce_debug_notranslate")
+
+if CLIENT then
+	-- Need to make a new convar since gmod_language isn't sent to server.
+	
+	local gmod_language = GetConVar("gmod_language")
+	local gmod_language_rep = CreateClientConVar("gmod_language_rep", DefaultLanguage, false, true)
+	local changeLanguage
+	local hl2ce_cl_langaugeoverride = CreateClientConVar("hl2ce_cl_langaugeoverride", "default", true, true, "Overrides gmod_language_rep. Use \"override\" to use gmod_language's current language, \"default\" for server's default")
+	cvars.AddChangeCallback("hl2ce_cl_langaugeoverride", function(cvar, old, new)
+		CurrentLanguage = new
+		changeLanguage()
+	end, "hl2ce_cl_langaugeoverride")
+
+	function changeLanguage()
+		local l = hl2ce_cl_langaugeoverride:GetString()
+		CurrentLanguage = l == "override" and gmod_language:GetString() or l == "default" and DefaultLanguage or l
+		if CurrentLanguage ~= gmod_language_rep:GetString() then
+			-- Let server know our language changed.
+			RunConsoleCommand("gmod_language_rep", CurrentLanguage)
+		end
+	end
+
+
+	timer.Create("checklanguagechange", 1, 0, changeLanguage)
+end
+
+local translate_GetLanguages
+local translate_GetLanguageName
+local translate_GetTranslations
+local translate_AddLanguage
+local translate_AddTranslation
+local translate_Get
+local translate_Format
+local translate_ClientGet
+local translate_ClientFormat
+local plPrintMessage
+
 
 function translate.GetLanguages()
 	return Languages

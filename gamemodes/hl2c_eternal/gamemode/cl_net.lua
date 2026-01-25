@@ -63,7 +63,7 @@ net.Receive("hl2ce_boss", function(len)
 end)
 
 net.Receive("hl2ce_fail", function(len)
-    local time = math.min(10, RESTART_MAP_TIME)
+    local time = math.min(15, RESTART_MAP_TIME)
 
     local s1 = translate.Get("you_lost")
     local len = utf8.len(s1)
@@ -104,11 +104,15 @@ net.Receive("hl2ce_fail", function(len)
     failtext:Center()
     failtext:CenterVertical(0.65)
 
+    -- how can i optimize this? well...
+    -- local 
     failtext.Think = function(self)
-        local str = utf8.sub(s2, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, 4.5)))))
+        if self.NoMoreUpdate then return end
+        local str = utf8.sub(s2, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10)))))
         if str == self:GetText() then return end
         self:SetText(str)
         surface.PlaySound("buttons/lightswitch2.wav")
+        -- self.NoMoreUpdate = true
     end
 
     failtext:AlphaTo(0, 1, time, function(_, self)
@@ -133,8 +137,21 @@ net.Receive("hl2ce_playerkilled", function(len)
         local pl = net.ReadEntity()
 	
         if !GetConVar("hl2ce_cl_noplrdeathsound"):GetBool() then
-            local lowermodelname = string.lower(pl:GetModel())
-            pl:EmitSound("vo/npc/"..(string.find(lowermodelname, "female", 1, true) and "female01" or "male01").."/no0"..math.random(2)..".wav")
+            local model = string.lower(pl:GetModel())
+            local sndid = GAMEMODE.DeathVoicelineModels[model] or "Male"
+            if !sndid then return end
+
+            local mdlsnds = GAMEMODE.DeathVoicelines[sndid]
+            if !mdlsnds then return end
+
+            local snd
+            if isstring(mdlsnds) then
+                snd = mdlsnds
+            else
+                snd = table.Random(mdlsnds)
+            end
+
+            pl:EmitSound(snd)
         end
     else
         chat.AddText("Killed by ", Color(255,0,0), language.GetPhrase(net.ReadString()))
