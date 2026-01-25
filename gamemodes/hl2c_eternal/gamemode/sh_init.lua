@@ -14,21 +14,6 @@ include("sh_pets.lua")
 -- Create console variables to make these config vars easier to access
 local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE, "Forced difficulty.")
 
--- DEBUG.
-local hl2ce_debug_translate = CreateConVar("hl2ce_debug_translate", 0, FCVAR_ARCHIVE + FCVAR_REPLICATED, "Debug the translated text")
-GM.DebugTranslate = hl2ce_debug_translate:GetBool()
-cvars.AddChangeCallback("hl2ce_debug_translate", function(cvar, old, new)
-	GAMEMODE.DebugTranslate = tobool(new)
-	BroadcastLua(string.format([[GAMEMODE.DebugTranslate = %s]], tobool(new)))
-end, "hl2ce_debug_translate")
-
-local hl2ce_debug_notranslate = CreateConVar("hl2ce_debug_notranslate", 0, FCVAR_ARCHIVE + FCVAR_REPLICATED, "Don't actually translate")
-GM.DebugNoTranslate = hl2ce_debug_notranslate:GetBool()
-cvars.AddChangeCallback("hl2ce_debug_notranslate", function(cvar, old, new)
-	GAMEMODE.DebugNoTranslate = tobool(new)
-	BroadcastLua(string.format([[GAMEMODE.DebugNoTranslate = %s]], tobool(new)))
-end, "hl2ce_debug_notranslate")
-
 -- General gamemode information
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"

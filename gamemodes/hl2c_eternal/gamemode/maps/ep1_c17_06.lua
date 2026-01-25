@@ -1,6 +1,10 @@
 -- NOT. EVEN. FINISHED.
--- This map is bugged.
-NEXT_MAP = "d1_trainstation_01"
+-- This map is bugged. And btw don't try to kill strider early or you'll softlock the map.
+if PLAY_EPISODE_2 then
+    NEXT_MAP = "ep2_outland_01"
+else
+    NEXT_MAP = "d1_trainstation_01"
+end
 
 NEXT_MAP_PERCENT = 1
 NEXT_MAP_INSTANT_PERCENT = 101

@@ -1,5 +1,7 @@
 NEXT_MAP = "ep2_outland_01a"
 
+RESET_PL_INFO = true
+
 TRIGGER_CHECKPOINT = {
 	{Vector(340, -864, -4), Vector(404, -714, 96)},
 	{Vector(-3560, 1657, 144), Vector(-3768, 1744, 252)}
@@ -26,21 +28,40 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
         return true
     end
 
-	if ( !game.SinglePlayer() && ( ent:GetClass() == "player_speedmod" ) && ( string.lower(input) == "modifyspeed" ) ) then
-	
-		for _, ply in ipairs(player.GetAll()) do
-		
-			ply:SetLaggedMovementValue( tonumber( value ) )
-		
+	if ent:GetName() == "relay.alyx.spawn" and input:lower() == "trigger" then
+		for _,ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+
+			ply:SetPos(Vector(888, -194, -46))
+			ply:SetEyeAngles(Angle(0, -30, 0))
 		end
-	
+		GAMEMODE:CreateSpawnPoint(Vector(888, -194, -46), -30)
+	end
+
+	if !game.SinglePlayer() and ent:GetClass() == "player_speedmod" and string.lower(input) == "modifyspeed" then
+		for _, ply in ipairs(player.GetAll()) do
+			ply:SetLaggedMovementValue(tonumber(value))
+		end
 		return true
-	
 	end
 
 	if ent:GetName() == "command_physcannon" and string.lower(input) == "command" then
-		for _,ply in ipairs(player.GetAll()) do
+		for _,ply in ipairs(player.GetLiving()) do
 			ply:Give("weapon_physcannon")
+		end
+	end
+
+	if GAMEMODE.EXMode then
+		if ent:GetName() == "message_chapter_title1" and input:lower() == "showmessage" then
+			timer.Simple(2, function()
+				PrintMessage(3, "Chapter B1")
+			end)
+
+			timer.Simple(3.7, function()
+				PrintMessage(3, "The story continues... sorry, I don't have a lot of chapter name ideas remaining")
+			end)
+
+			return true
 		end
 	end
 end

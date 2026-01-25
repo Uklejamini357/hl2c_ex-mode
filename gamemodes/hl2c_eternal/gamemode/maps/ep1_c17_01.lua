@@ -1,5 +1,10 @@
 NEXT_MAP = "ep1_c17_02"
 
+TRIGGER_CHECKPOINT = {
+	{Vector(1920, 2184, 96), Vector(1680, 2280, 196)}
+}
+-- not including ep1_c17_01a since it's just the replica of this map but only plays in the second part
+
 if CLIENT then return end
 
 -- Player spawns

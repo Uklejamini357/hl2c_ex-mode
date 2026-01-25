@@ -1,4 +1,4 @@
-NEXT_MAP = "ep1_c17_02b"
+NEXT_MAP = "ep1_c17_02b" -- map order is kinda messy..
 
 if CLIENT then return end
 
@@ -6,8 +6,8 @@ if CLIENT then return end
 function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_physcannon")
 	ply:Give("weapon_pistol")
-	ply:Give("weapon_shotgun")
 	ply:Give("weapon_smg1")
+	ply:Give("weapon_shotgun")
 	ply:Give("weapon_frag")
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)

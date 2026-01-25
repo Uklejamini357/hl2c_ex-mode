@@ -949,11 +949,16 @@ function GM:NextMap(instant)
 	end
 end
 concommand.Add("hl2ce_next_map", function(ply)
-	if (IsValid(ply) && ply:IsAdmin()) then
+	if ply:IsValid() and !ply:IsAdmin() then
+		ply:PrintMessage(HUD_PRINTTALK, "You are not admin!")
+		return
+	end
+
+	if changingLevel then
+		timer.Adjust("hl2c_next_map", 0, 1)
+	else
 		NEXT_MAP_TIME = 0
 		hook.Run("NextMap")
-	else
-		ply:PrintMessage(HUD_PRINTTALK, "You are not admin!")
 	end
 end)
 concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)

@@ -557,7 +557,9 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			end
 		end
 	elseif ent:GetClass() == "npc_sniper" then
-		PrintMessage(3, "WTF YOU KILLED HIM!")
+		if ent.VariantType == 1 then
+			PrintMessage(3, "WTF YOU KILLED HIM!")
+		end
 	elseif ent:GetClass() == "npc_poisonzombie" then
 		if ent.VariantType == 1 then
 			local ent2 = ents.Create("npc_headcrab_poison")

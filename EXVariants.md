@@ -23,9 +23,12 @@ Variant 1: Bloodly - 0.7x health and 0.5x damage. Can inflict bleed, which infli
 Variant 2: None
 
 Zombine:
-Variant 1: 2.2x health, 1.3x XP gain
+Variant 1: Tanky - 2.2x health, less damage. 1.3x XP gain
 Variant 2: None
 
+Strider:
+Variant 1: Furious - Always has aggressive behavior.
+Variant 2: Wip - Only color change.
 
 
 

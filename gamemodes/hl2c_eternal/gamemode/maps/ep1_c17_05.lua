@@ -10,11 +10,15 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
+	ply:Give("weapon_crowbar")
 	ply:Give("weapon_physcannon")
 	ply:Give("weapon_pistol")
-	ply:Give("weapon_shotgun")
 	ply:Give("weapon_smg1")
 	ply:Give("weapon_ar2")
+	ply:Give("weapon_shotgun")
+	ply:Give("weapon_crossbow")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_rpg")
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -25,44 +29,14 @@ hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
-	-- local ent = ents.Create("base_ai")
-	-- ent:Spawn()
-
-	-- local ent = ents.Create("ai_goal_follow")
-	-- ent:SetName("refugee_follow_player_1")
-	-- ent:SetKeyValue("goal", "!player")
-	-- ent:SetKeyValue("formation", "0")
-	-- ent:SetKeyValue("actor", "citizen_refugees_1")
-	-- ent:SetKeyValue("searchtype", "0")
-	-- ent:SetKeyValue("startactive", "1")
-	-- ent:Spawn()
-
-	-- local ent = ents.Create("ai_goal_follow")
-	-- ent:SetName("refugee_follow_player_2")
-	-- ent:SetKeyValue("goal", "!player")
-	-- ent:SetKeyValue("formation", "0")
-	-- ent:SetKeyValue("actor", "citizen_refugees_2")
-	-- ent:SetKeyValue("searchtype", "0")
-	-- ent:SetKeyValue("startactive", "1")
-	-- ent:Spawn()
-
-	-- local ent = ents.Create("ai_goal_follow")
-	-- ent:SetName("refugee_follow_player_3")
-	-- ent:SetKeyValue("goal", "!player")
-	-- ent:SetKeyValue("formation", "0")
-	-- ent:SetKeyValue("actor", "citizen_refugees_3")
-	-- ent:SetKeyValue("searchtype", "0")
-	-- ent:SetKeyValue("startactive", "1")
-	-- ent:Spawn()
-
-	-- local ent = ents.Create("ai_goal_follow")
-	-- ent:SetName("refugee_follow_player_4")
-	-- ent:SetKeyValue("goal", "!player")
-	-- ent:SetKeyValue("formation", "0")
-	-- ent:SetKeyValue("actor", "citizen_refugees_4")
-	-- ent:SetKeyValue("searchtype", "0")
-	-- ent:SetKeyValue("startactive", "1")
-	-- ent:Spawn()
+	ents.FindByName("global_newgame_entmaker")[1]:Remove()
+	
+	local alyx = ents.Create("npc_alyx")
+	alyx:SetName("alyx")
+	alyx:SetKeyValue("GameEndAlly", "1")
+	-- alyx:Give("weapon_shotgun") -- this gives duplicate shotgun, so meh
+	alyx:SetPos(Vector(9871, 12492, -632))
+	alyx:Spawn()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 

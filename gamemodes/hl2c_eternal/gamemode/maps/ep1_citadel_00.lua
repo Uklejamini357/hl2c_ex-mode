@@ -1,6 +1,8 @@
 NEXT_MAP = "ep1_citadel_01"
 GM.XP_REWARD_ON_MAP_COMPLETION = 0
 
+RESET_PL_INFO = true
+
 TRIGGER_CHECKPOINT = {
 	{ Vector( -8922, 5856, -144 ), Vector( -9106, 5744, 8 ) },
 	{ Vector( -6720, 5572, -124 ), Vector( -6890, 5512, 0 ) },
