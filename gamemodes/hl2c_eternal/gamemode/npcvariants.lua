@@ -400,23 +400,45 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 		end
 	elseif class == "npc_manhack" then
 	elseif class == "npc_zombie" then
-		if ent.VariantType == 1 then -- Explosive variant of regular zombies that explodes upon its' death (Explosions can be chained)
-			ent.ent_Color = Color(255,128,128)
-			ent.ent_MaxHealthMul = 0.6
-			ent.ent_HealthMul = 0.6
+		if ent.VariantType == 1 then -- Volatile variant - Violently explodes on death!
+			ent.ent_Color = Color(254,54,54)
+			ent.ent_MaxHealthMul = 1.4
+			ent.ent_HealthMul = 1.4
+			ent.XPGainMult = 1.3
+		elseif ent.VariantType == 2 then -- Undying variant - 95% chance to revive, with higher hp.
+			ent.ent_Color = Color(163,121,236)
+			ent.ent_MaxHealthMul = 0.9
+			ent.ent_HealthMul = 0.9
+		elseif ent.VariantType == 3 then -- Deathful variant - On death drops a vial that poisons the player with 80% of player's health (or minimum 10 damage) if picked up!
+			ent.ent_Color = Color(33,254,44)
+			ent.ent_MaxHealthMul = 1.2
+			ent.ent_HealthMul = 1.2
+
+			ent.XPGainMult = 1.2
 		end
-	elseif class == "npc_fastzombie" then -- 6.66x animation speed
+	elseif class == "npc_fastzombie" then -- 6.66x animation speed (hmm...)
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
 			ent.ent_MaxHealthMul = 0.7
 			ent.ent_HealthMul = 0.7
 		end
-	elseif class == "npc_zombine" then -- Tanky Zombine variant (Deals less damage but has much more health) Still very vulnerable to fire
+	elseif class == "npc_zombine" then -- Suicider - Spams pulling out grenade if it has less than 50% hp. If it manages to kill itself, explode violently with 250 radius (WHAT?!?!?)
 		if ent.VariantType == 1 then
-			ent.ent_Color = Color(255,128,255)
-			ent.ent_MaxHealthMul = 2.2
-			ent.ent_HealthMul = 2.2
+			ent.ent_Color = Color(161,89,228)
+			ent.ent_MaxHealthMul = 1.8
+			ent.ent_HealthMul = 1.8
 			ent.XPGainMult = 1.3
+		elseif ent.VariantType == 2 then -- Infested - Spawns 8 headcrabs if it dies! (Are you kidding me...)
+			ent.ent_Color = Color(247,35,35)
+			ent.ent_MaxHealthMul = 1.1
+			ent.ent_HealthMul = 1.1
+			ent.XPGainMult = 1
+		elseif ent.VariantType == 3 then -- Lethal - If it sprints, game over. (yes.)
+			ent.ent_Color = Color(57,192,216)
+			ent.ent_MaxHealthMul = 1.1
+			ent.ent_HealthMul = 1.1
+			ent.XPGainMult = 1.25
+			ent.DifficultyGainMult = 1.1
 		end
 	elseif class == "npc_antlionguard" then -- Healer Antlion Guard that slowly heals nearby antlions! (But is rarer!)
 		ent.VariantType = math.random(1,5) --make antlion guard variant less common
@@ -463,8 +485,8 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 	if ent:GetClass() == "npc_zombie" then
 		if ent.VariantType == 1 then
 			local ent2 = ents.Create("env_explosion")
-			ent2:SetOwner(attacker)
-			ent2:SetKeyValue("iMagnitude", 45)
+			ent2:SetOwner(ent)
+			ent2:SetKeyValue("iMagnitude", 150)
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 30))
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
@@ -496,6 +518,27 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:SetAngles(ent:GetAngles())
 			ent2:Spawn()
 			OnSpawnNewEnt(ent, ent2)
+		end
+	elseif ent:GetClass() == "npc_zombine" then
+		if ent.VariantType == 1 and ent == attacker then
+			local ent2 = ents.Create("env_explosion")
+			ent2:SetOwner(ent)
+			ent2:SetKeyValue("iMagnitude", 150)
+			ent2:SetKeyValue("iRadiusOverride", 250)
+			ent2:SetPos(ent:GetPos() + Vector(0, 0, 30))
+			ent2:SetAngles(ent:GetAngles())
+			ent2:Spawn()
+			ent2:Fire("explode")
+		elseif ent.VariantType == 2 then
+			local ang = ent:GetAngles()
+			for i=0,7 do
+				local ent2 = ents.Create("npc_headcrab")
+				ent2:SetPos(ent:GetPos() + ((ang + Angle(0, i*45, 0)):Forward()*48 + Vector(0, 0, 8)))
+				ent2:SetAngles(ang)
+				ent2:Spawn()
+				ent2:Fire("explode")
+				OnSpawnNewEnt(ent, ent2)
+			end
 		end
 	elseif ent:GetClass() == "npc_combine_s" then
 		if ent.VariantType == 1 then
@@ -668,6 +711,17 @@ hook.Add("EntityTakeDamage", "HL2cHyperEX_NPCVariantTakeDamage", HL2cHyperEX_NPC
 local function HL2cHyperEX_NPCVariantThink(ent, class)
 	if class == "npc_fastzombie" then
 		ent:SetPlaybackRate(6.66)
+	elseif class == "npc_zombie" then
+		if ent.VariantType == 3 then
+			ent:SetColor(HSVToColor(((CurTime() - ent.spawnTime)*200) % 360, 1, 1))
+		end
+	elseif class == "npc_zombine" then
+		if ent.VariantType == 1 and ent:Health() < ent:GetMaxHealth()/2 and (not ent.NextGrenadePull or ent.NextGrenadePull<CurTime()) then
+			ent:Input("PullGrenade")
+			ent.NextGrenadePull = CurTime() + 1.2
+		elseif ent.VariantType == 3 then
+			ent:SetPlaybackRate(6.96)
+		end
 	elseif class == "npc_strider" then
 		if ent.VariantType == 1 then
 			local enemy = ent:GetEnemy()

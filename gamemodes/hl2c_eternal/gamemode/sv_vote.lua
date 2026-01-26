@@ -52,7 +52,7 @@ function VoteComplete()
 
 	PrintMessage(3, "Restarting...")
 
-	gamemode.Call("RestartMap", 0)
+	gamemode.Call("RestartMap", 0.01)
 end
 
 hook.Add("PlayerSay", "hl2ce_RestartMapVote", function(ply, text)

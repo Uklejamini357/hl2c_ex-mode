@@ -246,6 +246,7 @@ function GM:OnEntityCreated(ent)
 		-- ent:EnableCustomCollisions(true)
 	end
 
+	ent.spawnTime = CurTime()
 	if ent:IsNPC() then
 		ent.PlyAttackers = {}
 	end
