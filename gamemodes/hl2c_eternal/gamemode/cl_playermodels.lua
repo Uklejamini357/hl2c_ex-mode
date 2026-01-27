@@ -30,10 +30,8 @@ function GM:OpenPlayerModelMenu()
 
 	-- Window frame closed
 	function window:OnClose()
-	
-		net.Start( "UpdatePlayerModel" )
+		net.Start("hl2ce_updateplrmodel")
 		net.SendToServer()
-	
 	end
 
 	-- Model panel

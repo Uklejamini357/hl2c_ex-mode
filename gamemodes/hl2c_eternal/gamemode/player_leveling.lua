@@ -59,7 +59,7 @@ function meta:GiveXP(xp, nomul)
         self:GainLevel()
     end
 
-    net.Start("XPGain")
+    net.Start("hl2ce_xpgain")
     net.WriteInfNumber(xpgain)
     net.Send(self)
     GAMEMODE:NetworkString_UpdateStats(self)

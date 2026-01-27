@@ -14,7 +14,7 @@ net.Receive("hl2c_updatestats", function(length)
     ply.CelestialityPoints = net.ReadInfNumber()
 end)
 
-net.Receive("UpdateSkills", function(length)
+net.Receive("hl2ce_skills", function(length)
     local ply = LocalPlayer()
     if !ply:IsValid() then return end
 
@@ -38,7 +38,7 @@ XPGained = InfNumber(0)
 XPGainedTotal = InfNumber(0)
 XPColor = 0
 
-net.Receive("XPGain", function(length)
+net.Receive("hl2ce_xpgain", function(length)
 	local xp = net.ReadInfNumber()
 
 	XPGained = xp

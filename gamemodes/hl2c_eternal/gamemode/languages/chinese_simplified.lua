@@ -60,6 +60,7 @@ LANG.cant_spawn_vehicle = "You may not spawn a vehicle at this time."
 LANG.cant_spawn_vehicle_cooldown = "You've already spawned a vehicle! Try again in %d seconds!"
 LANG.cant_spawn_vehicle_nearby_plrs = "There are players around you! Find an open space to spawn your vehicle."
 LANG.cant_spawn_vehicle_no_space = "Insufficient space for spawning in a vehicle!"
+LANG.cant_spawn_vehicle_airborne = "You can't spawn a vehicle while airborne!"
 LANG.cant_remove_vehicle = "You may not remove your vehicle at this time."
 
 -- Gamemode, and Maps

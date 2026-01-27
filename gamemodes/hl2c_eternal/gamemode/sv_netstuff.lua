@@ -19,7 +19,7 @@ end
 
 function GM:NetworkString_UpdateSkills(ply)
     if ply:IsBot() then return end
-    net.Start("UpdateSkills")
+    net.Start("hl2ce_skills")
     net.WriteTable(ply.Skills)
     net.Send(ply)
 end
@@ -47,7 +47,7 @@ net.Receive("hl2c_updatestats", function(length, ply)
     end 
 end)
 
-net.Receive("UpgradePerk", function(length, ply)
+net.Receive("hl2ce_upgperk", function(length, ply)
 	local perk = net.ReadString()
     local count = net.ReadUInt(32)
     local sks = ply.Skills
@@ -59,19 +59,19 @@ net.Receive("UpgradePerk", function(length, ply)
     count = infmath.ConvertInfNumberToNormalNumber(infmath.min(limit - sks[perk], curpoints))
 
     if infmath.ConvertInfNumberToNormalNumber(ply.StatPoints) < 1 then
-        ply:PrintMessage(HUD_PRINTTALK, "You need Skill Points to upgrade this skill!")
+        ply:PrintTranslatedMessage(HUD_PRINTTALK, "need_sp_skill")
 		return false
 	end
 
     if tonumber(sks[perk]) >= limit then
-        ply:PrintMessage(HUD_PRINTTALK, "You have reached the max amount of points for this skill!")
+        ply:PrintTranslatedMessage(HUD_PRINTTALK, "skill_max_reached")
 		return false
 	end
 
     local old = sks[perk]
 	sks[perk] = old + count
 	ply.StatPoints = ply.StatPoints - count
-    ply:PrintMessage(HUD_PRINTTALK, Format("Increased %s by %d point(s)!", perk, count))
+    ply:PrintTranslatedMessage(HUD_PRINTTALK, "skill_increased_lvl", perk, count)
 
     if skill.OnApply then
         skill.OnApply(ply, old, sks[perk])
@@ -97,17 +97,17 @@ net.Receive("hl2ce_unlockperk", function(len, ply)
     local plyprestige = infmath.ConvertInfNumberToNormalNumber(ply[prestigetypepoints])
 
     if infmath.ConvertInfNumberToNormalNumber(ply[prestigetype]) < prestigereq then
-        ply:PrintMessage(3, "Not enough "..prestigetype)
+        ply:PrintTranslatedMessage(3, "perk_noprestige")
         return
     end
 
     if plyprestige < cost then
-        ply:PrintMessage(3, "Not enough "..prestigetype.." Points!")
+        ply:PrintTranslatedMessage(3, "perk_noprestige_points", prestigetype)
         return
     end
     ply[prestigetypepoints] = plyprestige - cost
 
-    ply:PrintMessage(3, "Perk Unlocked: "..perk.Name)
+    ply:PrintTranslatedMessage(3, "perk_unlocked", perk.Name)
     ply.UnlockedPerks[name] = true
     
 
@@ -160,7 +160,7 @@ net.Receive("hl2ce_buyupgrade", function(len, ply)
     end
 
     if old != ply.EternityUpgradeValues[upg] then
-        PrintMessage(3, "Increased "..old.." -> "..ply.EternityUpgradeValues[upg])
+        ply:PrintTranslatedMessage(3, "eupg_increased", old, ply.EternityUpgradeValues[upg])
     end
 
     GAMEMODE:NetworkString_UpdateEternityUpgrades(ply)

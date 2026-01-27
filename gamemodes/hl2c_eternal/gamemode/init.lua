@@ -13,6 +13,7 @@ AddCSLuaFile("cl_perksmenu.lua")
 AddCSLuaFile("cl_prestige.lua")
 AddCSLuaFile("cl_config.lua")
 AddCSLuaFile("cl_upgradesmenu.lua")
+AddCSLuaFile("cl_admin.lua")
 
 AddCSLuaFile("sh_cvars.lua")
 AddCSLuaFile("sh_config.lua")
@@ -287,12 +288,17 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	local eff_difficulty = ent:IsPlayer() and self:GetEffectiveDifficulty(ent) or attacker:IsPlayer() and self:GetEffectiveDifficulty(attacker) or difficulty
 
 	-- Godlike NPCs take no damage ever
-	if IsValid(ent) and table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
+	if table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
 		return true
 	end
 
 	-- NPCs cannot be damaged by friends
-	if (IsValid(ent) and ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
+	if (ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
+		return true
+	end
+
+	-- invulnerable npc's :)
+	if ent.dontDIE then
 		return true
 	end
 
@@ -509,7 +515,7 @@ function GM:GrabAndSwitch(instant)
 
 
 		if faststart then
-			PrintMessage(3, "Ah shit, here we go again.")
+			PrintTranslatedMessage(3, "hardcore_again_01")
 
 			timer.Simple(0.7, function()
 				for _,pl in player.Iterator() do
@@ -526,7 +532,7 @@ function GM:GrabAndSwitch(instant)
 						end
 					end
 
-					pl:PrintMessage(3, "This is your "..run..suffix.." run.")
+					pl:PrintTranslatedMessage(3, "hardcore_run", run..suffix)
 				end
 			end)
 
@@ -535,9 +541,9 @@ function GM:GrabAndSwitch(instant)
 			end)
 
 		else
-			PrintMessage(3, "Hi.")
+			PrintTranslatedMessage(3, "hardcore_intro1")
 			timer.Simple(1.5, function()
-				PrintMessage(3, "Welcome to hardcore mode.")
+				PrintTranslatedMessage(3, "hardcore_intro2")
 			end)
 			timer.Simple(4, function()
 				for _,pl in player.Iterator() do
@@ -554,17 +560,17 @@ function GM:GrabAndSwitch(instant)
 						end
 					end
 
-					pl:PrintMessage(3, "This is your "..run..suffix.." run.")
+					pl:PrintTranslatedMessage(3, "hardcore_run", run..suffix)
 				end
 			end)
 			timer.Simple(6.9, function()
-				PrintMessage(3, "Past this point you may not respawn anymore.")
+				PrintTranslatedMessage(3, "hardcore_intro3")
 			end)
 			timer.Simple(9.6, function()
-				PrintMessage(3, "If all players die, the run is over!")
+				PrintTranslatedMessage(3, "hardcore_intro4")
 			end)
 			timer.Simple(12.8, function()
-				PrintMessage(3, "Good luck!")
+				PrintTranslatedMessage(3, "hardcore_intro5")
 			end)
 		
 			timer.Simple(15, function()
@@ -628,15 +634,12 @@ function GM:Initialize()
 	-- Network strings
 	util.AddNetworkString("SetCheckpointPosition")
 	util.AddNetworkString("NextMap")
-	util.AddNetworkString("PlayerInitialSpawn")
 	util.AddNetworkString("RestartMap")
-	util.AddNetworkString("ShowHelp")
-	util.AddNetworkString("ShowTeam")
-	util.AddNetworkString("UpdatePlayerModel")
+	util.AddNetworkString("hl2ce_updateplrmodel")
 	
-	util.AddNetworkString("XPGain")
-	util.AddNetworkString("UpdateSkills")
-	util.AddNetworkString("UpgradePerk")
+	util.AddNetworkString("hl2ce_xpgain")
+	util.AddNetworkString("hl2ce_skills")
+	util.AddNetworkString("hl2ce_upgperk")
 
 	util.AddNetworkString("hl2c_playerready")
 	util.AddNetworkString("hl2ce_prestige")
@@ -761,7 +764,7 @@ function GM:PlayerCompletedMap(ply)
 
 	if infmath.ConvertInfNumberToNormalNumber(txp) > 0 then
 		ply:GiveXP(txp, true)
-		ply:PrintMessage(HUD_PRINTTALK, Format("You were given additional %s XP for completing this map.", tostring(txp)))
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "gained_add_xp", tostring(txp))
 	end
 
 	-- Moneys
@@ -770,7 +773,7 @@ function GM:PlayerCompletedMap(ply)
 	if infmath.ConvertInfNumberToNormalNumber(gain) > 0 then
 		ply.MoneysGain = 0
 		ply.Moneys = ply.Moneys + gain
-		ply:PrintMessage(3, "You have gained +"..tostring(gain).." moneys")
+		ply:PrintTranslatedMessage(3, "gained_moneys", tostring(gain))
 	end
 
 	if ply.MapStats then -- Map stats display after completing the map (Not yet.)
@@ -787,11 +790,11 @@ function GM:PlayerCompletedCampaign(ply)
 	local map = game.GetMap()
 	local gamename = "[INVALID]"
 	if map == "d3_breen_01" then
-		gamename = "Half-Life 2"
+		gamename = translate.ClientGet(ply, "game_hl2")
 	elseif map == "ep1_c17_06" then
-		gamename = "Half-Life 2: Episode One"
+		gamename = translate.ClientGet(ply, "game_hl2ep1")
 	elseif map == "ep2_outland_12a" then
-		gamename = "Half-Life 2: Episode Two"
+		gamename = translate.ClientGet(ply, "game_hl2ep2")
 	end
 
 	local xp = 1 + (2+math.max(0, math.log10(ply:Frags()))*0.2)
@@ -799,8 +802,8 @@ function GM:PlayerCompletedCampaign(ply)
 		xp = xp * ply.MapStats.GainedXP*0.15
 	end
 
-	ply:PrintMessage(3, Format("Congratulations - you have completed %s", gamename))
-	ply:PrintMessage(3, Format("You were awarded %s XP", ply:GiveXP(xp)))
+	ply:PrintTranslatedMessage(3, "game_completed", gamename)
+	ply:PrintTranslatedMessage(3, "game_completed_xp", ply:GiveXP(xp))
 end
 
 function GM:HardcoreSaveAlivePlayers()
@@ -814,10 +817,10 @@ end
 
 function GM:OnHardcoreEnabled(state)
 	if state then
-		PrintMessage(3, "Hardcore mode enabled. Good luck...")
+		PrintTranslatedMessage(3, "hardcore_on")
 		self:HardcoreSaveAlivePlayers()
 	else
-		PrintMessage(3, "Hardcore mode disabled.")
+		PrintTranslatedMessage(3, "hardcore_off")
 		self.HardcoreAlivePlayers = {}
 	end
 end
@@ -951,7 +954,7 @@ function GM:NextMap(instant)
 end
 concommand.Add("hl2ce_next_map", function(ply)
 	if ply:IsValid() and !ply:IsAdmin() then
-		ply:PrintMessage(HUD_PRINTTALK, "You are not admin!")
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_admin")
 		return
 	end
 
@@ -973,11 +976,11 @@ concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
 		print(ply:Nick().." used respawn command!")
 	else
 		if !ply:IsAdmin() then
-			ply:PrintMessage(HUD_PRINTTALK, "You are not admin!")
+			ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_admin")
 		elseif ply:Alive() || !table.HasValue(deadPlayers, ply:SteamID()) then
-			ply:PrintMessage(HUD_PRINTTALK, "You are not dead!")
+			ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_dead")
 		elseif changingLevel then
-			ply:PrintMessage(HUD_PRINTTALK, "Map is currenlty being changed, you can't respawn at this time!")
+			ply:PrintTranslatedMessage(HUD_PRINTTALK, "mapchange_cantrespawn")
 		end
 	end
 end)
@@ -1328,7 +1331,7 @@ function GM:PlayerInitialSpawn(ply)
 	
 	-- If the player died before, kill them again
 	if table.HasValue(deadPlayers, ply:SteamID()) and !self:CanPlayerRespawn(ply) then
-		ply:PrintMessage(HUD_PRINTTALK, "You cannot respawn now. Sorry!")
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_respawn")
 		ply.deathPos = ply:EyePos()
 	
 		ply:RemoveVehicle()
@@ -1461,10 +1464,6 @@ function GM:PlayerSpawnReady(ply)
 end
 
 function GM:PlayerReady(ply)
-	-- Send initial player spawn to client
-	net.Start("PlayerInitialSpawn")
-	net.WriteBool(self.CustomPMs)
-	net.Send(ply)
 end
 
 function GM:ReachedCheckpoint(ply) -- ply is activator, not working yet
@@ -1534,7 +1533,7 @@ function GM:PlayerNoClip(ply)
 		return false
 	end
 
-	return ply:IsAdmin() && self.AdminNoclip
+	return ply:IsAdmin() and self.AdminNoclip
 end
 
 
@@ -1789,47 +1788,56 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 end
 
 
+local sk_npc_head = GetConVar("sk_npc_head")
+local sk_npc_chest = GetConVar("sk_npc_chest")
+local sk_npc_stomach = GetConVar("sk_npc_stomach")
+local sk_npc_arm = GetConVar("sk_npc_arm")
+local sk_npc_leg = GetConVar("sk_npc_leg")
 -- Called every time a player does damage to an npc
-function GM:ScaleNPCDamage(npc, hitGroup, dmgInfo)
-	local attacker = dmgInfo:GetAttacker()
+function GM:ScaleNPCDamage(npc, hitGroup, dmginfo)
+	local hitGroupScale = 1
 	-- Where are we hitting?
-	if (hitGroup == HITGROUP_HEAD) then
-		hitGroupScale = GetConVarNumber("sk_npc_head")
-	elseif (hitGroup == HITGROUP_CHEST) then
-		hitGroupScale = GetConVarNumber("sk_npc_chest")
-	elseif (hitGroup == HITGROUP_STOMACH) then
-		hitGroupScale = GetConVarNumber("sk_npc_stomach")
-	elseif ((hitGroup == HITGROUP_LEFTARM) || (hitGroup == HITGROUP_RIGHTARM)) then
-		hitGroupScale = GetConVarNumber("sk_npc_arm")
-	elseif ((hitGroup == HITGROUP_LEFTLEG) || (hitGroup == HITGROUP_RIGHTLEG)) then
-		hitGroupScale = GetConVarNumber("sk_npc_leg")
-	else
-		hitGroupScale = 1
+	if hitGroup == HITGROUP_HEAD then
+		hitGroupScale = sk_npc_head:GetFloat()
+	elseif hitGroup == HITGROUP_CHEST then
+		hitGroupScale = sk_npc_chest:GetFloat()
+	elseif hitGroup == HITGROUP_STOMACH then
+		hitGroupScale = sk_npc_stomach:GetFloat()
+	elseif hitGroup == HITGROUP_LEFTARM or hitGroup == HITGROUP_RIGHTARM then
+		hitGroupScale = sk_npc_arm:GetFloat()
+	elseif hitGroup == HITGROUP_LEFTLEG or hitGroup == HITGROUP_RIGHTLEG then
+		hitGroupScale = sk_npc_leg:GetFloat()
 	end
 
 	-- Calculate the damage
+	dmginfo:ScaleDamage(hitGroupScale)
 end
 
 
--- Scale the damage based on being shot in a hitbox 
-function GM:ScalePlayerDamage(ply, hitGroup, dmgInfo)
+-- Scale the damage based on being shot in a hitbox
+local sk_player_head = GetConVar("sk_player_head")
+local sk_player_chest = GetConVar("sk_player_chest")
+local sk_player_stomach = GetConVar("sk_player_stomach")
+local sk_player_arm = GetConVar("sk_player_arm")
+local sk_player_leg = GetConVar("sk_player_leg")
+function GM:ScalePlayerDamage(ply, hitGroup, dmginfo)
+	local hitGroupScale = 1
 
 	-- Where are we even hitting?
-	if (hitGroup == HITGROUP_HEAD) then
-		hitGroupScale = GetConVarNumber("sk_player_head")
-	elseif (hitGroup == HITGROUP_CHEST) then
-		hitGroupScale = GetConVarNumber("sk_player_chest")
-	elseif (hitGroup == HITGROUP_STOMACH) then
-		hitGroupScale = GetConVarNumber("sk_player_stomach")
-	elseif ((hitGroup == HITGROUP_LEFTARM) || (hitGroup == HITGROUP_RIGHTARM)) then
-		hitGroupScale = GetConVarNumber("sk_player_arm")
-	elseif ((hitGroup == HITGROUP_LEFTLEG) || (hitGroup == HITGROUP_RIGHTLEG)) then
-		hitGroupScale = GetConVarNumber("sk_player_leg")
-	else
-		hitGroupScale = 1
+	if hitGroup == HITGROUP_HEAD then
+		hitGroupScale = sk_player_head:GetFloat()
+	elseif hitGroup == HITGROUP_CHEST then
+		hitGroupScale = sk_player_chest:GetFloat()
+	elseif hitGroup == HITGROUP_STOMACH then
+		hitGroupScale = sk_player_stomach:GetFloat()
+	elseif hitGroup == HITGROUP_LEFTARM or hitGroup == HITGROUP_RIGHTARM then
+		hitGroupScale = sk_player_arm:GetFloat()
+	elseif hitGroup == HITGROUP_LEFTLEG or hitGroup == HITGROUP_RIGHTLEG then
+		hitGroupScale = sk_player_leg:GetFloat()
 	end
 
 	-- Calculate the damage
+	dmginfo:ScaleDamage(hitGroupScale)
 end 
 
 
@@ -1861,6 +1869,11 @@ function GM:ShowSpare1(ply)
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle_nearby_plrs")
 			return
 		end
+	end
+
+	if !ply:IsOnGround() then
+		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle_airborne")
+		return
 	end
 
 	-- Spawn the vehicle
@@ -2059,7 +2072,7 @@ local function UpdatePlayerModel(len, ply)
 		hook.Run("PlayerSetModel", ply)
 	end
 end
-net.Receive("UpdatePlayerModel", UpdatePlayerModel)
+net.Receive("hl2ce_updateplrmodel", UpdatePlayerModel)
 
 net.Receive("hl2c_playerready", function(len, ply)
 	if ply.PlayerReady then return end
@@ -2275,3 +2288,11 @@ hook.Add("player_disconnect", "ConnectionTableRemove", function(data)
 end)
 ]]
 
+concommand.Add("debug_gettracehitpos", function(pl)
+	if !IsValid(pl) then return end
+	local pos = pl:GetEyeTrace().HitPos
+	pos.x = math.Round(pos.x)
+	pos.y = math.Round(pos.y)
+	pos.z = math.Round(pos.z)
+	pl:PrintMessage(2, Format("Vector(%d, %d, %d)", pos.x, pos.y, pos.z))
+end)

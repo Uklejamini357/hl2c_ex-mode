@@ -11,6 +11,7 @@ include("cl_perksmenu.lua")
 include("cl_prestige.lua")
 include("cl_config.lua")
 include("cl_upgradesmenu.lua")
+include("cl_admin.lua")
 
 local translate_Get = translate.Get
 local translate_Format = translate.Format
@@ -404,10 +405,14 @@ end
 function GM:InitPostEntity()
 	local ply = LocalPlayer()
 
+	if !file.Exists(self.VaultFolder.."/client/shown_help.txt", "DATA") then
+		ShowHelp()
+		file.Write(self.VaultFolder.."/client/shown_help.txt", "You've viewed the help menu in Half-Life 2 Campaign.")
+	end
 
-	self:PlayerReady()
 	net.Start("hl2c_playerready")
 	net.SendToServer()
+	self:PlayerReady()
 end
 
 function GM:PlayerReady()
@@ -417,24 +422,18 @@ function GM:PlayerReady()
 	ply.Level = InfNumber(0)
 	ply.StatPoints = InfNumber(0)
 	ply.Prestige = InfNumber(0)
-	ply.PrestigePoints = InfNumber(0, 0)
+	ply.PrestigePoints = InfNumber(0)
 	ply.Eternities = InfNumber(0)
-	ply.EternityPoints = InfNumber(0, 0)
+	ply.EternityPoints = InfNumber(0)
 
 	-- Endless
 	ply.Celestiality = InfNumber(0)
 	ply.CelestialityPoints = InfNumber(0)
 	ply.Rebirths = InfNumber(0)
 	ply.RebirthPoints = InfNumber(0)
-	ply.Ascensions = InfNumber(0)
-	ply.AscensionPoints = InfNumber(0)
-
-	-- True Endless
-	ply.MythiLegendaries = InfNumber(0)
-	ply.MythiLegendaryPoints = InfNumber(0)
 
 
-	ply.Moneys = InfNumber(0, 0)
+	ply.Moneys = InfNumber(0)
 	ply.Skills = {}
 
 
@@ -469,7 +468,11 @@ function GM:PlayerBindPress(ply, bind, down)
 	if bind == "gm_showhelp" then
 		ShowHelp()
 	elseif bind == "gm_showteam" then
-		ShowTeam()
+		if ply:IsAdmin() and input.IsKeyDown(KEY_R) then
+			self:OpenAdminMenu()
+		else
+			ShowTeam()
+		end
 	end
 
 	return false
@@ -479,14 +482,14 @@ end
 -- Called when a player sends a chat message
 function GM:OnPlayerChat( ply, text, team, dead )
 	local tab = {}
-	if ( dead || ( IsValid( ply ) && ( ply:Team() == TEAM_DEAD ) ) ) then
+	if dead or (IsValid(ply) and ply:Team() == TEAM_DEAD) then
 		table.insert(tab, Color(191, 30, 40))
-		table.insert(tab, "*Dead* ")
+		table.insert(tab, "*"..translate.Get("dead").."* ")
 	end
 
-	if ( team ) then
+	if team then
 		table.insert(tab, Color(30, 160, 40))
-		table.insert(tab, "(TEAM) ")
+		table.insert(tab, "("..translate.Get("team")..") ")
 	end
 
 /*
@@ -500,43 +503,27 @@ function GM:OnPlayerChat( ply, text, team, dead )
 	end
 */
 
-	if ( IsValid( ply ) ) then
-		table.insert( tab, ply )
+	if IsValid(ply) then
+		table.insert(tab, ply)
 	else
-		table.insert( tab, "Console" )
+		table.insert(tab, "Console")
 	end
 
-	table.insert( tab, Color( 255, 255, 255 ) )
-	table.insert( tab, ": "..text )
+	table.insert(tab, Color(255, 255, 255))
+	table.insert(tab, ": "..text)
 
-	chat.AddText( unpack( tab ) )
+	chat.AddText(unpack(tab))
 	return true
 end
 
 
 -- Called when going to the next map
-function NextMap( len )
+function NextMap(len)
 
 	nextMapCountdownStart = net.ReadFloat()
 
 end
-net.Receive( "NextMap", NextMap )
-
-
--- Called when player spawns for the first time
-function PlayerInitialSpawn( len )
-
-	-- Shows the help menu
-	if !file.Exists( GAMEMODE.VaultFolder.."/client/shown_help.txt", "DATA") then
-		ShowHelp(0)
-		file.Write(GAMEMODE.VaultFolder.."/client/shown_help.txt", "You've viewed the help menu in Half-Life 2 Campaign.")
-	end
-
-	-- Enable or disable the custom playermodel menu
-	-- CUSTOM_PLAYERMODEL_MENU_ENABLED = net.ReadBool()
-
-end
-net.Receive("PlayerInitialSpawn", PlayerInitialSpawn)
+net.Receive("NextMap", NextMap)
 
 
 -- Called when restarting maps
@@ -851,7 +838,7 @@ function GM:ShowSkills()
 			Button:SetText(translate_Format("inc_sk", name, 1))
 			Button:SetToolTip(formatted)
 			Button.DoClick = function(Button)
-				net.Start("UpgradePerk")
+				net.Start("hl2ce_upgperk")
 				net.WriteString(k)
 				net.WriteUInt(input.IsShiftDown() and 1e6 or 1, 32)
 				net.SendToServer()
@@ -859,7 +846,7 @@ function GM:ShowSkills()
 			Button.DoDoubleClick = Button.DoClick
 			Button.DoRightClick = function()
 				Derma_StringRequest("Enter desired SP to apply on a skill", "", 1, function(str)
-					net.Start("UpgradePerk")
+					net.Start("hl2ce_upgperk")
 					net.WriteString(k)
 					net.WriteUInt(input.IsShiftDown() and 1e6 or 1, 32)
 					net.SendToServer()
@@ -939,7 +926,7 @@ function SetCheckpointPosition( len )
 	checkpointPosition = net.ReadVector()
 
 end
-net.Receive( "SetCheckpointPosition", SetCheckpointPosition )
+net.Receive("SetCheckpointPosition", SetCheckpointPosition )
 
 
 local function SpawnMenuOpen(self)
