@@ -1,4 +1,32 @@
+-- Network strings
+util.AddNetworkString("SetCheckpointPosition")
+util.AddNetworkString("NextMap")
+util.AddNetworkString("RestartMap")
+util.AddNetworkString("hl2ce_updateplrmodel")
 
+util.AddNetworkString("hl2ce_xpgain")
+util.AddNetworkString("hl2ce_skills")
+util.AddNetworkString("hl2ce_upgperk")
+
+util.AddNetworkString("hl2c_playerready")
+util.AddNetworkString("hl2ce_prestige")
+util.AddNetworkString("hl2ce_firstprestige")
+util.AddNetworkString("hl2ce_unlockperk")
+util.AddNetworkString("hl2c_updatestats")
+util.AddNetworkString("hl2ce_updateperks")
+util.AddNetworkString("hl2ce_buyupgrade")
+util.AddNetworkString("hl2ce_updateeternityupgrades")
+util.AddNetworkString("hl2ce_finishedmap")
+util.AddNetworkString("hl2ce_boss")
+util.AddNetworkString("hl2ce_music")
+util.AddNetworkString("hl2ce_fail")
+util.AddNetworkString("hl2ce_map_event")
+util.AddNetworkString("hl2ce_playerkilled")
+util.AddNetworkString("hl2ce_playertimer")
+
+util.AddNetworkString("hl2ce_admin_teleport")
+util.AddNetworkString("hl2ce_admin_changemap")
+util.AddNetworkString("hl2ce_admin_completemaptest")
 
 
 function GM:NetworkString_UpdateStats(ply)
@@ -165,4 +193,89 @@ net.Receive("hl2ce_buyupgrade", function(len, ply)
 
     GAMEMODE:NetworkString_UpdateEternityUpgrades(ply)
 	
+end)
+
+net.Receive("hl2ce_admin_teleport", function(len, ply)
+    if !ply:IsAdmin() then return end
+    
+    local str = net.ReadString()
+
+    if str == "spawn" then
+        if INFO_PLAYER_SPAWN then
+            if !INFO_PLAYER_SPAWN[1] then return end
+
+            local pos = INFO_PLAYER_SPAWN[1]
+            ply:SetPos(pos)
+            ply:SetEyeAngles(Angle(0, INFO_PLAYER_SPAWN[2], 0))
+        elseif #GAMEMODE.OriginalSpawnPointsPos > 0 then
+            local spawn = table.Random(GAMEMODE.OriginalSpawnPointsPos)
+            if spawn[1] then
+                ply:SetPos(spawn[1])
+            end
+            if spawn[2] then
+                ply:SetEyeAngles(spawn[2])
+            end
+        else
+            local ent = gamemode.Call("PlayerSelectSpawn", ply)
+            if IsValid(ent) then
+                ply:SetPos(ent:GetPos())
+                ply:SetEyeAngles(ent:GetAngles())
+            end
+        end
+    elseif str == "changelevel" then
+        if TRIGGER_DELAYMAPLOAD then
+            local pos = (TRIGGER_DELAYMAPLOAD[1] + TRIGGER_DELAYMAPLOAD[2]) / 2
+            ply:SetPos(pos)
+        else
+            local ent = ents.FindByClass("trigger_delaymapload")[1]
+            if IsValid(ent) then
+                ply:SetPos(ent:GetPos())
+                ply:SetEyeAngles(ent:GetAngles())
+            end
+        end
+    elseif string.sub(str, 1, 10) == "checkpoint" then
+        local num = tonumber(str:sub(12))
+        if !TRIGGER_CHECKPOINT[num] then return end
+
+        local pos = (TRIGGER_CHECKPOINT[num][1] + TRIGGER_CHECKPOINT[num][2]) / 2
+        pos.z = math.min(TRIGGER_CHECKPOINT[num][1].z, TRIGGER_CHECKPOINT[num][2].z)
+        ply:SetPos(pos)
+    end
+end)
+
+net.Receive("hl2ce_admin_changemap", function(len, ply)
+    if !ply:IsAdmin() then return end
+    
+    local str = net.ReadString()
+    local map = net.ReadString() or ""
+
+    for _,tbl in pairs(GAMEMODE.ChaptersList) do
+        if tbl.ID == str then
+            if map ~= "" then
+                if table.HasValue(tbl.Maps, map) then
+                    game.ConsoleCommand(string.format("changelevel %s\n", map))
+                    print(string.format("%s is changed the map to %s (%s)!", ply:Nick(), map, tbl.Name))
+                    PrintMessage(3, string.format("[ALERT] Map is being changed to %s (%s)!", map, tbl.Name))
+                end
+
+                return
+            end
+
+            game.ConsoleCommand(string.format("changelevel %s\n", tbl.Map))
+            print(string.format("%s is changed the map to %s (%s)!", ply:Nick(), tbl.Map, tbl.Name))
+            PrintMessage(3, string.format("[ALERT] Map is being changed to %s (%s)!", tbl.Map, tbl.Name))
+
+            break
+        end
+    end
+end)
+
+net.Receive("hl2ce_admin_completemaptest", function(len, ply)
+    if !ply:IsAdmin() then return end
+
+    local GM = GAMEMODE
+    GM.MapCompleteTest = true
+    gamemode.Call("RestartMap", 0.01)
+    gamemode.Call("CompleteMap", ply)
+    timer.Remove("hl2c_next_map")
 end)

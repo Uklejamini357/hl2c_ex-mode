@@ -1,9 +1,15 @@
-NEXT_MAP = "ep1_citadel_02b"
+NEXT_MAP = "ep2_outland_04"
 
 if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_357")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_shotgun")
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -12,6 +18,11 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 function hl2cMapEdit()
 
 	ents.FindByName("spawnitems_template")[1]:Remove()
+
+	local vort = ents.Create("npc_vortigaunt")
+	vort:SetPos(Vector(-1301, -3885, -903))
+	vort:SetName("vort")
+	vort:Spawn()
 
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)

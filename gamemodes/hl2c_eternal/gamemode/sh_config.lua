@@ -761,6 +761,142 @@ GM.DeathVoicelines = {
 	Monk = "vo/ravenholm/monk_death07.wav"
 }
 
+
+GM.ChaptersList = {}
+local function RegisterChapter(id, name, map)
+	local tbl = {ID = id, Name = name, Map = map, Maps = {}}
+	table.insert(GM.ChaptersList, tbl)
+	table.insert(tbl.Maps, map)
+
+	return tbl
+end
+
+local function RegisterMapChapter(id, map)
+	table.insert(istable(id) and id.Maps or GM.ChaptersList[id].Maps, map)
+
+	return tbl
+end
+
+local ch = RegisterChapter("hl2_c1", "Chapter 1", "d1_trainstation_01")
+RegisterMapChapter(ch, "d1_trainstation_02")
+RegisterMapChapter(ch, "d1_trainstation_03")
+RegisterMapChapter(ch, "d1_trainstation_04")
+
+ch = RegisterChapter("hl2_c2", "Chapter 2", "d1_trainstation_05")
+RegisterMapChapter(ch, "d1_trainstation_06")
+
+ch = RegisterChapter("hl2_c3", "Chapter 3", "d1_canals_01")
+RegisterMapChapter(ch, "d1_canals_01a")
+RegisterMapChapter(ch, "d1_canals_02")
+RegisterMapChapter(ch, "d1_canals_03")
+RegisterMapChapter(ch, "d1_canals_05")
+
+ch = RegisterChapter("hl2_c4", "Chapter 4", "d1_canals_06")
+RegisterMapChapter(ch, "d1_canals_07")
+RegisterMapChapter(ch, "d1_canals_08")
+RegisterMapChapter(ch, "d1_canals_09")
+RegisterMapChapter(ch, "d1_canals_10")
+RegisterMapChapter(ch, "d1_canals_11")
+RegisterMapChapter(ch, "d1_canals_12")
+RegisterMapChapter(ch, "d1_canals_13")
+
+ch = RegisterChapter("hl2_c5", "Chapter 5", "d1_eli_01")
+RegisterMapChapter(ch, "d1_eli_02")
+
+ch = RegisterChapter("hl2_c6", "Chapter 6", "d1_town_01")
+RegisterMapChapter(ch, "d1_town_01a")
+RegisterMapChapter(ch, "d1_town_02")
+RegisterMapChapter(ch, "d1_town_03")
+RegisterMapChapter(ch, "d1_town_02a")
+RegisterMapChapter(ch, "d1_town_04")
+RegisterMapChapter(ch, "d1_town_05")
+
+ch = RegisterChapter("hl2_c7", "Chapter 7", "d2_coast_01")
+RegisterMapChapter(ch, "d2_coast_03")
+RegisterMapChapter(ch, "d2_coast_04")
+RegisterMapChapter(ch, "d2_coast_05")
+RegisterMapChapter(ch, "d2_coast_07")
+RegisterMapChapter(ch, "d2_coast_08")
+
+ch = RegisterChapter("hl2_c8", "Chapter 8", "d2_coast_09")
+RegisterMapChapter(ch, "d2_coast_10")
+RegisterMapChapter(ch, "d2_coast_11")
+RegisterMapChapter(ch, "d2_coast_12")
+RegisterMapChapter(ch, "d2_prison_01")
+
+ch = RegisterChapter("hl2_c9", "Chapter 9", "d2_prison_02")
+RegisterMapChapter(ch, "d2_prison_03")
+RegisterMapChapter(ch, "d2_prison_04")
+RegisterMapChapter(ch, "d2_prison_05")
+
+ch = RegisterChapter("hl2_c9a", "Chapter 9a", "d2_prison_06")
+RegisterMapChapter(ch, "d2_prison_07")
+RegisterMapChapter(ch, "d2_prison_08")
+RegisterMapChapter(ch, "d3_c17_01")
+
+ch = RegisterChapter("hl2_c10", "Chapter 10", "d3_c17_02")
+RegisterMapChapter(ch, "d3_c17_03")
+RegisterMapChapter(ch, "d3_c17_04")
+RegisterMapChapter(ch, "d3_c17_05")
+RegisterMapChapter(ch, "d3_c17_06a")
+RegisterMapChapter(ch, "d3_c17_06b")
+RegisterMapChapter(ch, "d3_c17_07")
+RegisterMapChapter(ch, "d3_c17_08")
+
+ch = RegisterChapter("hl2_c11", "Chapter 11", "d3_c17_09")
+RegisterMapChapter(ch, "d3_c17_10a")
+RegisterMapChapter(ch, "d3_c17_10b")
+RegisterMapChapter(ch, "d3_c17_11")
+RegisterMapChapter(ch, "d3_c17_12")
+RegisterMapChapter(ch, "d3_c17_12b")
+RegisterMapChapter(ch, "d3_c17_13")
+
+ch = RegisterChapter("hl2_c12", "Chapter 12", "d3_citadel_01")
+RegisterMapChapter(ch, "d3_citadel_02")
+RegisterMapChapter(ch, "d3_citadel_03")
+RegisterMapChapter(ch, "d3_citadel_04")
+RegisterMapChapter(ch, "d3_citadel_05")
+
+ch = RegisterChapter("hl2_c13", "Chapter 13", "d3_breen_01")
+
+ch = RegisterChapter("ep1_c1", "[EP1] Chapter 1", "ep1_citadel_00")
+RegisterMapChapter(ch, "ep1_citadel_01")
+RegisterMapChapter(ch, "ep1_citadel_02")
+RegisterMapChapter(ch, "ep1_citadel_02b")
+
+ch = RegisterChapter("ep1_c2", "[EP1] Chapter 2", "ep1_citadel_03")
+RegisterMapChapter(ch, "ep1_citadel_04")
+ch = RegisterChapter("ep1_c3", "[EP1] Chapter 3", "ep1_c17_00")
+RegisterMapChapter(ch, "ep1_c17_00a")
+
+ch = RegisterChapter("ep1_c4", "[EP1] Chapter 4", "ep1_c17_01")
+RegisterMapChapter(ch, "ep1_c17_02")
+RegisterMapChapter(ch, "ep1_c17_02b")
+RegisterMapChapter(ch, "ep1_c17_02a")
+
+ch = RegisterChapter("ep1_c5", "[EP1] Chapter 5", "ep1_c17_05")
+RegisterMapChapter(ch, "ep1_c17_06")
+
+ch = RegisterChapter("ep2_c1", "[EP2] Chapter 1", "ep2_outland_01")
+RegisterMapChapter(ch, "ep2_outland_01a")
+ch = RegisterChapter("ep2_c2", "[EP2] Chapter 2", "ep2_outland_02")
+RegisterMapChapter(ch, "ep2_outland_03")
+RegisterMapChapter(ch, "ep2_outland_04")
+ch = RegisterChapter("ep2_c3", "[EP2] Chapter 3", "ep2_outland_05")
+RegisterMapChapter(ch, "ep2_outland_06")
+RegisterMapChapter(ch, "ep2_outland_06a")
+ch = RegisterChapter("ep2_c4", "[EP2] Chapter 4", "ep2_outland_07")
+RegisterMapChapter(ch, "ep2_outland_08")
+ch = RegisterChapter("ep2_c5", "[EP2] Chapter 5", "ep2_outland_09")
+RegisterMapChapter(ch, "ep2_outland_10")
+RegisterMapChapter(ch, "ep2_outland_10a")
+ch = RegisterChapter("ep2_c6", "[EP2] Chapter 6", "ep2_outland_11")
+RegisterMapChapter(ch, "ep2_outland_11a")
+RegisterMapChapter(ch, "ep2_outland_11b")
+RegisterMapChapter(ch, "ep2_outland_12")
+ch = RegisterChapter("ep2_c7", "[EP2] Chapter 7", "ep2_outland_12a")
+
+
 GM.PlayerConfigurables = {
 	["AutoPrestige"] = {"number", 0, "AutoPrestige", "When to prestige?", 0, function(ply) return 1e6 end}, -- #1 type, #2 default, #3 name, #4 description, #5 min (func), #6 max (func)
 	["ShouldNotifyPrestige"] = {"bool", 0, 1},

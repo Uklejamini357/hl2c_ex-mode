@@ -84,6 +84,7 @@ function GM:MakeOptions()
 	CreateCheck("Draw XP gain text", "hl2ce_cl_drawxpgaintext")
 	CreateCheck("Disable player death sounds", "hl2ce_cl_noplrdeathsound")
 	CreateCheck("Show time spent on map", "hl2ce_cl_showmaptimer")
+	CreateCheck("Don't show lose screen", "hl2ce_cl_noshowlosetext")
 
 	CreateCheck("Disable flashing lights", "hl2ce_cl_noepilepsy")
 

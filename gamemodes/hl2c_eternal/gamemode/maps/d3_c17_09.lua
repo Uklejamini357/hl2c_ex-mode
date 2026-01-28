@@ -23,8 +23,23 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
-
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
+
+function hl2cAcceptInput(ent, input)
+	if GAMEMODE.EXMode then
+		if ent:GetName() == "lcs_medic_greet" and input:lower() == "start" then
+			timer.Simple(2.5, function()
+				if !IsValid(ent) then return end
+				PrintMessage(3, "Chapter 11")
+			end)
+
+			timer.Simple(math.Rand(4.4,5), function()
+				if !IsValid(ent) then return end
+				PrintMessage(3, "The Combine Hell")
+			end)
+		end
+	end
+end
+hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

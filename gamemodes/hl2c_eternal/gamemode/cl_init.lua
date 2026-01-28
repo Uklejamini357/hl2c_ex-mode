@@ -29,6 +29,7 @@ GM.NoEpilepsy = hl2ce_cl_noepilepsy:GetBool()
 cvars.AddChangeCallback("hl2ce_cl_noepilepsy", function(cvar, old, new)
 	GAMEMODE.NoEpilepsy = tobool(new)
 end, "hl2ce_cl_noepilepsy")
+local hl2ce_cl_noshowlosetext = CreateClientConVar("hl2ce_cl_noshowlosetext", 0, true, false, "Don't show the lose screen.", 0, 1)
 
 -- Create data folders
 if !file.IsDir(GM.VaultFolder, "DATA") then file.CreateDir(GM.VaultFolder) end

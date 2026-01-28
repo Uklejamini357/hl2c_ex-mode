@@ -65,7 +65,6 @@ LANG.cant_spawn_vehicle_no_space = "Insufficient space for spawning in a vehicle
 LANG.cant_spawn_vehicle_airborne = "You can't spawn a vehicle while airborne!"
 LANG.cant_remove_vehicle = "You may not remove your vehicle at this time."
 
-LANG.gained_add_xp = "You were given additional %s XP for completing this map."
 LANG.gained_moneys = "You have gained +%s moneys"
 
 LANG.not_admin = "You are not an admin!"
@@ -101,6 +100,7 @@ LANG.x_completed_map = "%s has completed the map. (%s) [%i of %i]"
 LANG.difficulty = "Difficulty:"
 LANG.you_lost = "You lost!"
 LANG.all_players_died = "All players have died!"
+LANG.important_npc_died = "Important character has died!"
 LANG.lose_fzm = "Could not hold off the fast zombies!"
 LANG.zms_released = "ZOMBIES ARE RELEASED\nYOU TOOK TOO LONG!"
 LANG.lose_attempt1 = "The hell was your plan?! killing the antlion guard the easy way?!\nNo! This whole plan caused your team to fail!\nYou should know better!"

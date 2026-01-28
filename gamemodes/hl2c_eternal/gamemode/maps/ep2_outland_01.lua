@@ -23,10 +23,17 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
+function hl2cAcceptInput(ent, input, activator, caller, value)
     if !game.SinglePlayer() and string.lower(input) == "scriptplayerdeath" then -- Can break the sequences, again
         return true
     end
+
+	if !game.SinglePlayer() and ent:GetClass() == "player_speedmod" and string.lower(input) == "modifyspeed" then
+		for _, ply in ipairs(player.GetAll()) do
+			ply:SetLaggedMovementValue(tonumber(value))
+		end
+		return true
+	end
 
 	if !game.SinglePlayer() and ent:GetName() == "relay.alyx.spawn" and input:lower() == "trigger" then
 		for _,ply in ipairs(player.GetLiving()) do
@@ -38,13 +45,6 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		GAMEMODE:CreateSpawnPoint(Vector(888, -194, -46), -30)
 	end
 
-	if !game.SinglePlayer() and ent:GetClass() == "player_speedmod" and string.lower(input) == "modifyspeed" then
-		for _, ply in ipairs(player.GetAll()) do
-			ply:SetLaggedMovementValue(tonumber(value))
-		end
-		return true
-	end
-
 	if ent:GetName() == "command_physcannon" and string.lower(input) == "command" then
 		for _,ply in ipairs(player.GetLiving()) do
 			ply:Give("weapon_physcannon")
@@ -53,6 +53,29 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 
 	if !game.SinglePlayer() and ent:GetName() == "mine_pit_clip_brush" and input:lower() == "enable" then
 		return true
+	end
+
+	if ent:GetName() == "SS_cable_fix_begin" then
+		if input:lower() == "cancelsequence" then
+			local fixent = ents.FindByName("lcs_alyx_monitorsout")[1]
+
+			timer.Simple(5, function()
+				if !IsValid(fixent) then return end
+				fixent:Fire("Resume")
+			end)
+		end
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "relay_elev_fall" and input:lower() == "trigger" then
+		for _,ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+			ply:Give("weapon_crowbar")
+
+			ply:SetPos(Vector(-6286, 3810, -304))
+			ply:SetEyeAngles(Angle(0, -90, 0))
+		end
+
+		GAMEMODE:ReplaceSpawnPoint(Vector(-6094, 3630, -1380), 180)
 	end
 
 	if GAMEMODE.EXMode then

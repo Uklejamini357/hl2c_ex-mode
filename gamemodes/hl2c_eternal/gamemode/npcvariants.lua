@@ -1,6 +1,6 @@
 local function AntlionGuardAURA()
 	for k,ent in pairs(ents.FindByClass("npc_antlionguard")) do
-		if !ent:IsValid() or ent.VariantType != 5 or ent:Health() < 0 then continue end 
+		if !ent:IsValid() or ent.VariantType != 1 or ent:Health() < 0 then continue end 
 		local effectdata = EffectData()
 		ent:SetHealth(math.Clamp(ent:Health() + 3, 0, ent:GetMaxHealth()))
 		if !timer.Exists("NPC_ANTLIONGUARD_AURA_FX") then
@@ -100,14 +100,14 @@ function HL2cEX_NPCVariantSpawn(ent)
 			ent.ent_HealthMul = 2.2
 			ent.XPGainMult = 1.3
 		end
-	elseif ent:GetClass() == "npc_antlionguard" then -- Healer Antlion Guard that slowly heals nearby antlions! (But is rarer!)
+	elseif ent:GetClass() == "npc_antlionguard" then -- Healer Antlion Guard that slowly heals nearby antlions!
 		ent.VariantType = math.random(1,5) --make antlion guard variant less common
-		if ent.VariantType == 5 then
+		if ent.VariantType == 1 then
 			ent.ent_Color = Color(0,255,0)
 			ent.ent_MaxHealthMul = 1.1
 			ent.ent_HealthMul = 1.1
 			ent.XPGainMult = 1.3
-	 else
+	 	else
 			ent.ent_MaxHealthMul = 1.3
 			ent.ent_HealthMul = 1.3
 			ent.XPGainMult = 1.4
@@ -185,7 +185,9 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 			ent2:GetPhysicsObject():SetVelocityInstantaneous((attacker:GetPos() - ent2:GetPos()) * 2)
 		end
 	elseif ent:GetClass() == "npc_sniper" then
-		PrintMessage(3, "WTF YOU KILLED HIM!")
+		if ent.VariantType == 1 then
+			PrintMessage(3, "WTF YOU KILLED HIM!")
+		end
 	elseif ent:GetClass() == "npc_poisonzombie" then
 		if ent.VariantType == 1 then
 			local ent2 = ents.Create("npc_headcrab_poison")
@@ -231,7 +233,7 @@ function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
 		end
 	elseif attackerclass == "npc_sniper" then
 		if attacker.VariantType == 1 then
-			dmginfo:ScaleDamage(215790)
+			dmginfo:ScaleDamage(math.Rand(0, 215790)) -- insane rng moment
 		end
 	elseif attackerclass == "npc_fastzombie" then
 		if attacker.VariantType == 1 then
@@ -441,8 +443,8 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			ent.DifficultyGainMult = 1.1
 		end
 	elseif class == "npc_antlionguard" then -- Healer Antlion Guard that slowly heals nearby antlions! (But is rarer!)
-		ent.VariantType = math.random(1,5) --make antlion guard variant less common
-		if ent.VariantType == 5 then
+		ent.VariantType = math.random(1,2) --make antlion guard variant less common
+		if ent.VariantType == 1 then
 			ent.ent_Color = Color(0,255,0)
 			ent.ent_MaxHealthMul = 1.1
 			ent.ent_HealthMul = 1.1

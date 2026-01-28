@@ -221,7 +221,7 @@ end
 function GM:OnEntityCreated(ent)
 	-- NPC Lag Compensation
 	if self.LagCompensation and ent:IsNPC() and !table.HasValue(NPC_EXCLUDE_LAG_COMPENSATION, ent:GetClass()) then
-		ent:SetLagCompensated(true) -- caused all crowbars and stunsticks to not have swing animation. wow
+		ent:SetLagCompensated(true)
 	end
 
 	-- Vehicle Passenger Seating
@@ -492,6 +492,7 @@ end
 local blah
 -- Called by GoToNextLevel
 function GM:GrabAndSwitch(instant)
+	if self.MapCompleteTest then return end
 	if blah then return end
 	blah = true
 
@@ -611,6 +612,8 @@ function GM:Initialize()
 	nextAreaOpenTime = 0
 	startingWeapons = {}
 
+	self.MapCompleteTest = nil
+
 	self.MapVars = {}
 	if self.MapVarsPersisting == nil then
 		self.MapVarsPersisting = {}
@@ -630,32 +633,6 @@ function GM:Initialize()
 	self.HardcoreAlivePlayers = {}
 	self:LoadCampaignData()
 	self:EnableHardcore(gamemode.Call("ShouldEnableHardcore"))
-
-	-- Network strings
-	util.AddNetworkString("SetCheckpointPosition")
-	util.AddNetworkString("NextMap")
-	util.AddNetworkString("RestartMap")
-	util.AddNetworkString("hl2ce_updateplrmodel")
-	
-	util.AddNetworkString("hl2ce_xpgain")
-	util.AddNetworkString("hl2ce_skills")
-	util.AddNetworkString("hl2ce_upgperk")
-
-	util.AddNetworkString("hl2c_playerready")
-	util.AddNetworkString("hl2ce_prestige")
-	util.AddNetworkString("hl2ce_firstprestige")
-	util.AddNetworkString("hl2ce_unlockperk")
-	util.AddNetworkString("hl2c_updatestats")
-	util.AddNetworkString("hl2ce_updateperks")
-	util.AddNetworkString("hl2ce_buyupgrade")
-	util.AddNetworkString("hl2ce_updateeternityupgrades")
-	util.AddNetworkString("hl2ce_finishedmap")
-	util.AddNetworkString("hl2ce_boss")
-	util.AddNetworkString("hl2ce_music")
-	util.AddNetworkString("hl2ce_fail")
-	util.AddNetworkString("hl2ce_map_event")
-	util.AddNetworkString("hl2ce_playerkilled")
-	util.AddNetworkString("hl2ce_playertimer")
 
 	-- We want regular fall damage and the ai to attack players and stuff
 	game.ConsoleCommand("ai_disabled 0\n")
@@ -764,7 +741,6 @@ function GM:PlayerCompletedMap(ply)
 
 	if infmath.ConvertInfNumberToNormalNumber(txp) > 0 then
 		ply:GiveXP(txp, true)
-		ply:PrintTranslatedMessage(HUD_PRINTTALK, "gained_add_xp", tostring(txp))
 	end
 
 	-- Moneys
@@ -776,9 +752,11 @@ function GM:PlayerCompletedMap(ply)
 		ply:PrintTranslatedMessage(3, "gained_moneys", tostring(gain))
 	end
 
-	if ply.MapStats then -- Map stats display after completing the map (Not yet.)
+	local stats = ply.MapStats
+	if stats then -- Map stats display after completing the map (Not yet.)
 		net.Start("hl2ce_finishedmap")
-		net.WriteTable(ply.MapStats)
+		net.WriteInfNumber(stats.GainedXP)
+		net.WriteInfNumber(txp)
 		net.Send(ply)
 	end
 
@@ -862,11 +840,16 @@ end
 -- Called as soon as all map entities have been spawned 
 function GM:MapEntitiesSpawned()
 
+	hook.Run("PreMapEdit")
+
 	-- Remove old spawn points
 	if (MasterPlayerStartExists()) then
+		self.OriginalSpawnPointsPos = {}
 		for _, ips in pairs(ents.FindByClass("info_player_start")) do
 			if (!ips:HasSpawnFlags(1) || INFO_PLAYER_SPAWN) then
 				ips:Remove()
+			else
+				table.insert(self.OriginalSpawnPointsPos, {ips:GetPos(), ips:GetAngles()})
 			end
 		end
 	end
@@ -961,8 +944,7 @@ concommand.Add("hl2ce_next_map", function(ply)
 	if changingLevel then
 		timer.Adjust("hl2c_next_map", 0, 1)
 	else
-		NEXT_MAP_TIME = 0
-		hook.Run("NextMap")
+		hook.Run("NextMap", true)
 	end
 end)
 concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
@@ -1094,7 +1076,7 @@ function GM:OnNPCKilled(npc, killer, weapon)
 				game.KickID(killer:UserID(), "You killed an important NPC actor!")
 			end
 
-			gamemode.Call("FailMap", killer, "Important character has died!")
+			gamemode.Call("FailMap", killer, CUSTOM_NPC_KILLED_MESSAGE or "important_npc_died")
 		end
 	end
 
@@ -1126,7 +1108,7 @@ end
 
 function GM:EntityRemoved(ent)
 	if ent:IsNPC() and NPC_NONPCKILL_HOOK[ent:GetClass()] and ent.m_LastAttacker and ent.m_LastAttackTime == CurTime() then
-		gamemode.Call("OnNPCKilled", ent, ent.m_LastAttacker, ent.m_LastInflictor)
+		hook.Run("OnNPCKilled", ent, ent.m_LastAttacker, ent.m_LastInflictor)
 	end
 end
 
@@ -1547,14 +1529,10 @@ end
 
 -- Select the player spawn
 function hl2cPlayerSelectSpawn(ply)
-
-	if (MasterPlayerStartExists()) then
-	
+	if MasterPlayerStartExists() then
 		local spawnPoints = ents.FindByClass("info_player_start")
-		return spawnPoints[ #spawnPoints ]
-	
+		return spawnPoints[#spawnPoints]
 	end
-
 end
 hook.Add("PlayerSelectSpawn", "hl2cPlayerSelectSpawn", hl2cPlayerSelectSpawn)
 
@@ -1722,7 +1700,15 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 		timer.Create("hl2c_restart_map", overridetime, 1, restart)
 	end
 end
-concommand.Add("hl2ce_restart_map", function(ply) if (IsValid(ply) && ply:IsAdmin()) then gamemode.Call("RestartMap", 0); end end)
+concommand.Add("hl2ce_restart_map", function(ply)
+	if IsValid(ply) and ply:IsAdmin() then
+		if changingLevel then
+			timer.Adjust("hl2c_restart_map", 0, 1)
+		else
+			gamemode.Call("RestartMap", 0)
+		end
+	end
+end)
 
 function GM:OnMapFailed(ply)
 	local diff = self:GetDifficulty(true, true)

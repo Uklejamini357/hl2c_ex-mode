@@ -47,12 +47,16 @@ net.Receive("hl2ce_xpgain", function(length)
 end)
 
 net.Receive("hl2ce_finishedmap", function(length)
-	local tbl = net.ReadTable()
+	local xpgained = net.ReadInfNumber()
+	local bonusxp = net.ReadInfNumber()
 
 
     gamemode.Call("OnMapCompleted")
     gamemode.Call("PostOnMapCompleted")
-    -- chat.AddText("Map completed")
+
+    local color_yellow = Color(255,255,190)
+    chat.AddText(color_white, "Map summary:")
+    chat.AddText(color_white, "XP Gained: ", color_yellow, tostring(xpgained), color_white, " (+", color_yellow, tostring(bonusxp), color_white, " bonus xp)")
     -- for k,v in pairs(tbl) do
     --     chat.AddText(k, " ", v)
     -- end
@@ -63,6 +67,7 @@ net.Receive("hl2ce_boss", function(len)
 end)
 
 net.Receive("hl2ce_fail", function(len)
+    if GetConVar("hl2ce_cl_noshowlosetext"):GetBool() then return end
     local time = math.min(15, RESTART_MAP_TIME)
 
     local s1 = translate.Get("you_lost")

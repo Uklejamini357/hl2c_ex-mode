@@ -51,9 +51,11 @@ function GM:LoadCampaignData()
     local load = {
         CampaignMapVars = function(v) GAMEMODE.CampaignMapVars = v end,
         HardcoreAlivePlayers = function(v) GAMEMODE.HardcoreAlivePlayers = v end,
-        -- PrevMap = function(v) GAMEMODE.PrevMap = v end,
-        -- NextMap = function(v) GAMEMODE.NextMap = v end
+        PrevMap = function(v) GAMEMODE.PrevMap = v end,
+        LastMap = function(v) GAMEMODE.LastMap = v end
     }
+
+    if data.LastMap ~= game.GetMap() then self:DeleteCampaignData() return end
 
     for variable, val in pairs(data) do
         if load[variable] then
@@ -71,8 +73,8 @@ function GM:SaveCampaignData()
 
 	insertdata("CampaignMapVars", self.CampaignMapVars)
 	insertdata("HardcoreAlivePlayers", self.HardcoreAlivePlayers)
-	insertdata("PrevMap", self.PrevMap)
-	insertdata("LastMap", self.LastMap)
+	insertdata("PrevMap", game.GetMap())
+	insertdata("LastMap", NEXT_MAP)
 
     local filedir = "hl2c_eternal/server/campaigndata.txt"
     local savedata = util.TableToJSON(Data, true)
