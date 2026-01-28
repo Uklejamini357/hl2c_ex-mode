@@ -636,6 +636,17 @@ Once you're dead you cannot respawn until the next map.]])
 	text:SetWrap(true)
 	list:AddItem(text)
 
+	if pl:IsAdmin() then
+		local text = vgui.Create("DLabel", list)
+		text:SetText([[Admin tip:
+Press R + F2 to open admin menu!]])
+		text:SetTextColor(Color(155,255,255))
+		text:SetContentAlignment(5)
+		text:SizeToContents()
+		text:SetWrap(true)
+		list:AddItem(text)
+	end
+
 	if GAMEMODE.EnableHardcoreMode then
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[Hardcore Mode has been enabled. You only have one life per run! Play carefully...]])

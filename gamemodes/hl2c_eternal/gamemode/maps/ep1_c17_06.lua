@@ -41,7 +41,7 @@ function hl2cMapEdit()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
-
+local completed
 -- Accept input
 function hl2cAcceptInput(ent, input)
     if ent:GetName() == "lcs_al_leavingOnTrain" and string.lower(input) == "start" then

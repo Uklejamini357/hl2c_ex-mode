@@ -207,7 +207,7 @@ net.Receive("hl2ce_admin_teleport", function(len, ply)
             local pos = INFO_PLAYER_SPAWN[1]
             ply:SetPos(pos)
             ply:SetEyeAngles(Angle(0, INFO_PLAYER_SPAWN[2], 0))
-        elseif #GAMEMODE.OriginalSpawnPointsPos > 0 then
+        elseif GAMEMODE.OriginalSpawnPointsPos and #GAMEMODE.OriginalSpawnPointsPos > 0 then
             local spawn = table.Random(GAMEMODE.OriginalSpawnPointsPos)
             if spawn[1] then
                 ply:SetPos(spawn[1])
