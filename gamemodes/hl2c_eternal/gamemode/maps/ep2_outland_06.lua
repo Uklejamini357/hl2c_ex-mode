@@ -11,9 +11,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 
-	ents.FindByName("player_items_template")[1]:Remove()
-
-	if !game.SinglePlayer() then ents.FindByName("boxcar_door_close")[1]:Remove(); end
+	-- ents.FindByName("player_items_template")[1]:Remove()
 
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)

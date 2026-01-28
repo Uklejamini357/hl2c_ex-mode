@@ -10,17 +10,22 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
-
-	ents.FindByName("player_items_template")[1]:Remove()
-
-	if !game.SinglePlayer() then ents.FindByName("boxcar_door_close")[1]:Remove(); end
-
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
-
+	if GAMEMODE.HyperEXMode then
+		if ent:GetName() == "dogvstrider_alyx_hide_lcs" and input:lower() == "start" then
+			local strider = ents.FindByName("river_strider")[1]
+			timer.Create("blah", 0, 0, function()
+				if !IsValid(strider) then return end
+				local eff = EffectData()
+				eff:SetOrigin(strider:GetPos())
+				util.Effect("Explosion", eff)
+			end)
+		end
+	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
