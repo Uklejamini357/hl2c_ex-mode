@@ -150,6 +150,14 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		return true
 	
 	end
+	
+	if GAMEMODE.EXMode then
+		if ent:GetName() == "s_room_detected_relay" and input:lower() == "trigger" then
+			PrintMessage(3, "YOU FUCKED UP")
+			PrintMessage(3, "YOU FUCKED UP")
+			PrintMessage(3, "YOU FUCKED UP")
+		end
+	end
 
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

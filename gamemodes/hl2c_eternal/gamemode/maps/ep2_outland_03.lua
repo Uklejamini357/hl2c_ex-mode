@@ -1,5 +1,11 @@
 NEXT_MAP = "ep2_outland_04"
 
+TRIGGER_CHECKPOINT = {
+	{Vector(5168, -5184, -352), Vector(5056, -5096, -64)},
+	{Vector(1432, -9504, -512), Vector(1600, -9408, -376)}
+}
+
+
 if CLIENT then return end
 
 -- Player spawns

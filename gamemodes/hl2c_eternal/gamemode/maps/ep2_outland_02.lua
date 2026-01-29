@@ -1,12 +1,6 @@
 
 NEXT_MAP = "ep2_outland_03"
 
-TRIGGER_CHECKPOINT = {
-	{Vector(-2284, -9132, -716), Vector(-2516, -8900, -596)},
-	-- {Vector(-3180, -9519, 111), Vector(-3060, -9434, 236)},
-	{Vector(-3182, -9390, 112), Vector(-3308, -9519, 240)},
-}
-
 if CLIENT then return end
 
 CUSTOM_NPC_KILLED_MESSAGE = "You failed to protect the vortigaunt from the antlion attacks!"
@@ -73,6 +67,30 @@ function hl2cAcceptInput(ent, input, activator)
 		end
 		
 		GAMEMODE:CreateSpawnPoint( Vector(-3024, -9304, -894), -90 )
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "lcs_pre_revive" and string.lower(input) == "start" then
+		for _,ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+
+			ply:SetPos(Vector(-3106, -9474, -894))
+			ply:SetEyeAngles(Angle(0, 0, 0))
+		end
+		
+		GAMEMODE:CreateSpawnPoint(Vector(-3106, -9474, -894), 0)
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "lcs_vort_goodbye" and string.lower(input) == "start" then
+		for _,ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+
+			ply:SetPos(Vector(-3106, -9474, -894))
+			ply:SetEyeAngles(Angle(0, 0, 0))
+		end
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "elevator_door_2_open_rl" and string.lower(input) == "start" then
+		GAMEMODE:CreateSpawnPoint(Vector(-3106, -9474, 112), 180)
 	end
 
 	if GAMEMODE.EXMode then

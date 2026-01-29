@@ -755,7 +755,7 @@ function GM:PlayerCompletedMap(ply)
 	local stats = ply.MapStats
 	if stats then -- Map stats display after completing the map (Not yet.)
 		net.Start("hl2ce_finishedmap")
-		net.WriteInfNumber(stats.GainedXP)
+		net.WriteInfNumber(stats.GainedXP or InfNumber(0))
 		net.WriteInfNumber(txp)
 		net.Send(ply)
 	end

@@ -263,7 +263,7 @@ function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
 	elseif attackerclass == "npc_headcrab_fast" then
 		dmginfo:SetDamageType(DMG_FALL)
 		dmginfo:ScaleDamage(1.2)
-	elseif attackerclass == "npc_antlionguard" then
+	elseif attackerclass == "npc_antlionguard" and dmginfo:GetDamageType() ~= DMG_POISON then
 		dmginfo:ScaleDamage(2.25)
 	elseif attackerclass == "npc_barnacle" then
 		if attacker.VariantType == 1 then
@@ -673,7 +673,7 @@ local function HL2cHyperEX_NPCVariantInflictDamage(ent, dmginfo)
 	elseif attackerclass == "npc_headcrab_fast" then
 		dmginfo:SetDamageType(DMG_FALL)
 		dmginfo:ScaleDamage(1.2)
-	elseif attackerclass == "npc_antlionguard" then
+	elseif attackerclass == "npc_antlionguard" and dmginfo:GetDamageType() ~= DMG_POISON then
 		dmginfo:ScaleDamage(2.25)
 	elseif attackerclass == "npc_barnacle" then
 		if attacker.VariantType == 1 then

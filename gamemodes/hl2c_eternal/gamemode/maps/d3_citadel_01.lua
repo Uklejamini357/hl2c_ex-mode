@@ -164,7 +164,6 @@ if CLIENT then
 	return
 end
 
-local failer
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_crowbar")
@@ -282,7 +281,6 @@ function hl2cMapEdit()
 	end
 
 	PLAYER_VIEWCONTROL = nil
-	failer = nil
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
@@ -324,8 +322,8 @@ function hl2cAcceptInput(ent, input, caller)
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "zapper_fade" ) && ( string.lower(input) == "fade" ) ) then
-		if failer then
-			gamemode.Call("FailMap", failer, "wrong_pod_taken")
+		if GAMEMODE.MapVars.Failer then
+			gamemode.Call("FailMap", GAMEMODE.MapVars.Failer, "wrong_pod_taken")
 		else
 			caller:PrintMessage(3, "No.")
 			return true
@@ -333,7 +331,11 @@ function hl2cAcceptInput(ent, input, caller)
 		-- PrintMessage(3, "You failed the map. (You took wrong the wrong pod.)")
 	end
 
-	if failer and string.sub(ent:GetName(), 1, 9) == "playerpod" then
+	if IsValid(CITADEL_VEHICLE_ENTITY) and string.sub(ent:GetName(), 1, 9) == "playerpod" and (input:lower() == "use" or input:lower() == "entervehicle") then
+		return true
+	end
+
+	if IsValid(CITADEL_VEHICLE_ENTITY) and string.sub(ent:GetName(), 1, 9) == "zapperpod" and (input:lower() == "use" or input:lower() == "entervehicle") then
 		return true
 	end
 
@@ -411,12 +413,13 @@ hook.Add("PlayerSay", "hl2cPlayerSay", hl2cPlayerSay)
 function hl2cPlayerEnteredVehicle(ply, vehicle)
 	if game.SinglePlayer() then return end
 	if vehicle:GetClass() == "prop_vehicle_prisoner_pod" then
+		if IsValid(CITADEL_VEHICLE_ENTITY) then return end
 		CITADEL_VEHICLE_ENTITY = vehicle
-		if !failer and string.sub(vehicle:GetName(), 1, 9) == "zapperpod" then
-			failer = ply
+		if !GAMEMODE.MapVars.Failer and string.sub(vehicle:GetName(), 1, 9) == "zapperpod" then
+			GAMEMODE.MapVars.Failer = ply
 
 			if GAMEMODE.HyperEXMode then
-				gamemode.Call("FailMap", failer, "you_softlocked")
+				gamemode.Call("FailMap", GAMEMODE.MapVars.Failer, "you_softlocked")
 			elseif GAMEMODE.EXMode then
 				BroadcastLua([[chat.AddText(Color(255,0,0), "BOI YO FUCKED UP REAL HARD")]])
 			else

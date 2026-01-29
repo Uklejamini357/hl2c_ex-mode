@@ -1,3 +1,5 @@
+-- I don't know why the fuck this map sometimes gets stuck in infinite loop
+
 NEXT_MAP = "ep2_outland_01a"
 
 RESET_PL_INFO = true
@@ -21,6 +23,13 @@ function hl2cMapEdit()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
+function hl2cEntityTakeDamage(ent, dmginfo)
+	if ent:IsNPC() and (ent:GetName() == "hunter.rooftop" or ent:GetName() == "hunter.hallway" or ent:GetName() == "hunter") then
+		return true
+	end
+end
+hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage)
+
 
 -- Accept input
 function hl2cAcceptInput(ent, input, activator, caller, value)
@@ -33,6 +42,16 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 			ply:SetLaggedMovementValue(tonumber(value))
 		end
 		return true
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "clip_player_train" and input:lower() == "enable" then
+		for _,ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+
+			ply:SetPos(Vector(54, 56, 240))
+			ply:SetEyeAngles(Angle(0, 0, 0))
+		end
+		GAMEMODE:CreateSpawnPoint(Vector(334, 64, -60), 0)
 	end
 
 	if !game.SinglePlayer() and ent:GetName() == "relay.alyx.spawn" and input:lower() == "trigger" then
