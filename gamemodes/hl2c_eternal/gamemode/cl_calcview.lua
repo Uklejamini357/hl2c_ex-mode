@@ -81,14 +81,14 @@ function GM:CalcView(ply, origin, angles, fov, znear, zfar)
 end
 
 local function DeathView(pl, origin, angles, fov)
-	if pl:Alive() then return end
+	if pl:Alive() or pl:GetObserverMode() ~= OBS_MODE_NONE then return end
 	if hl2ce_cl_fpdeath:GetInt() ~= 1 then return end
 	if hl2ce_cl_fpdeath_classic:GetBool() then return {origin = pl:GetPos() + Vector(0,0,8)} end
 
 	local View
 	local rag = pl:GetRagdollEntity()
 
-	if rag:IsValid() and pl:GetObserverMode() == OBS_MODE_NONE then
+	if rag:IsValid() then
 		local Eyes = rag:GetAttachment(rag:LookupAttachment("Eyes"))
 		if Eyes then
 			View = {origin = Eyes.Pos, angles = Eyes.Ang}

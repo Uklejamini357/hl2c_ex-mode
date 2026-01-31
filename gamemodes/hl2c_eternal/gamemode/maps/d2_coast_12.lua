@@ -35,11 +35,11 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 
-	game.SetGlobalState( "antlion_allied", GLOBAL_ON )
+	game.SetGlobalState("antlion_allied", GLOBAL_ON)
 
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
 
-	table.insert( FRIENDLY_NPCS, "npc_antlion" )
+	table.insert(FRIENDLY_NPCS, "npc_antlion")
 
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)

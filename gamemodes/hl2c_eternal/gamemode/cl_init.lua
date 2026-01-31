@@ -202,7 +202,7 @@ function GM:HUDPaint()
 	end
 	if !ContextMenu or !ContextMenu:IsVisible() then
 		if hl2ce_cl_showmaptimer:GetBool() then
-			draw.DrawText(string.format("Time spent: %s", string.ToMinutesSeconds(CurTime() - (pl.startTime or 0))), "hl2ce_font_small", ScrW()/2, ScrH()*0.1, Color(255,255,100), TEXT_ALIGN_CENTER)
+			draw.DrawText(translate.Format("time_spent", string.ToMinutesSeconds(CurTime() - (pl.startTime or 0))), "hl2ce_font_small", ScrW()/2, ScrH()*0.1, Color(255,255,100), TEXT_ALIGN_CENTER)
 		end
 	end
 
@@ -247,13 +247,13 @@ function GM:HUDPaint()
 	-- Are we going to the next map?
 	if nextMapCountdownStart then
 		local nextMapCountdownLeft = math.Round( nextMapCountdownStart + NEXT_MAP_TIME - CurTime() )
-		draw.SimpleTextOutlined(nextMapCountdownLeft > 0 and "Next Map in "..tostring(nextMapCountdownLeft) or "Switching Maps!", "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
+		draw.SimpleTextOutlined(nextMapCountdownLeft > 0 and translate.Format("switching_map_in_x", tostring(nextMapCountdownLeft)) or translate.Get("switching_map"), "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
 	end
 
 	-- Are we restarting the map?
 	if restartMapCountdownStart then
 		local restartMapCountdownLeft = math.ceil( restartMapCountdownStart + RESTART_MAP_TIME - CurTime() )
-		draw.SimpleTextOutlined(restartMapCountdownLeft > 0 and "Restarting Map in "..tostring(restartMapCountdownLeft) or "Restarting Map!", "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
+		draw.SimpleTextOutlined(restartMapCountdownLeft > 0 and translate.Format("restarting_in_x", tostring(restartMapCountdownLeft)) or translate.Get("restarting_map"), "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
 	end
 
 	-- On top of it all

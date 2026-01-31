@@ -13,7 +13,7 @@ hook.Add("PlayerReady", "hl2cPlayerReady", function(ply)
 	timer.Simple(3, function()
 		ply:PrintMessage(3, "Welcome to Epic Hardcore map.")
 		ply:PrintMessage(3, "Well. You're not going to be able to beat it anyway.")
-		ply:PrintMessage(3, "Later section is absolute hell.")
+		ply:PrintMessage(3, "Later section is an absolute hell.")
 	end)
 end)
 

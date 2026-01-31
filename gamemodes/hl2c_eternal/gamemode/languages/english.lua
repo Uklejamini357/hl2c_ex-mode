@@ -18,6 +18,7 @@ translate.AddLanguage("en", "English")
 -- HUD
 LANG.health = "Health:"
 LANG.armor = "Armor:"
+LANG.time_spent = "Time spent: %s"
 
 LANG.team = "TEAM"
 LANG.dead = "Dead"
@@ -94,6 +95,10 @@ LANG.game_hl2ep2 = LANG.game_hl2..": Episode Two"
 LANG.hardcore_on = "Hardcore mode enabled. Good luck..."
 LANG.hardcore_off = "Hardcore mode disabled."
 
+LANG.restarting_in_x = "Restarting Map in %s"
+LANG.restarting_map = "Restarting Map!"
+LANG.switching_map_in_x = "Next Map in %s"
+LANG.switching_map = "Switching Maps!"
 LANG.x_completed_map = "%s has completed the map. (%s) [%i of %i]"
 
 

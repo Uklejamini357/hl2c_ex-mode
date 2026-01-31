@@ -18,6 +18,10 @@ translate.AddLanguage("zh-cn", "简体中文") -- Chinese (Simplified)
 -- HUD
 LANG.health = "健康:"
 LANG.armor = "盔甲:"
+LANG.time_spent = "所用时间：%s"
+
+LANG.team = "TEAM"
+LANG.dead = "Dead"
 
 
 LANG.options = "Options"
@@ -63,7 +67,38 @@ LANG.cant_spawn_vehicle_no_space = "Insufficient space for spawning in a vehicle
 LANG.cant_spawn_vehicle_airborne = "You can't spawn a vehicle while airborne!"
 LANG.cant_remove_vehicle = "You may not remove your vehicle at this time."
 
+LANG.gained_moneys = "You have gained +%s moneys"
+
+LANG.not_admin = "You are not an admin!"
+LANG.not_dead = "You are not dead!"
+LANG.mapchange_cantrespawn = "Map is currenlty being changed, you can't respawn at this time!"
+LANG.cant_respawn = "You cannot respawn now. Sorry!"
+
+-- Skills and Perks
+LANG.skill_need_sp = "You need Skill Points to upgrade this skill!"
+LANG.skill_max_reached = "You have reached the max amount of points for this skill!"
+LANG.skill_increased_lvl = "Increased %s by %d point(s)!"
+
+LANG.perk_noprestige = "Not enough %s"
+LANG.perk_noprestige_points = "Not enough %s Points!"
+LANG.perk_unlocked = "Perk Unlocked: %s"
+LANG.eupg_increased = "Increased %s -> %s"
+
 -- Gamemode, and Maps
+LANG.game_completed = "Congratulations! You have completed %s!"
+LANG.game_completed_xp = "You were awarded %s XP."
+
+LANG.game_hl2 = "Half-Life 2"
+LANG.game_hl2ep1 = LANG.game_hl2..": Episode One"
+LANG.game_hl2ep2 = LANG.game_hl2..": Episode Two"
+
+LANG.hardcore_on = "Hardcore mode enabled. Good luck..."
+LANG.hardcore_off = "Hardcore mode disabled."
+
+LANG.restarting_in_x = "在 %s 中重新启动地图"
+LANG.restarting_map = "重新加载地图！"
+LANG.switching_map_in_x = "%s中的下一张地图"
+LANG.switching_map = "切换地图！"
 LANG.x_completed_map = "%s 完成了地图。(%s) [%i of %i]"
 
 
@@ -82,3 +117,13 @@ LANG.wrong_pod_taken = "BRUHHHHHHHHHHH YOU TOOK THE WRONG POD WHAT IS WRONG WITH
 LANG.you_softlocked = "你卡住了"
 LANG.you_failed_to_escape = "You failed to escape the endless trap!\nYou had the chance, but you blew it!"
 LANG.breen_escaped = "You let Dr. Breen escape!"
+
+LANG.hardcore_intro1 = "Hi."
+LANG.hardcore_intro2 = "Welcome to hardcore mode."
+LANG.hardcore_intro3 = "Past this point you may not respawn anymore."
+LANG.hardcore_intro4 = "If all players die, the run is over!"
+LANG.hardcore_intro5 = "Good luck!"
+
+LANG.hardcore_again = "Ah shit, here we go again."
+LANG.hardcore_run = "This is your %s run."
+

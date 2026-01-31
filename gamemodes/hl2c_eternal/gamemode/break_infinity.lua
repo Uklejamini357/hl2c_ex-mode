@@ -375,6 +375,7 @@ function ConvertStringToInfNumber(str)
 
     return InfNumber(mantissa, exponent)
 end
+infmath.ConvertStringToInfNumber = ConvertStringToInfNumber
 
 infmath.FormatText = t.FormatText
 

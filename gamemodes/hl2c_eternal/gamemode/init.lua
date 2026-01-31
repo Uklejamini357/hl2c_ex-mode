@@ -1120,21 +1120,21 @@ end, HOOK_HIGH)
 local gmod_maxammo = GetConVar("gmod_maxammo")
 function GM:PlayerCanPickupWeapon(ply, wep)
 	local wepclass = wep:GetClass()
-	if ((ply:Team() != TEAM_ALIVE) || (table.HasValue(ADMINISTRATOR_WEAPONS, wepclass) && !ply:IsAdmin())) then
+	if ply:Team() != TEAM_ALIVE or table.HasValue(ADMINISTRATOR_WEAPONS, wepclass) and !ply:IsAdmin() then
 		return false
 	end
 
-	if ((wep:GetPrimaryAmmoType() <= 0) && ply:HasWeapon(wepclass)) then
+	if wep:GetPrimaryAmmoType() <= 0 and ply:HasWeapon(wepclass) then
 		return false
 	end
 
 	if !gmod_maxammo:GetBool() then
-		if (wep:GetPrimaryAmmoType() > 0) then
-			if ply:HasWeapon(wepclass) && (ply:GetAmmoCount(wep:GetPrimaryAmmoType()) >= game.GetAmmoMax(wep:GetPrimaryAmmoType())) then
+		if wep:GetPrimaryAmmoType() > 0 then
+			if ply:HasWeapon(wepclass) and ply:GetAmmoCount(wep:GetPrimaryAmmoType()) >= game.GetAmmoMax(wep:GetPrimaryAmmoType()) then
 				return false
 			end
-		elseif (wep:GetSecondaryAmmoType() > 0) then
-			if ply:HasWeapon(wepclass) && (ply:GetAmmoCount(wep:GetSecondaryAmmoType()) >= game.GetAmmoMax(wep:GetSecondaryAmmoType())) then
+		elseif wep:GetSecondaryAmmoType() > 0 then
+			if ply:HasWeapon(wepclass) and ply:GetAmmoCount(wep:GetSecondaryAmmoType()) >= game.GetAmmoMax(wep:GetSecondaryAmmoType()) then
 				return false
 			end
 		end

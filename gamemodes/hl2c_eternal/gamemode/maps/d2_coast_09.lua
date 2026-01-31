@@ -8,9 +8,6 @@ if file.Exists("hl2c_eternal/d2_coast_08.txt", "DATA") then
 	file.Delete( "hl2c_eternal/d2_coast_08.txt" )
 end
 
-COAST_SET_ALLOWED_VEHICLE = true
-
-
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_crowbar")
@@ -37,13 +34,14 @@ function hl2cMapEdit()
 	ents.FindByName("wheel_filter")[1]:Fire("AddOutput", "filterclass prop_vehicle_jeep_old")
 
 	ALLOWED_VEHICLE = "Jeep"
+	COAST_SET_ALLOWED_VEHICLE = true
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
 function hl2cAcceptInput(ent, input, activator)
-	if !game.SinglePlayer() and ent:GetName() == "spawn_dropship" and string.lower(input) == "trigger" then
+	if !game.SinglePlayer() and COAST_SET_ALLOWED_VEHICLE and ent:GetName() == "spawn_dropship" and string.lower(input) == "trigger" then
 		ALLOWED_VEHICLE = nil
 		PrintMessage(HUD_PRINTTALK, "Vehicle spawning has been disabled.")
 

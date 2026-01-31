@@ -258,7 +258,7 @@ function GM:OpenPlayerModelMenu()
 			RunConsoleCommand( "cl_playerskin", "0" )
 		end
 
-		timer.Simple(0.1, function()
+		timer.Simple(0, function()
 			UpdateFromConvars()
 		end)
 	end

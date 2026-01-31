@@ -12,7 +12,7 @@ end)
 
 hook.Add("PlayerReady", "hl2cPlayerReady", function(ply)
 	timer.Simple(3, function()
-		ply:PrintMessage(3, "This will probably one of the trickiest hard maps ever made.")
+		ply:PrintMessage(3, "This is probably one of the trickiest hard maps ever made.")
 		ply:PrintMessage(3, "It will take you an insane amount of attempts to actually complete it.")
 		ply:PrintMessage(3, "Good luck!")
 		ply:PrintMessage(3, "Map by AnonymoScoot")

@@ -287,7 +287,6 @@ function GM:PlayerPostThink(ply)
 	end
 end
 
-
 -- why i'm using GlobalString instead of Float value:
 -- Allows to be broadcasted to client with numbers like 2^128 (3.40e38) and above until 2^1024 (1.79e308) values
 -- break infinity update: NOW UP TO 10^(1.79e308)!!!!!
@@ -313,10 +312,10 @@ GM.PreviousDifficulty = (GAMEMODE or GM).PreviousDifficulty or InfNumber(1)
 GM.PreviousDifficultyStr = (GAMEMODE or GM).PreviousDifficultyStr or "1"
 
 function GM:GetDifficulty(noncvar, noadditionalmul)
-	local diffcvarvalue = tonumber(hl2ce_server_force_difficulty:GetString()) or 1
-	
-	if not noncvar and diffcvarvalue > 0 then
-		return InfNumber(diffcvarvalue)
+	local diffcvarvalue = hl2ce_server_force_difficulty:GetString()
+
+	if not noncvar and ((tonumber(diffcvarvalue or 0) or 1) > 0) then
+		return infmath.ConvertStringToInfNumber(diffcvarvalue)
 	end
 
 	local global_diff_str = GetGlobalString("hl2c_difficulty", 1)
