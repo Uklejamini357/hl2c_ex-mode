@@ -49,7 +49,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
+function hl2cAcceptInput(ent, input, activator, caller, value)
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "firstdropship_lcs1" ) && string.lower(input) == "start" ) then
 	
@@ -90,59 +90,38 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 	end
 
 	if ( !game.SinglePlayer() && ( ent:GetName() == "s_room_detected_relay" ) && ( string.lower(input) == "trigger" ) ) then
-	
-		timer.Simple( 20, function()
-		
-			for _, ent in pairs( ents.FindByName("s_room_doors" ) ) do
-			
+		timer.Simple(20, function()
+			for _, ent in pairs(ents.FindByName("s_room_doors")) do
 				if ( IsValid( ent ) ) then
-				
 					ent:Fire( "Open" )
-				
 				end
-			
 			end
 		
 			for _, ent in pairs( ents.FindByName("s_room_turret_*" ) ) do
-			
 				if ( IsValid( ent ) ) then
-				
 					ent:Fire( "Disable" )
-				
 				end
-			
 			end
 		
 			for _, ent in pairs( ents.FindByName("s_laser*" ) ) do
-			
 				if ( IsValid( ent ) && ( ent:GetClass() == "env_beam" ) ) then
-				
 					ent:Fire( "TurnOn" )
-				
 				end
-			
 			end
 		
 			ents.FindByName("s_room_nodelink_2")[1]:Fire( "TurnOn" )
 			ents.FindByName("s_room_panelswitch")[1]:Fire( "Unlock" )
 			ents.FindByName("laser_on_sound")[1]:Fire( "PlaySound" )
-		
 		end)
 	
 	end
 
 	if ( ( ent:GetName() == "lcs_barney_h4x_pows" ) && string.lower(input) == "start" ) then
-	
 		for _, ent in pairs( ents.FindByName("citizen_pod*" ) ) do
-		
 			if ( IsValid( ent ) && ent:IsNPC() ) then
-			
 				ent:Fire( "GiveWeapon", "weapon_ar2" )
-			
 			end
-		
 		end
-	
 	end
 
 	if ( !game.SinglePlayer() && ( ( ent:GetName() == "lobby_combinedoor" ) || ( ent:GetName() == "exit_combinedoor" ) ) && ( string.lower(input) == "setanimation" ) && ( ( string.lower( value ) == "close" ) || ( string.lower( value ) == "idle_closed" ) ) ) then

@@ -1,6 +1,6 @@
 NEXT_MAP = "d3_c17_01"
 
-TRIGGER_DELAYMAPLOAD = { Vector( -954, -1049, 912 ), Vector( -868, -965, 995 ) }
+TRIGGER_DELAYMAPLOAD = {Vector(-954, -1049, 912), Vector(-868, -965, 995)}
 
 NEXT_MAP_PERCENT = 1
 NEXT_MAP_INSTANT_PERCENT = 1
@@ -11,7 +11,6 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:Give("weapon_crowbar")
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_smg1")
@@ -23,72 +22,60 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_rpg")
 	ply:Give("weapon_crossbow")
 	ply:Give("weapon_bugbait")
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
 
 	if !game.SinglePlayer() then
-	
 		ents.FindByName("PClip_sec_tp_door_1")[1]:Remove()
 		ents.FindByName("combine_door_2")[1]:Remove()
-	
+		PRISON_PREVENT_DOORS = false
 	end
 
-	timer.Create( "hl2cTurretRelationship", 1, 0, function() if ( IsValid( ents.FindByName("relationship_turret_vs_player_like")[1] ) ) then ents.FindByName("relationship_turret_vs_player_like")[1]:Fire( "ApplyRelationship" ) end end)
-
+	timer.Create( "hl2cTurretRelationship", 1, 0, function()
+		if IsValid(ents.FindByName("relationship_turret_vs_player_like")[1]) then
+			ents.FindByName("relationship_turret_vs_player_like")[1]:Fire("ApplyRelationship")
+		end
+	end)
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
-
-	if ( !game.SinglePlayer() && !PRISON_PREVENT_DOORS && ( ent:GetName() == "brush_bigdoor_PClip_1" ) && string.lower(input) == "enable" ) then
-	
+function hl2cAcceptInput(ent, input, activator, caller, value)
+	if !game.SinglePlayer() and !PRISON_PREVENT_DOORS and ent:GetName() == "brush_bigdoor_PClip_1" and string.lower(input) == "enable" then
 		PRISON_PREVENT_DOORS = true
-		for _, ply in ipairs(player.GetAll()) do
-		
-			ply:SetVelocity( Vector( 0, 0, 0 ) )
-			ply:SetPos( Vector( -914, 943, 961 ) )
-			ply:SetEyeAngles( Angle( 0, -90, 0 ) )
-		
+		for _, ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+			ply:SetVelocity(Vector(0, 0, 0))
+			ply:SetPos(Vector(-914, 943, 961))
+			ply:SetEyeAngles(Angle(0, -90, 0))
 		end
-		GAMEMODE:CreateSpawnPoint( Vector( -914, 943, 961 ), -90 )
-	
+		GAMEMODE:CreateSpawnPoint(Vector(-914, 943, 961), -90)
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "PClip_teleport_shield_final" ) && string.lower(input) == "enable" ) then
-	
-		for _, ply in ipairs(player.GetAll()) do
-		
-			ply:SetVelocity( Vector( 0, 0, 0 ) )
-			ply:SetPos( Vector( 128, 7, 1066 ) )
-			ply:SetEyeAngles( Angle( 0, 90, 0 ) )
-		
+	if !game.SinglePlayer() and ent:GetName() == "PClip_teleport_shield_final" and string.lower(input) == "enable" then
+		for _, ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+			ply:SetVelocity(Vector(0, 0, 0))
+			ply:SetPos(Vector(128, 7, 1066))
+			ply:SetEyeAngles(Angle(0, 90, 0))
 		end
-		GAMEMODE:CreateSpawnPoint( Vector( 128, 7, 1550 ), 90 )
-	
+		GAMEMODE:CreateSpawnPoint(Vector(128, 7, 1550), 90)
 	end
 
-	if ( !game.SinglePlayer() && PRISON_PREVENT_DOORS && ( ( ent:GetName() == "sec_room_door_1" ) || ( ent:GetName() == "sec_tp_door_1" ) ) && ( string.lower(input) == "close" ) ) then
-	
+	if !game.SinglePlayer() && PRISON_PREVENT_DOORS and (ent:GetName() == "sec_room_door_1" or ent:GetName() == "sec_tp_door_1") and string.lower(input) == "close" then
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && PRISON_PREVENT_DOORS && ( ent:GetName() == "combine_door_1" ) && ( string.lower(input) == "setanimation" ) && ( ( string.lower( value ) == "close" ) || ( string.lower( value ) == "idle_closed" ) ) ) then
-	
+	if !game.SinglePlayer() && PRISON_PREVENT_DOORS and ent:GetName() == "combine_door_1" and string.lower(input) == "setanimation" and (string.lower(value) == "close" or string.lower(value) == "idle_closed") then
 		return true
-	
 	end
-
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

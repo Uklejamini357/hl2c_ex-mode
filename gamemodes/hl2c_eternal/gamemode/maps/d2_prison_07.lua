@@ -24,7 +24,6 @@ function hl2cPlayerSpawn(ply)
 	if IsValid(turret_ai) then
 		turret_ai:Fire("ApplyRelationship")
 	end
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -80,20 +79,17 @@ end
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "door_croom2_gate" ) && ( string.lower(input) == "close" ) ) then
-	
+	if !game.SinglePlayer() and ent:GetName() == "door_croom2_gate" and string.lower(input) == "close" then
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "logic_room5_entry" ) && ( string.lower(input) == "trigger" ) ) then
+	if !game.SinglePlayer() and ent:GetName() == "logic_room5_entry" and string.lower(input) == "trigger" then
 		for _, ply in ipairs(player.GetAll()) do
-			ply:SetVelocity( Vector( 0, 0, 0 ) )
-			ply:SetPos( Vector( 4161, -3966, -519 ) )
-			ply:SetEyeAngles( Angle( 0, -90, 0 ) )
+			ply:SetVelocity(Vector(0, 0, 0))
+			ply:SetPos(Vector(4161, -3966, -519))
+			ply:SetEyeAngles(Angle(0, -90, 0))
 		end
-		GAMEMODE:CreateSpawnPoint( Vector( 4710, -4237, -524 ), 180 )
+		GAMEMODE:CreateSpawnPoint(Vector(4710, -4237, -524), 180)
 	end
 
 	-- if you think you can cheese the 2nd room... too bad!
@@ -101,7 +97,7 @@ function hl2cAcceptInput(ent, input)
 	-- and turrets aren't going to be able to handle them all alone
 	-- AND, the room above which you'd use to skip this section... well, you can't anymore!
 	if GAMEMODE.EXMode then
-		if ( ent:GetName() == "logic_room5_entry" ) && ( string.lower(input) == "trigger" ) then
+		if ent:GetName() == "logic_room5_entry" and string.lower(input) == "trigger" then
 			local function SpawnTurret(pos, ang)
 				local turret = ents.Create("npc_turret_floor")
 				turret:SetName("turret_buddy")
@@ -120,13 +116,12 @@ function hl2cAcceptInput(ent, input)
 				SpawnTurret(Vector(4124, -4066, -538), Angle(0, -90, 0))
 			end
 
-			
 			ents.FindByName("relationship_turret_vs_player_like")[1]:Fire("ApplyRelationship")
 		end
 
 
 		if ent:GetName() == "lcs_message_room5_incoming" and input:lower() == "start" then
---[[
+--[[ -- cowardly boss doesn't want to come out, sometimes doesn't get networked for some reason
 			FORCE_NPCVARIANT = 2
 			local npc = ents.Create("npc_combine_s")
 			npc.ent_MaxHealthMul = (npc.ent_MaxHealthMul or 1) * 150

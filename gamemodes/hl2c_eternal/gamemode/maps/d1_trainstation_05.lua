@@ -56,7 +56,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
+function hl2cAcceptInput(ent, input, activator, caller, value)
 
 	if ( !game.SinglePlayer() && ent:GetClass() == "point_viewcontrol" ) then
 	

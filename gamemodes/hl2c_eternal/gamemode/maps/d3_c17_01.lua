@@ -34,25 +34,17 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "door_klab01" ) && ( string.lower(input) == "setanimation" ) && ( string.lower( value ) == "close" ) ) then
-	
+function hl2cAcceptInput(ent, input, activator, caller, value)
+	if !game.SinglePlayer() and ent:GetName() == "door_klab01" and string.lower(input) == "setanimation" and string.lower(value) == "close" then
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ( ent:GetName() == "doors_elevator_1" ) || ( ent:GetName() == "doors_elevator_2" ) ) && ( string.lower(input) == "close" ) ) then
-	
+	if !game.SinglePlayer() and (ent:GetName() == "doors_elevator_1" or ent:GetName() == "doors_elevator_2") and string.lower(input) == "close" then
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ( ent:GetName() == "pclip_TPdoor" ) || ( ent:GetName() == "pclip_exitdoor" ) ) && string.lower(input) == "enable" ) then
-	
+	if !game.SinglePlayer() and (ent:GetName() == "pclip_TPdoor" or ent:GetName() == "pclip_exitdoor") and string.lower(input) == "enable" then
 		return true
-	
 	end
-
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

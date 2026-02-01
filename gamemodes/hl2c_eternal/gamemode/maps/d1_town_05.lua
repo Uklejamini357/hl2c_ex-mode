@@ -1,8 +1,7 @@
 NEXT_MAP = "d2_coast_01"
 
-TRIGGER_DELAYMAPLOAD = { Vector( -1723, 10939, 904 ), Vector( -1638, 10995, 1010 ) }
+TRIGGER_DELAYMAPLOAD = {Vector(-1723, 10939, 904), Vector(-1638, 10995, 1010)}
 
-TOWN_CREATE_NEW_SPAWNPOINT = true
 
 if CLIENT then return end
 
@@ -51,8 +50,8 @@ function hl2cAcceptInput(ent, input)
 		return true
 	end
 
-	if !game.SinglePlayer() and TOWN_CREATE_NEW_SPAWNPOINT and ent:GetName() == "citizen_warehouse_door_1" and input:lower() == "open" then
-		TOWN_CREATE_NEW_SPAWNPOINT = false
+	if !game.SinglePlayer() and !GAMEMODE.MapVars.SpawnpointCreated and ent:GetName() == "citizen_warehouse_door_1" and input:lower() == "open" then
+		GAMEMODE.MapVars.SpawnpointCreated = true
 		GAMEMODE:CreateSpawnPoint(Vector(-1160, 10122, 908), 90)
 	end
 

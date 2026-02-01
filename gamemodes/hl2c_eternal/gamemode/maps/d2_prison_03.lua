@@ -1,12 +1,12 @@
-INFO_PLAYER_SPAWN = { Vector( -2380, 3198, 135 ), 180 }
+INFO_PLAYER_SPAWN = {Vector(-2380, 3198, 135), 180}
 
 NEXT_MAP = "d2_prison_04"
 
 if CLIENT then return end
 
 -- Player initial spawn
-function hl2cPlayerInitialSpawn( ply )
-	ply:SendLua( "table.insert( FRIENDLY_NPCS, \"npc_antlion\" )" )
+function hl2cPlayerInitialSpawn(ply)
+	ply:SendLua("table.insert(FRIENDLY_NPCS, \"npc_antlion\")")
 end
 hook.Add("PlayerInitialSpawn", "hl2cPlayerInitialSpawn", hl2cPlayerInitialSpawn)
 

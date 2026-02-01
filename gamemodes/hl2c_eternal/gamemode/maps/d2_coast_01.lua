@@ -4,7 +4,6 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:Give("weapon_crowbar")
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_smg1")
@@ -13,7 +12,6 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_physcannon")
 	ply:Give("weapon_shotgun")
 	ply:Give("weapon_ar2")
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
@@ -31,12 +29,10 @@ function hl2cMapEdit()
 	ents.FindByName("jeep")[1]:Fire( "EnableGun", "1" )
 	ents.FindByName("jeep")[1]:SetBodygroup( 1, 1 )
 
-
 	local ent = ents.Create("prop_dynamic")
 	ent:SetModel("models/props_wasteland/cargo_container01.mdl")
 	ent:SetPos(Vector(-8610, 512, 956))
 	ent:SetAngles(Angle(0, 0, 0))
-
 
 	if ent:PhysicsInit(SOLID_VPHYSICS) then
 		ent:GetPhysicsObject():EnableMotion(false)
@@ -72,9 +68,9 @@ function hl2cAcceptInput(ent, input, caller)
 	local entname = ent:GetName()
 	local inputlower = input:lower()
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "logic_startcraneseq" ) && ( string.lower(input) == "trigger" ) ) then
+	if !game.SinglePlayer() and entname == "logic_startcraneseq" and inputlower == "trigger" then
 		ALLOWED_VEHICLE = "Jeep"
-		PrintMessage( HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3)." )
+		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
 
 		if GAMEMODE.EXMode then
 			timer.Simple(2.1, function()
@@ -86,7 +82,7 @@ function hl2cAcceptInput(ent, input, caller)
 		end
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "push_car_superjump_01" ) && string.lower(input) == "disable" ) then
+	if !game.SinglePlayer() and entname == "push_car_superjump_01" and inputlower == "disable" then
 		return true
 	end
 

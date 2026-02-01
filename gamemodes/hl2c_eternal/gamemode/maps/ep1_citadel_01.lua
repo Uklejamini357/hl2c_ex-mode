@@ -35,7 +35,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
+function hl2cAcceptInput(ent, input, activator, caller, value)
     if not game.SinglePlayer() and string.lower(input) == "scriptplayerdeath" then -- Might potentially break sequences
         return true
     end

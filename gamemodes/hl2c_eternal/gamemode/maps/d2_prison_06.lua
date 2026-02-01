@@ -5,14 +5,13 @@ NEXT_MAP = "d2_prison_07"
 -- TRIGGER_DELAYMAPLOAD = { Vector( 420, 58, 9 ), Vector( 455, 157, 114 ) }
 
 TRIGGER_CHECKPOINT = {
-	{ Vector( 1415, 595, -192 ), Vector( 1456, 757, -31 ) }
+	{Vector(1415, 595, -192), Vector(1456, 757, -31)}
 }
 
 if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:Give("weapon_crowbar")
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_smg1")
@@ -24,14 +23,12 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_rpg")
 	ply:Give("weapon_crossbow")
 	ply:Give("weapon_bugbait")
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
@@ -56,8 +53,7 @@ local function SpawnSoldier(wep, pos, ang, id)
 end
 
 -- Accept input
-function hl2cAcceptInput( ent, input, activator, caller, value )
-
+function hl2cAcceptInput(ent, input, activator, caller, value)
 	if !game.SinglePlayer() and ent:GetName() == "lcs_np_meetup03" and string.lower(input) == "resume" then
 		for _, ply in ipairs(player.GetAll()) do
 			ply:SetVelocity(Vector(0, 0, 0))
@@ -130,7 +126,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		end
 
 		-- i would love to make the first room with more soldiers, but this breaks the script.
-		if !GAMEMODE.MapVars.Room1SoldiersSpawned and ent:GetName() == "maker_croom1_1" and input:lower() == "spawn" then
+		-- if !GAMEMODE.MapVars.Room1SoldiersSpawned and ent:GetName() == "maker_croom1_1" and input:lower() == "spawn" then
 			-- GAMEMODE.MapVars.Room1SoldiersSpawned = true
 
 			-- SpawnSoldier("weapon_ar2", Vector(1084, 360, -192), 0, "room1_soldier")
@@ -138,7 +134,7 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			-- SpawnSoldier("weapon_shotgun", Vector(1338, 1128, -192), 180, "room1_soldier")
 			-- SpawnSoldier("weapon_ar2", Vector(1248, 1216, -192), -90, "room1_soldier")
 			-- SpawnSoldier("weapon_ar2", Vector(1120, 1216, -192), -90, "room1_soldier")
-		end
+		-- end
 
 		if ent:GetName() == "stair_soldiers_spawner" and input:lower() == "forcespawn" then
 			local tbl = {
@@ -246,6 +242,5 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			end
 		end
 	end
-
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

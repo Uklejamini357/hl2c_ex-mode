@@ -100,7 +100,6 @@ end)
 
 -- Initialize entities
 function hl2cMapEdit()
-
 	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
@@ -120,97 +119,90 @@ function hl2cMapEdit()
 	else
 		timer.Remove("ActivateAntlionSpawningGlobal")
 	end
-
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
-function hl2cInitPostEntity()
-end
-hook.Add("InitPostEntity", "hl2cInitPostEntity", hl2cInitPostEntity)
-
 -- Accept input
 function hl2cAcceptInput(ent, input)
-	if ( !game.SinglePlayer() && ( ent:GetName() == "tutorial_exit_conditions" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("tutorial_follow_enemy")[1] ) ) then ents.FindByName("tutorial_follow_enemy")[1]:Fire( "Trigger" ) end
-		if ( IsValid( ents.FindByName("hudhint_squeezebait")[1] ) ) then ents.FindByName("hudhint_squeezebait")[1]:Fire( "ShowHudHint", "", 3 ) end
+	local entname = ent:GetName()
+	local inputlower = input:lower()
+
+	local e
+	if !game.SinglePlayer() and entname == "tutorial_exit_conditions" and inputlower == "enable" then
+		e = ents.FindByName("tutorial_follow_enemy")[1]
+		if IsValid(e) then e:Fire("Trigger") end
+		e = ents.FindByName("hudhint_squeezebait")[1]
+		if IsValid(e) then e:Fire("ShowHudHint", "", 3) end
+		return true
+	end
+
+	if !game.SinglePlayer() and entname == "aisc_vort_follow" and inputlower == "enable" then
+		e = ents.FindByName("aisc_vort_follow")[1]
+		if IsValid(e) then e:Fire("Kill") end
+		e = ents.FindByName("aigl_vort")[1]
+		if IsValid(e) then e:Fire("Activate") end
+		e = ents.FindByName("aigf_vort")[1]
+		if IsValid(e) then e:Fire("Kill") end
+		e = ents.FindByName("aisc_vort_lead_to_guard")[1]
+		if IsValid(e) then e:Fire("Enable") end
+		return true
+	end
+
+	if !game.SinglePlayer() and entname == "aisc_vort_lead_to_guard" and inputlower == "enable" then
+		e = ents.FindByName("aisc_vort_lead_to_guard")[1]
+		if IsValid(e) then e:Fire("Disable") end
+		e = ents.FindByName("aigl_vort")[1]
+		if IsValid(e) then e:Fire("Deactivate") end
+		e = ents.FindByName("aisc_vort_begin_extract")[1]
+		if IsValid(e) then e:Fire("Enable") end
+		return true
+	end
+
+	if !game.SinglePlayer() and entname == "aisc_vort_begin_extract" and inputlower == "enable" then
+		e = ents.FindByName("vortigaunt_bugbait")[1]
+		if IsValid(e) then e:Fire("ExtractBugbait", "citizen_ambush_guard", 0.1) end
+		return true
+	end
+
+	if !game.SinglePlayer() and entname == "aisc_waitforgordon" and inputlower == "enable" then
+		e = ents.FindByName("lcs_vort_in_camp_a")[1]
+		if IsValid(e) then e:Fire("Resume") end
+		e = ents.FindByName("aisc_waitforgordon")[1]
+		if IsValid(e) then e:Fire("Kill") end
+		return true
+	end
+
+	if !game.SinglePlayer() and entname == "aisc_gordonlostinterest" and inputlower == "enable" then
+		e = ents.FindByName("lcs_vort_interrupted")[1]
+		if IsValid(e) then e:Fire("Cancel") end
+		return true
+	end
+
+	if !game.SinglePlayer() and COAST_PREVENT_CAMP_DOOR and entname == "camp_door" and inputlower == "close" then
+		return true
+	end
+
+	if !game.SinglePlayer() and COAST_PREVENT_CAMP_DOOR and entname == "camp_door_blocker" and inputlower == "enable" then
 		return true
 	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_vort_follow" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("aisc_vort_follow")[1] ) ) then ents.FindByName("aisc_vort_follow")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("aigl_vort")[1] ) ) then ents.FindByName("aigl_vort")[1]:Fire( "Activate" ) end
-		if ( IsValid( ents.FindByName("aigf_vort")[1] ) ) then ents.FindByName("aigf_vort")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("aisc_vort_lead_to_guard")[1] ) ) then ents.FindByName("aisc_vort_lead_to_guard")[1]:Fire( "Enable" ) end
+	if !game.SinglePlayer() and COAST_PREVENT_CAMP_DOOR and entname == "antlion_cage_door" and inputlower == "close" then
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_vort_lead_to_guard" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("aisc_vort_lead_to_guard")[1] ) ) then ents.FindByName("aisc_vort_lead_to_guard")[1]:Fire( "Disable" ) end
-		if ( IsValid( ents.FindByName("aigl_vort")[1] ) ) then ents.FindByName("aigl_vort")[1]:Fire( "Deactivate" ) end
-		if ( IsValid( ents.FindByName("aisc_vort_begin_extract")[1] ) ) then ents.FindByName("aisc_vort_begin_extract")[1]:Fire( "Enable" ) end
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_vort_begin_extract" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("vortigaunt_bugbait")[1] ) ) then ents.FindByName("vortigaunt_bugbait")[1]:Fire( "ExtractBugbait", "citizen_ambush_guard", 0.1 ) end
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_waitforgordon" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("lcs_vort_in_camp_a")[1] ) ) then ents.FindByName("lcs_vort_in_camp_a")[1]:Fire( "Resume" ) end
-		if ( IsValid( ents.FindByName("aisc_waitforgordon")[1] ) ) then ents.FindByName("aisc_waitforgordon")[1]:Fire("Kill") end
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_gordonlostinterest" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("lcs_vort_interrupted")[1] ) ) then ents.FindByName("lcs_vort_interrupted")[1]:Fire( "Cancel" ) end
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && COAST_PREVENT_CAMP_DOOR && ( ent:GetName() == "camp_door" ) && ( string.lower(input) == "close" ) ) then
-	
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && COAST_PREVENT_CAMP_DOOR && ( ent:GetName() == "camp_door_blocker" ) && string.lower(input) == "enable" ) then
-	
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && COAST_PREVENT_CAMP_DOOR && ( ent:GetName() == "antlion_cage_door" ) && ( string.lower(input) == "close" ) ) then
-	
-		return true
-	
-	end
-
-	if ( !game.SinglePlayer() && ( ent:GetName() == "music_antlionguard_1" ) && ( string.lower(input) == "playsound" ) ) then
+	if !game.SinglePlayer() and entname == "music_antlionguard_1" and inputlower == "playsound" then
 		GAMEMODE:CreateSpawnPoint( Vector( 4393, 6603, 590 ), 65 )
 	end
 
-	if ( !game.SinglePlayer() && !COAST_PREVENT_CAMP_DOOR && ( ent:GetName() == "vortigaunt_bugbait" ) && ( string.lower(input) == "extractbugbait" ) ) then
-	
+	if !game.SinglePlayer() and !COAST_PREVENT_CAMP_DOOR and entname == "vortigaunt_bugbait" and inputlower == "extractbugbait" then
 		COAST_PREVENT_CAMP_DOOR = true
-	
 	end
 
-	if ent:GetName() == "citizen_ambush_guard" and input:lower() == "unburrow" then
+	if entname == "citizen_ambush_guard" and input:lower() == "unburrow" then
 		if GAMEMODE.EXMode then
 			timer.Simple(0, function() PrintMessage(3, "You") end)
-			timer.Simple(0.3, function() PrintMessage(3, "absolutely") end)
+			timer.Simple(0.3, function() PrintMessage(3, "have") end)
 			timer.Simple(0.6, function() PrintMessage(3, "FUCKED") end)
 			timer.Simple(0.9, function() PrintMessage(3, "UP") end)
 		end
@@ -220,10 +212,9 @@ function hl2cAcceptInput(ent, input)
 			net.WriteEntity(ent)
 			net.Broadcast()
 		end)
-
 	end
 
-	if ent:GetName() == "relay_guarddead" and string.lower(input) == "trigger" then
+	if entname == "relay_guarddead" and inputlower == "trigger" then
 		ents.FindByName("camp_door_blocker")[1]:Fire("Disable")
 		ents.FindByName("camp_setup")[1]:Fire("Trigger")
 
@@ -238,13 +229,13 @@ function hl2cAcceptInput(ent, input)
 		end)
 	end
 
-	if ent:GetName() == "camp_setup" and string.lower(input) == "trigger" then
+	if entname == "camp_setup" and inputlower == "trigger" then
 		for _,ply in ipairs(player.GetAll()) do
 			ply:Give("weapon_bugbait")
 		end
 	end
 
-	if ent:GetName() == "lcs_getgoing" and string.lower(input) == "start" then
+	if entname == "lcs_getgoing" and inputlower == "start" then
 		ents.FindByName("antlion_cage_door")[1]:Fire("Open")
 		ents.FindByName("gate_linear")[1]:Fire("Open")
 		ents.FindByName("gate_mover_blocker")[1]:Fire("disable")
@@ -255,7 +246,7 @@ function hl2cAcceptInput(ent, input)
 		end
 	end
 
-	if ent:GetName() == "vortigaunt_bugbait" and string.lower(input) == "startscripting" then
+	if entname == "vortigaunt_bugbait" and inputlower == "startscripting" then
 		return true
 	end
 

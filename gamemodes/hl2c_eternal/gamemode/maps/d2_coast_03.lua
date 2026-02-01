@@ -6,7 +6,6 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
-
 	ply:Give("weapon_crowbar")
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_smg1")
@@ -15,93 +14,79 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_physcannon")
 	ply:Give("weapon_shotgun")
 	ply:Give("weapon_ar2")
-
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 
 -- Initialize entities
 function hl2cMapEdit()
-
-	game.SetGlobalState( "no_seagulls_on_jeep", GLOBAL_ON )
+	game.SetGlobalState("no_seagulls_on_jeep", GLOBAL_ON)
 
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
-	ents.FindByName("jeep_filter")[1]:Fire( "AddOutput", "filterclass prop_vehicle_jeep_old" )
+	ents.FindByName("jeep_filter")[1]:Fire("AddOutput", "filterclass prop_vehicle_jeep_old")
 
 	if !game.SinglePlayer() then
-	
 		ents.FindByName("antlion_spawner")[1]:Fire( "AddOutput", "spawntarget jeep" )
-	
 	end
-
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
 function hl2cAcceptInput(ent, input, activator)
+	local entname = ent:GetName()
+	local inputlower = input:lower()
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_ingreeterrange" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("lcs_odessaGreeting")[1] ) ) then ents.FindByName("lcs_odessaGreeting")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("aisc_ingreeterrange")[1] ) ) then ents.FindByName("aisc_ingreeterrange")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("lcs_odessa_lead")[1] ) ) then ents.FindByName("lcs_odessa_lead")[1]:Fire( "Start", "", 0.1 ) end
+	if !game.SinglePlayer() and entname == "aisc_ingreeterrange" and inputlower == "enable" then
+		if IsValid(ents.FindByName("lcs_odessaGreeting")[1]) then ents.FindByName("lcs_odessaGreeting")[1]:Fire("Kill") end
+		if IsValid(ents.FindByName("aisc_ingreeterrange")[1]) then ents.FindByName("aisc_ingreeterrange")[1]:Fire("Kill") end
+		if IsValid(ents.FindByName("lcs_odessa_lead")[1]) then ents.FindByName("lcs_odessa_lead")[1]:Fire("Start", "", 0.1) end
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_pre_ingreeterrange" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("ss_gordongreet")[1] ) ) then ents.FindByName("ss_gordongreet")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("aisc_pre_ingreeterrange")[1] ) ) then ents.FindByName("aisc_pre_ingreeterrange")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("lcs_odessaGreeting")[1] ) ) then ents.FindByName("lcs_odessaGreeting")[1]:Fire("Start") end
+	if !game.SinglePlayer() and entname == "aisc_pre_ingreeterrange" and inputlower == "enable" then
+		if IsValid( ents.FindByName("ss_gordongreet")[1]) then ents.FindByName("ss_gordongreet")[1]:Fire("Kill") end
+		if IsValid( ents.FindByName("aisc_pre_ingreeterrange")[1]) then ents.FindByName("aisc_pre_ingreeterrange")[1]:Fire("Kill") end
+		if IsValid( ents.FindByName("lcs_odessaGreeting")[1]) then ents.FindByName("lcs_odessaGreeting")[1]:Fire("Start") end
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_gordontakesrpg" ) && string.lower(input) == "enable" ) then
-	
-		for _, ent in pairs( ents.FindByName("citizen_a_precmbt_*" ) ) do
-		
+	if !game.SinglePlayer() and entname == "aisc_gordontakesrpg" and inputlower == "enable" then
+		for _, ent in pairs(ents.FindByName("citizen_a_precmbt_*")) do
 			ent:Fire("Kill")
-		
 		end
-		if ( IsValid( ents.FindByName("player_leaves_house")[1] ) ) then ents.FindByName("player_leaves_house")[1]:Fire( "Enable" ) end
-		if ( IsValid( ents.FindByName("rocketman_scene_0")[1] ) ) then ents.FindByName("rocketman_scene_0")[1]:Fire( "Resume" ) end
-		if ( IsValid( ents.FindByName("spawner_rpg")[1] ) ) then ents.FindByName("spawner_rpg")[1]:Fire( "ForceSpawn" ) end
-		if ( IsValid( ents.FindByName("pd_rpg")[1] ) ) then ents.FindByName("pd_rpg")[1]:Fire("Kill") end
+		if IsValid(ents.FindByName("player_leaves_house")[1]) then ents.FindByName("player_leaves_house")[1]:Fire( "Enable" ) end
+		if IsValid(ents.FindByName("rocketman_scene_0")[1]) then ents.FindByName("rocketman_scene_0")[1]:Fire( "Resume" ) end
+		if IsValid(ents.FindByName("spawner_rpg")[1]) then ents.FindByName("spawner_rpg")[1]:Fire( "ForceSpawn" ) end
+		if IsValid(ents.FindByName("pd_rpg")[1]) then ents.FindByName("pd_rpg")[1]:Fire("Kill") end
 		return true
 	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_odessapostgunship" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("aisc_odessapostgunshipignored")[1] ) ) then ents.FindByName("aisc_odessapostgunshipignored")[1]:Fire( "Enable" ) end
-		if ( IsValid( ents.FindByName("tm_gatekeeper")[1] ) ) then ents.FindByName("tm_gatekeeper")[1]:Fire( "ForceSpawn" ) end
-		if ( IsValid( ents.FindByName("aisc_odessapostgunship")[1] ) ) then ents.FindByName("aisc_odessapostgunship")[1]:Fire("Kill") end
-		if ( IsValid( ents.FindByName("rocketman_gunship1")[1] ) ) then ents.FindByName("rocketman_gunship1")[1]:Fire( "Resume" ) end
-		if ( IsValid( ents.FindByName("ss_odessa_radio")[1] ) ) then ents.FindByName("ss_odessa_radio")[1]:Fire( "CancelSequence" ) end
-		if ( IsValid( ents.FindByName("post_gunship_jeep_relay")[1] ) ) then ents.FindByName("post_gunship_jeep_relay")[1]:Fire("Kill") end
+	if !game.SinglePlayer() and entname == "aisc_odessapostgunship" and inputlower == "enable" then
+		if IsValid(ents.FindByName("aisc_odessapostgunshipignored")[1]) then ents.FindByName("aisc_odessapostgunshipignored")[1]:Fire("Enable") end
+		if IsValid(ents.FindByName("tm_gatekeeper")[1]) then ents.FindByName("tm_gatekeeper")[1]:Fire("ForceSpawn") end
+		if IsValid(ents.FindByName("aisc_odessapostgunship")[1]) then ents.FindByName("aisc_odessapostgunship")[1]:Fire("Kill") end
+		if IsValid(ents.FindByName("rocketman_gunship1")[1]) then ents.FindByName("rocketman_gunship1")[1]:Fire("Resume") end
+		if IsValid(ents.FindByName("ss_odessa_radio")[1]) then ents.FindByName("ss_odessa_radio")[1]:Fire("CancelSequence") end
+		if IsValid(ents.FindByName("post_gunship_jeep_relay")[1]) then ents.FindByName("post_gunship_jeep_relay")[1]:Fire("Kill") end
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "aisc_odessapostgunshipignored" ) && string.lower(input) == "enable" ) then
-	
-		if ( IsValid( ents.FindByName("lr_odessa_goodbye")[1] ) ) then ents.FindByName("lr_odessa_goodbye")[1]:Fire( "Trigger", "", 1 ) end
-		if ( IsValid( ents.FindByName("odessa_goodbye")[1] ) ) then ents.FindByName("odessa_goodbye")[1]:Fire( "Cancel" ) end
-		if ( IsValid( ents.FindByName("odessa_getyourcar")[1] ) ) then ents.FindByName("odessa_getyourcar")[1]:Fire( "Cancel" ) end
-		if ( IsValid( ents.FindByName("lr_odessa_getyourcar")[1] ) ) then ents.FindByName("lr_odessa_getyourcar")[1]:Fire( "Trigger", "", 0.5 ) end
-		if ( IsValid( ents.FindByName("lr_vort_goodbye")[1] ) ) then ents.FindByName("lr_vort_goodbye")[1]:Fire( "Trigger", "", 1.5 ) end
-		if ( IsValid( ents.FindByName("vort_goodbye")[1] ) ) then ents.FindByName("vort_goodbye")[1]:Fire( "Cancel" ) end
+	if !game.SinglePlayer() and entname == "aisc_odessapostgunshipignored" and inputlower == "enable" then
+		if IsValid(ents.FindByName("lr_odessa_goodbye")[1]) then ents.FindByName("lr_odessa_goodbye")[1]:Fire("Trigger", "", 1) end
+		if IsValid(ents.FindByName("odessa_goodbye")[1]) then ents.FindByName("odessa_goodbye")[1]:Fire("Cancel") end
+		if IsValid(ents.FindByName("odessa_getyourcar")[1]) then ents.FindByName("odessa_getyourcar")[1]:Fire("Cancel") end
+		if IsValid(ents.FindByName("lr_odessa_getyourcar")[1]) then ents.FindByName("lr_odessa_getyourcar")[1]:Fire("Trigger", "", 0.5) end
+		if IsValid(ents.FindByName("lr_vort_goodbye")[1]) then ents.FindByName("lr_vort_goodbye")[1]:Fire("Trigger", "", 1.5) end
+		if IsValid(ents.FindByName("vort_goodbye")[1]) then ents.FindByName("vort_goodbye")[1]:Fire("Cancel") end
 		return true
-	
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "basement_gordon_first_entered" ) && ( string.lower(input) == "trigger" ) ) then
+	if !game.SinglePlayer() and entname == "basement_gordon_first_entered" and inputlower == "trigger" then
 		ALLOWED_VEHICLE = nil
-		PrintMessage( HUD_PRINTTALK, "Vehicle spawning has been disabled." )
-	
+		PrintMessage(HUD_PRINTTALK, "Vehicle spawning has been disabled.")
+
 		for _, ply in ipairs(player.GetLiving()) do
 			if ply == activator then continue end
 			if IsValid(ply.vehicle) or !ply:InVehicle() then
@@ -118,16 +103,15 @@ function hl2cAcceptInput(ent, input, activator)
 		ent:Fire("kill")
 	end
 
-	if !game.SinglePlayer() && ( ent:GetName() == "spawner_rpg" ) && ( string.lower(input) == "forcespawn" ) then
+	if !game.SinglePlayer() and entname == "spawner_rpg" and inputlower == "forcespawn" then
 		for _, ply in ipairs(player.GetAll()) do
 			ply:Give("weapon_rpg")
 		end
 	end
 
-	if !game.SinglePlayer() and ent:GetName() == "lr_odessa_goodbye" and string.lower(input) == "trigger" then
+	if !game.SinglePlayer() and entname == "lr_odessa_goodbye" and inputlower == "trigger" then
 		ALLOWED_VEHICLE = "Jeep"
-		PrintMessage( HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3)." )
+		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
 	end
-
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
