@@ -51,24 +51,26 @@ local function SpawnSoldier(wep, pos, ang, id)
 	ent:SetAngles(Angle(0, ang, 0))
 	ent:SetName(id)
 	ent:Spawn()
+
+	return ent
 end
 
 -- Accept input
 function hl2cAcceptInput( ent, input, activator, caller, value )
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "lcs_np_meetup03" ) && ( string.lower(input) == "resume" ) ) then
+	if !game.SinglePlayer() and ent:GetName() == "lcs_np_meetup03" and string.lower(input) == "resume" then
 		for _, ply in ipairs(player.GetAll()) do
-			ply:SetVelocity( Vector( 0, 0, 0 ) )
-			ply:SetPos( Vector( 1570, 706, -680 ) )
-			ply:SetEyeAngles( Angle( 0, -180, 0 ) )
+			ply:SetVelocity(Vector(0, 0, 0))
+			ply:SetPos(Vector(1570, 706, -680))
+			ply:SetEyeAngles(Angle(0, -180, 0))
 		end
 	end
 
-	-- if ( !game.SinglePlayer() && ( ent:GetName() == "introom_door_1" ) && ( string.lower(input) == "setanimation" ) && ( value == "close" ) ) then
-		-- return true
+	-- if !game.SinglePlayer() and ent:GetName() == "introom_door_1" and string.lower(input) == "setanimation" and value == "close" then
+	-- 	-- return true
 	-- end
 
-	if ( !game.SinglePlayer() && ( ( ent:GetName() == "door_controlroom_1" ) || ( ent:GetName() == "door_room1_gate" ) ) && ( string.lower(input) == "close" ) ) then
+	if !game.SinglePlayer() and (ent:GetName() == "door_controlroom_1" or ent:GetName() == "door_room1_gate") and string.lower(input) == "close" then
 		return true
 	end
 
@@ -82,6 +84,37 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 			if ply == activator then continue end
 			ply:SetPos(Vector(500, 100, 0))
 		end
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "lcs_np_cell01b" and input:lower() == "start" then
+		timer.Create("eli_scene.timeout", 15, 1, function()
+			if !IsValid(ent) then return end
+			ent:Fire("Cancel")
+			ents.FindByName("lcs_np_cell02")[1]:Fire("Start")
+		end)
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "lcs_np_cell01b" and input:lower() == "cancel" then
+		if timer.Exists("eli_scene.timeout") then
+			timer.Remove("eli_scene.timeout")
+		end
+	end
+
+	if !game.SinglePlayer() and ent:GetName() == "lcs_np_cell02" and input:lower() == "start" then
+		ents.FindByName("introom_door_1")[1]:Fire("SetAnimation", "close")
+		ents.FindByName("introom_door_1")[1]:Fire("Close")
+
+		for _,ply in ipairs(player.GetAll()) do
+			if ply == activator then continue end
+			ply:SetPos(Vector(550, 106, 0))
+		end
+
+		timer.Create("eli_scene_02.timeout", 90, 1, function()
+			if !IsValid(ent) then return end
+			ents.FindByName("alyx")[1]:SetPos(Vector(580, 204, 0))
+			-- ent:Fire("Cancel")
+			-- ents.FindByName("lcs_np_cell02")[1]:Fire("Start")
+		end)
 	end
 
 	if GAMEMODE.EXMode then
@@ -108,10 +141,109 @@ function hl2cAcceptInput( ent, input, activator, caller, value )
 		end
 
 		if ent:GetName() == "stair_soldiers_spawner" and input:lower() == "forcespawn" then
-			SpawnSoldier("weapon_ar2", Vector(-144, 864, 0), 90, "room2_soldier")
-			SpawnSoldier("weapon_ar2", Vector(-256, 848, 0), 90, "room2_soldier")
-			SpawnSoldier("weapon_shotgun", Vector(128, 624, 0), 180, "room2_soldier")
-			SpawnSoldier("weapon_shotgun", Vector(128, 720, 0), 180, "room2_soldier")
+			local tbl = {
+				SpawnSoldier("weapon_ar2", Vector(-144, 864, 0), 90, "room2_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(-256, 848, 0), 90, "room2_soldier"),
+				SpawnSoldier("weapon_shotgun", Vector(128, 624, 0), 180, "room2_soldier"),
+				SpawnSoldier("weapon_shotgun", Vector(128, 720, 0), 180, "room2_soldier")
+			}
+
+			local alyx = ents.FindByName("alyx")[1]
+			for _,ent in ipairs(tbl) do
+				if alyx then
+					ent:SetEnemy(alyx)
+					ent:UpdateEnemyMemory(alyx, alyx:GetPos())
+				end
+
+				ent:SetLastPosition(Vector(816, 640, -192))
+				ent:SetSchedule(SCHED_FORCED_GO_RUN)
+			end
+		end
+
+		-- first gate (I wish this section had nodegraph.)
+		if ent:GetName() == "logic_room1_gate" and input:lower() == "trigger" then
+			local tbl = {
+				SpawnSoldier("weapon_ar2", Vector(508, -1700, 0), 90, "gate1_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(562, -1700, 0), 90, "gate1_soldier"),
+			}
+
+			for _,ent in ipairs(tbl) do
+				ent:SetEnemy(activator)
+				ent:UpdateEnemyMemory(activator, activator:GetPos())
+
+				ent:SetLastPosition(Vector(536, -1008, 0))
+				ent:SetSchedule(SCHED_FORCED_GO_RUN)
+			end
+		end
+
+		-- blocked gate
+		if ent:GetName() == "logic_room1_blockedgate" and input:lower() == "trigger" then
+			local tbl = {
+				SpawnSoldier("weapon_ar2", Vector(776, -2288, 0), 180, "blockedgate1_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(776, -2432, 0), 180, "blockedgate1_soldier"),
+			}
+
+			for _,ent in ipairs(tbl) do
+				ent:SetEnemy(activator)
+				ent:UpdateEnemyMemory(activator, activator:GetPos())
+
+				ent:SetLastPosition(Vector(530, -2156, 0))
+				ent:SetSchedule(SCHED_FORCED_GO_RUN)
+			end
+		end
+
+		-- vent
+		if ent:GetName() == "lcs_np_al_room2_vent" and input:lower() == "start" then
+			SpawnSoldier("weapon_ar2", Vector(2032, -2050, -240), -135, "gate2_solier")
+		end
+
+		-- 2nd gate
+		if ent:GetName() == "lcs_np_al_room2_gate" and input:lower() == "start" then
+		end
+
+		-- ambush
+		if ent:GetName() == "logic_room2_ambush" and input:lower() == "trigger" then
+			local tbl = {
+				SpawnSoldier("weapon_ar2", Vector(1165, -2839, -240), 180, "ambush_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(954, -2716, -240), 180, "ambush_soldier"),
+				SpawnSoldier("weapon_shotgun", Vector(954, -2614, -240), 180, "ambush_soldier"),
+				SpawnSoldier("weapon_shotgun", Vector(1216, -2920, -240), 90, "ambush_soldier"),
+				SpawnSoldier("weapon_shotgun", Vector(1216, -2980, -240), 90, "ambush_soldier"),
+			}
+
+			for _,ent in ipairs(tbl) do
+				ent:SetEnemy(activator)
+				ent:UpdateEnemyMemory(activator, activator:GetPos())
+
+				ent:SetLastPosition(Vector(1494, -2428, -240))
+				ent:SetSchedule(SCHED_FORCED_GO_RUN)
+			end
+		end
+		
+		-- shield off
+		if ent:GetName() == "physbox_room3_plug" and input:lower() == "enablemotion" then
+			GAMEMODE.MapVars.WhoDisabledShield = activator
+		end
+
+		if ent:GetName() == "logic_room3_field_disabled" and input:lower() == "trigger" then
+			local tbl = {
+				SpawnSoldier("weapon_shotgun", Vector(660, -2786, -240), -45, "forcefield_soldier"),
+				SpawnSoldier("weapon_shotgun", Vector(660, -2716, -240), -90, "forcefield_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(416, -2592, -240), 0, "forcefield_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(416, -2656, -240), 0, "forcefield_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(736, -1940, -240), -90, "forcefield_soldier"),
+				SpawnSoldier("weapon_ar2", Vector(580, -1940, -240), -90, "forcefield_soldier"),
+			}
+
+			for _,ent in ipairs(tbl) do
+				if GAMEMODE.MapVars.WhoDisabledShield then
+					ent:SetEnemy(GAMEMODE.MapVars.WhoDisabledShield)
+					ent:UpdateEnemyMemory(GAMEMODE.MapVars.WhoDisabledShield, GAMEMODE.MapVars.WhoDisabledShield:GetPos())
+				end
+
+				ent:SetLastPosition(Vector(1158, -3188, -240))
+				ent:SetSchedule(SCHED_FORCED_GO_RUN)
+			end
 		end
 	end
 

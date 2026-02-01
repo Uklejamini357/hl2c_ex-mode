@@ -243,7 +243,7 @@ function GM:IsSpecialPerson(ply, image)
 --you can add new special person table by yourself but you must keep the original ones and the new ones must be after steamid
 	if ply:SteamID64() == "76561198274314803" then
 		img = "icon16/award_star_gold_3.png"
-		tooltip = "HL2c Eternal coder"
+		tooltip = "The Eternal"
 	elseif ply:SteamID64() == "76561198058929932" then
 		img = "icon16/medal_gold_3.png"
 		tooltip = "Original Creator of Half-Life 2 Campaign"

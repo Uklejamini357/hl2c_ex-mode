@@ -2277,8 +2277,11 @@ end)
 concommand.Add("debug_gettracehitpos", function(pl)
 	if !IsValid(pl) then return end
 	local pos = pl:GetEyeTrace().HitPos
+	pos = pos / 2
 	pos.x = math.Round(pos.x)
 	pos.y = math.Round(pos.y)
 	pos.z = math.Round(pos.z)
+	pos = pos * 2
 	pl:PrintMessage(2, Format("Vector(%d, %d, %d)", pos.x, pos.y, pos.z))
+	pl:SendLua(Format("SetClipboardText(\"Vector(%d, %d, %d)\")", pos.x, pos.y, pos.z))
 end)
