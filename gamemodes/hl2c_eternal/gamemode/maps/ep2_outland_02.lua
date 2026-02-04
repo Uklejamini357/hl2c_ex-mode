@@ -1,6 +1,4 @@
 
-NEXT_MAP = "ep2_outland_03"
-
 if CLIENT then return end
 
 CUSTOM_NPC_KILLED_MESSAGE = "You failed to protect the vortigaunt from the antlion attacks!"
@@ -28,6 +26,11 @@ function hl2cPreMapEdit()
 		INFO_PLAYER_SPAWN = {Vector(-3100, -9476, -3097), 0}
 		NEXT_MAP = "ep2_outland_05"
 		GAMEMODE.XP_REWARD_ON_MAP_COMPLETION = 0
+	else
+		NEXT_MAP = "ep2_outland_03"
+		TRIGGER_CHECKPOINT = {
+			{Vector(-606, -9412, -712), Vector(-396, -9796, -524)}
+		}
 	end
 end
 hook.Add("PreMapEdit", "hl2cPreMapEdit", hl2cPreMapEdit)
@@ -56,6 +59,14 @@ function hl2cOnEntityCreated(ent)
 end
 hook.Add("OnEntityCreated", "hl2cOnEntityCreated", hl2cOnEntityCreated)
 
+-- Initialize entities
+function hl2cEntityTakeDamage(ent, dmginfo)
+	if ent:IsNPC() and (ent:GetName() == "sheckley" or ent:GetName() == "griggs") then
+		return true
+	end
+end
+hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage)
+
 
 -- Accept input
 function hl2cAcceptInput(ent, input, activator)
@@ -80,6 +91,15 @@ function hl2cAcceptInput(ent, input, activator)
 		GAMEMODE:CreateSpawnPoint(Vector(-3106, -9474, -894), 0)
 	end
 
+	if !game.SinglePlayer() and ent:GetName() == "lcs_vort_revive" and string.lower(input) == "start" then
+		for _,ply in ipairs(player.GetLiving()) do
+			if ply == activator then continue end
+
+			ply:SetPos(Vector(-3024, -9476, -900))
+			ply:SetEyeAngles(Angle(0, 0, 0))
+		end
+	end
+
 	if !game.SinglePlayer() and ent:GetName() == "lcs_vort_goodbye" and string.lower(input) == "start" then
 		for _,ply in ipairs(player.GetLiving()) do
 			if ply == activator then continue end
@@ -95,14 +115,14 @@ function hl2cAcceptInput(ent, input, activator)
 
 	if GAMEMODE.EXMode then
 		if ent:GetName() == "turret_arena_vcd_1" and input:lower() == "start" then
-			timer.Simple(1.3, function()
+			timer.Simple(3.3, function()
 				if !IsValid(ent) then return end
-				-- PrintMessage(3, "Chapter B2")
+				PrintMessage(3, "Chapter B2")
 			end)
 
-			timer.Simple(3.4, function()
+			timer.Simple(5.4, function()
 				if !IsValid(ent) then return end
-				-- PrintMessage(3, "The eternal loop >:)")
+				PrintMessage(3, "Prepare for unforseen consequences.")
 			end)
 		end
 	end

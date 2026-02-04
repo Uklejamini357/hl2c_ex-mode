@@ -1,6 +1,5 @@
 
 function GM:MakeOptions()
-	
 	local Window = vgui.Create("DFrame")
 	local wide,tall = math.min(ScrW(), 400), math.min(ScrH(), 440)
 	Window:SetSize(wide, tall)
@@ -8,8 +7,17 @@ function GM:MakeOptions()
 	Window:SetTitle("Options")
 	Window:SetVisible(true)
 	Window:SetDraggable(false)
-	Window:SetDeleteOnClose(false)
+	-- Window:SetDeleteOnClose(true)
 	Window:MakePopup()
+	Window:SetKeyBoardInputEnabled(false)
+	Window.Think = function(this)
+		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
+			timer.Simple(0, function()
+				this:Close()
+			end)
+			gui.HideGameUI()
+		end
+	end
 
 	local list = vgui.Create("DPanelList", Window)
 	list:EnableVerticalScrollbar()

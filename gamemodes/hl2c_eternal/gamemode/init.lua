@@ -516,7 +516,7 @@ function GM:GrabAndSwitch(instant)
 
 
 		if faststart then
-			PrintTranslatedMessage(3, "hardcore_again_01")
+			PrintTranslatedMessage(3, "hardcore_again")
 
 			timer.Simple(0.7, function()
 				for _,pl in player.Iterator() do
@@ -905,6 +905,12 @@ function GM:MapEntitiesSpawned()
 		fap:Fire("Open")
 	end
 
+	-- areaportal windows
+	for _, fap in ipairs(ents.FindByClass("func_areaportal")) do
+		fap:Fire("SetFadeStartDistance", "16384")
+		fap:Fire("SetFadeEndDistance", "16384")
+	end
+
 	-- Call a map edit (used by map lua hooks)
 	hook.Run("MapEdit")
 end
@@ -1269,6 +1275,8 @@ function GM:PlayerInitialSpawn(ply)
 
 	ply.UnlockedPerks = {}
 	ply.DisabledPerks = {}
+
+	-- ply.Achievements = {}
 
 	ply.ConfigData = {}
 
@@ -1909,6 +1917,10 @@ function GM:ShowSpare1(ply)
 		ply.vehicle:Spawn()
 		ply.vehicle:Activate()
 		if ALLOWED_VEHICLE == "Jeep" then ply.vehicle:SetBodygroup(1, 1) end
+		-- if ALLOWED_VEHICLE == "Jalopy" then
+		-- 	ply.vehicle:Fire("UnlockEntrance")
+		-- 	ply.vehicle:Fire("UnlockExit")
+		-- end
 		ply.vehicle.creator = ply
 		ply:EnterVehicle(ply.vehicle)
 	end
@@ -2114,6 +2126,11 @@ end
 function GM:AcceptInput(ent, input, activator, caller, value)
 	if ent:GetClass() == "func_areaportal" and (input:lower() == "close" or input:lower() == "toggle") then
 		ent:Fire("Open", nil, 0.01)
+		return true
+	end
+
+	if ent:GetClass() == "func_areaportalwindow" and (input:lower() == "setfadestartdistance" or input:lower() == "setfadeenddistance") and tonumber(value) ~= 16384 then
+		ent:Fire(input, 16384, 0.01)
 		return true
 	end
 

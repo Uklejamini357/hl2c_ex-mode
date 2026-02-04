@@ -5,7 +5,6 @@ ENT.Type = "brush"
 
 -- Called when the entity first spawns
 function ENT:Initialize()
-
 	self.ipsLocation = Vector( self.pos.x, self.pos.y, self.min.z + 8 )
 
 	local w = self.max.x - self.min.x
@@ -15,21 +14,18 @@ function ENT:Initialize()
 	local min = Vector( 0 - ( w / 2 ), 0 - ( l / 2 ), 0 - ( h / 2 ) )
 	local max = Vector( w / 2, l / 2, h / 2 ) 
 
-	self:DrawShadow( false )
-	self:SetCollisionBounds( min, max )
-	self:SetSolid( SOLID_BBOX )
-	self:SetCollisionGroup( COLLISION_GROUP_WORLD )
-	self:SetMoveType( 0 )
-	self:SetTrigger( true )
-
+	self:DrawShadow(false)
+	self:SetCollisionBounds(min, max)
+	self:SetSolid(SOLID_BBOX)
+	self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+	self:SetMoveType(0)
+	self:SetTrigger(true)
 end
 
 
 -- Called when an entity touches it
 function ENT:StartTouch( ent )
-
 	if IsValid(ent) && ent:IsPlayer() && ( ent:Team() == TEAM_ALIVE ) && !self.triggered && (ent:GetMoveType() != MOVETYPE_NOCLIP || ent:InVehicle()) then
-	
 		-- Checkpoint was triggered
 		self.triggered = true
 	
@@ -37,40 +33,31 @@ function ENT:StartTouch( ent )
 		if self.OnTouchRun then
 			self:OnTouchRun()
 		end
-	
+
 		-- Get the touching entity angles
 		local ang = ent:GetAngles()
-	
 		-- Skip creating a spawn point
-		if ( !self.skipSpawnpoint ) then
-		
-			GAMEMODE:CreateSpawnPoint( self.ipsLocation, ang.y )
-		
+		if !self.skipSpawnpoint then
+			GAMEMODE:CreateSpawnPoint(self.ipsLocation, ang.y)
 		end
 	
 		-- Each individual player
 		for _, ply in ipairs(player.GetAll()) do
-		
 			-- Set player positions
 			if ( IsValid( ply ) && ( ply != ent ) && ( ply:Team() == TEAM_ALIVE ) ) then
-			
 				if ( IsValid( ply:GetVehicle() ) ) then
-				
 					ply:ExitVehicle()
 					ply:GetVehicle():Remove()
-				
 				end
-			
 				ply:SetPos( self.ipsLocation )
 				ply:SetAngles( ang )
-			
 			end
 		
 			-- Dead players become alive again
 			if ( GAMEMODE.CheckpointRespawn && IsValid( ply ) && ( ply != ent ) && ( ply:Team() == TEAM_DEAD ) ) then
 				deadPlayers = {}
-			
-				ply:SetTeam( TEAM_ALIVE )
+
+				ply:SetTeam(TEAM_ALIVE)
 				ply:Spawn()
 			end
 		end

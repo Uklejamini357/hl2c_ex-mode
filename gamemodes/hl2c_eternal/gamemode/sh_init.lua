@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^inf.2" -- when will it end...
-GM.DateVer = "28-01-2026"
+GM.Version = "0.inf^inf.inf" -- when will it end...
+GM.DateVer = "03-02-2026"
 
 -- even crazier things inbound... beware!
 
@@ -102,7 +102,7 @@ end
 
 -- Called when a gravity gun is attempting to punt something
 function GM:GravGunPunt(ply, ent) 
-	if (IsValid(ent) && ent:IsVehicle() && (ent != ply.vehicle) && IsValid(ent.creator)) then
+	if IsValid(ent) and ent:IsVehicle() and ent != ply.vehicle and IsValid(ent.creator) then
 		return false
 	end
 
@@ -112,7 +112,7 @@ end
 
 -- Called when a physgun tries to pick something up
 function GM:PhysgunPickup(ply, ent)
-	if (string.find(ent:GetClass(), "trigger_") || (ent:GetClass() == "player")) then
+	if string.find(ent:GetClass(), "trigger_") or ent:GetClass() == "player" then
 		return false
 	end
 
@@ -124,8 +124,7 @@ hook.Add("CanProperty", "Hl2ce_CanProperty", function(ply, property, ent)
 end)
 
 hook.Add("EntityEmitSound", "EXModeChanges", function(snd)
-	-- PrintTable(snd)
-	-- print(snd.SoundName)
+	if !GAMEMODE.EXMode then return end
 	if snd.SoundName == "npc/attack_helicopter/aheli_weapon_fire_loop3.wav" then
 		snd.Pitch = snd.Pitch * 0.65
 		return true
@@ -151,8 +150,7 @@ end
 
 -- Players should never collide with each other or NPC's
 function GM:ShouldCollide(entA, entB)
-
-	if IsValid(entA) && IsValid(entB) then
+	if IsValid(entA) and IsValid(entB) then
 		local classa,classb = entA:GetClass(),entB:GetClass()
 		-- Prevent antlion guards from colliding each other
 		if classa == classb or classa == "npc_antlion" and classb == "npc_antlionguard" or classa == "npc_antlionguard" and classb == "npc_antlion" then
@@ -180,10 +178,6 @@ end
 
 -- Called when a player is being attacked
 function GM:PlayerShouldTakeDamage(ply, attacker)
-	-- if ((ply:Team() ~= TEAM_ALIVE) or !ply.vulnerable or (attacker:IsPlayer() and (attacker ~= ply)) or (attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer()) or attacker:IsGodlikeNPC() or attacker:IsFriendlyNPC()) then	
-	-- 	return false
-	-- end
-
 	if ply.invulnerableTime and ply.invulnerableTime > CurTime() then
 		return false
 	end

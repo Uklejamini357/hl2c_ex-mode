@@ -74,6 +74,7 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 		return true
 	end
 
+	-- sometimes it bugs out if you plug it in too fast
 	if ent:GetName() == "SS_cable_fix_begin" then
 		if input:lower() == "cancelsequence" then
 			local fixent = ents.FindByName("lcs_alyx_monitorsout")[1]

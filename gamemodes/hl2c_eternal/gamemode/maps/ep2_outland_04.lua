@@ -24,6 +24,9 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 	ents.FindByName("loaditems_template")[1]:Remove()
+	if !game.SinglePlayer() then
+		ents.FindByName("vort_freeman_death_vcd")[1]:Remove()
+	end
 
 	local vort = ents.Create("npc_vortigaunt")
 	vort:SetPos(Vector(4244, -1708, 384))
@@ -45,24 +48,43 @@ end
 hook.Add("OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled)
 
 
+local dontremove = {
+	"vort_dont_kill_guardian_vcd",
+	"vort_elevator_hint_lcs",
+	"vort_goodjob_vcd_1"
+}
+
 -- Accept input
 function hl2cAcceptInput(ent, input, activator)
-	if ent:GetName() == "vort_elevator_dialog_lcs" and input:lower() == "start" then
-		if !game.SinglePlayer() then
+	-- vort fallls to their death
+	if !game.SinglePlayer() then
+		if table.HasValue(dontremove, ent:GetName()) and (input:lower() == "cancel" or input:lower() == "kill") then
+			return true
+		end
+
+		if ent:GetName() == "guardcaveentry_block_player" and input:lower() == "enable" then
+			return true
+		end
+
+		if ent:GetName() == "grub_tunnel_1_playerblock" and input:lower() == "enable" then
+			return true
+		end
+
+		if ent:GetName() == "grub_tunnel_2_playerblock" and input:lower() == "enable" then
+			return true
+		end
+
+		if ent:GetName() == "guard_leap_3_playerblock" and input:lower() == "enable" then
+			return true
+		end
+
+		if ent:GetName() == "vort_elevator_dialog_lcs" and input:lower() == "start" then
 			for _,ply in ipairs(player.GetLiving()) do
-				if ply == activator then return end
+				if ply == activator then continue end
 				ply:SetPos(Vector(4910, -1609, -2244))
 				ply:SetEyeAngles(Angle(0,0,0))
 			end
 		end
-	end
-
-	if !game.SinglePlayer() and ent:GetName() == "grub_tunnel_1_playerblock" and input:lower() == "enable" then
-		return true
-	end
-
-	if !game.SinglePlayer() and ent:GetName() == "grub_tunnel_2_playerblock" and input:lower() == "enable" then
-		return true
 	end
 
 	if GAMEMODE.EXMode then

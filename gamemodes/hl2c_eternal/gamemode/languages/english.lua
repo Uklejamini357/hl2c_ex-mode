@@ -103,6 +103,7 @@ LANG.x_completed_map = "%s has completed the map. (%s) [%i of %i]"
 
 
 LANG.difficulty = "Difficulty:"
+LANG.difficulty_eff = "Effective:"
 LANG.you_lost = "You lost!"
 LANG.all_players_died = "All players have died!"
 LANG.important_npc_died = "Important character has died!"

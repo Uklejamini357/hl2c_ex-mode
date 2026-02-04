@@ -139,8 +139,10 @@ function GM:HUDPaint()
 		end
 	end
 
+	local cmenu = ContextMenu and ContextMenu:IsValid()
+
 	local colordifference
-	if FORCE_DIFFICULTY and ContextMenu and ContextMenu:IsValid() then
+	if FORCE_DIFFICULTY and cmenu then
 		colordifference = FORCE_DIFFICULTY > 1 and Color(255, 755 - FORCE_DIFFICULTY*500, 0) or FORCE_DIFFICULTY < 1 and Color(FORCE_DIFFICULTY*1020-765, 255, 0) or Color(255, 255, 0)
 		colordifference.a = 155
 		draw.DrawText(Format("Map forced difficulty bonus: %s%%", FormatNumber(math.Round(FORCE_DIFFICULTY * 100, 2))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 - 15, colordifference, TEXT_ALIGN_CENTER)
@@ -149,7 +151,7 @@ function GM:HUDPaint()
 	local diff_difference = infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifference)
 	local diff_difference_total = infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifferenceTotal)
 
-	if (ContextMenu and ContextMenu:IsValid()) or not hl2ce_cl_nohuddifficulty:GetBool() then
+	if cmenu or not hl2ce_cl_nohuddifficulty:GetBool() then
 		colordifference = !hl2ce_cl_noshowdifficultychange:GetBool() and self.DifficultyDifferenceTimeChange + 3 >= CurTime() and (diff_difference < 0 and Color(255, 220-((self.DifficultyDifferenceTimeChange+3-CurTime())*110), 0) or Color(255-((self.DifficultyDifferenceTimeChange+3-CurTime())*255/2), 220, 0)) or Color(255, 220, 0)
 		colordifference.a = 155
 
@@ -186,8 +188,8 @@ function GM:HUDPaint()
 			draw.DrawText(s, "TargetIDSmall", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT )
 		end
 
-		if (ContextMenu and ContextMenu:IsValid()) and self:GetEffectiveDifficulty(pl):log10() ~= (d/100):log10() then
-			draw.DrawText(Format("(Effective: %s%%)", FormatNumber(self:GetEffectiveDifficulty(pl)*100)), "TargetIDSmall", ScrW() / 2, ScrH() / 6 - 15, c, TEXT_ALIGN_CENTER)
+		if cmenu and self:GetEffectiveDifficulty(pl):log10() ~= (d/100):log10() then
+			draw.DrawText("("..translate.Get("difficulty_eff").." "..FormatNumber(self:GetEffectiveDifficulty(pl)*100).."%)", "TargetIDSmall", ScrW() / 2, ScrH() / 6 - 15, c, TEXT_ALIGN_CENTER)
 		end
 
 		if !hl2ce_cl_noshowdifficultychange:GetBool() and self.DifficultyDifferenceTimeChange + 3 >= CurTime() and self.DifficultyDifference ~= 0 then

@@ -27,6 +27,7 @@ function hl2cMapEdit()
 
 	local vort = ents.Create("npc_vortigaunt")
 	vort:SetPos(Vector(-1301, -3885, -903))
+	vort:SetKeyValue("GameEndAlly", "1")
 	vort:SetName("vort")
 	vort:Spawn()
 
@@ -36,6 +37,8 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
-
+	if !game.SinglePlayer() and ent:GetName() == "bucket_tunnel_clip" and input:lower() == "enable" then
+		return true
+	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
