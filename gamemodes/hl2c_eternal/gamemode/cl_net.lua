@@ -95,6 +95,11 @@ net.Receive("hl2ce_fail", function(len)
     end)
 
     local s2 = translate.Get(net.ReadString())
+    if s2 == "" then
+        chat.AddText(Color(255,0,0), s1)
+        return
+    end
+
     local len = utf8.len(s2)
     local font = "hl2ce_font"
     local createtime = CurTime()
@@ -123,6 +128,7 @@ net.Receive("hl2ce_fail", function(len)
     failtext:AlphaTo(0, 1, time, function(_, self)
         self:Remove()
     end)
+
 
     chat.AddText(Color(255,0,0), s1, " - ", Color(200,50,50), s2)
 end)

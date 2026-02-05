@@ -36,7 +36,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput(ent, input)
+function hl2cAcceptInput(ent, input, activator)
 	if GAMEMODE.EXMode then
 		if ent:GetName() == "lcs_welder_bottle" and input:lower() == "start" then
 			PrintMessage(3, "HEY, I WAS DRINKING THAT!!")
@@ -53,5 +53,9 @@ function hl2cAcceptInput(ent, input)
 			end)
 		end
 	end
+
+	if !game.SinglePlayer() and ent:GetName() == "alyx_check_fail" and input:lower() == "display" then
+		activator:Kill()
+    end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

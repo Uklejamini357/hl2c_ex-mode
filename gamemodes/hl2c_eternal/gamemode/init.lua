@@ -2141,6 +2141,8 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 
 		if !game.SinglePlayer() then
 			return true
+		else
+			gamemode.Call("FailMap", nil, "")
 		end
 	end
 
