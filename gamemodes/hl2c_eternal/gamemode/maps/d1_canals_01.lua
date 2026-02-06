@@ -25,10 +25,10 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 -- Accept input
 function hl2cAcceptInput(ent, input)
 	if !game.SinglePlayer() and ent:GetName() == "barrelpush_cop1_sched" and input:lower() == "startschedule" then
-		CANALS_TRAIN_PREVENT_STARTFOWARD = true
+		GAMEMODE.MapVars.PreventTrainStart = true
 	end
 
-	if !game.SinglePlayer() and CANALS_TRAIN_PREVENT_STARTFOWARD and ent:GetName() == "looping_traincar1" and input:lower() == "startforward" then
+	if !game.SinglePlayer() and GAMEMODE.MapVars.PreventTrainStart and ent:GetName() == "looping_traincar1" and input:lower() == "startforward" then
 		return true
 	end
 

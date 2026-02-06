@@ -46,6 +46,7 @@ local math_abs = math.abs
 local math_exp = math.exp
 local math_huge = math.huge
 local tonumber = tonumber
+local tostring = tostring
 local isinfnumber = isinfnumber
 
 MAX_NUMBER = 1.7976931348623e308
@@ -169,14 +170,16 @@ t.FormatText = function(self, roundto)
     end
 
     if infmath.usenotation == "scientific" then
-        if e > -3 and e < 9 then return math_Round(self.mantissa * 10^e, 7) end -- Normal numbers
+        if e > -3 and e < 9 then return tostring(math_Round(self.mantissa * 10^e, 7)) end -- Normal numbers
         local round = roundto or math_min(3, 8-math_floor(math_log10(abs_e)))
 
-        return (round >= 0 and math.Round(self.mantissa, round) or "").."e"..(
-        infmath.useexponentnotationtype == 2 and (e_negative and "-" or "")..(abs_e >= 1e9 and "e"..math_Round(math_log10(abs_e), 2) or abs_e) or
-        (e_negative and "-" or "")..string.Comma(abs_e >= 1e9 and math_Round(abs_e * 10^-math_floor(math_log10(abs_e)), 3).."e"..math_floor(math_log10(abs_e)) or abs_e))    
+        return tostring(
+            (round >= 0 and math.Round(self.mantissa, round) or "").."e"..(
+            infmath.useexponentnotationtype == 2 and (e_negative and "-" or "")..(abs_e >= 1e9 and "e"..math_Round(math_log10(abs_e), 2) or abs_e) or
+            (e_negative and "-" or "")..string.Comma(abs_e >= 1e9 and math_Round(abs_e * 10^-math_floor(math_log10(abs_e)), 3).."e"..math_floor(math_log10(abs_e)) or abs_e))
+        )
     elseif infmath.usenotation == "infinity" then
-        return math_Round(self:log10() / 308.25471555992, math_min(4, 10-math_log10(math_max(1, abs_e)))).."∞"
+        return tostring(math_Round(self:log10() / 308.25471555992, math_min(4, 10-math_log10(math_max(1, abs_e)))).."∞")
     end
 
     return "NaN"
@@ -187,12 +190,14 @@ t.DefaultFormat = function(self, roundto) -- Best use for data saving as string!
     local e = self.exponent
     local e_negative = e < 0
 
-    if e > -5 and e < 14 then return self.mantissa * 10^e end
+    if e > -5 and e < 14 then return tostring(self.mantissa * 10^e) end
     -- local round = math_floor(math_log10(e))
 
-    return self.mantissa.."e"..(
+    return tostring(
+        self.mantissa.."e"..(
     --(e_negative and "-" or "")..
-    (math_abs(e) == math.huge and "inf" or math_abs(e) >= 1e9 and e * 10^-math_floor(math_log10(math_abs(e))).."e"..math_floor(math_log10(math_abs(e))) or e))
+        math_abs(e) == math.huge and "inf" or math_abs(e) >= 1e9 and e * 10^-math_floor(math_log10(math_abs(e))).."e"..math_floor(math_log10(math_abs(e))) or e)
+    )
 end
 meta.DefaultFormat = t.DefaultFormat
 
