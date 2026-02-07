@@ -98,6 +98,16 @@ local function InitializePanel(pnl, list)
 		RunConsoleCommand("hl2ce_next_map")
 	end
 
+	local b = NewButton(pnl, "Force Fail map")
+	list:AddItem(b)
+	b.DoClick = function()
+		Derma_StringRequest("Put reason here", "Force fail map", "lmao", function(str)
+			net.Start("hl2ce_admin_forcefailmap")
+			net.WriteString(str)
+			net.SendToServer()
+		end)
+	end
+
 	local b = NewButton(pnl, "Test map completion")
 	b:SetTooltip("Restarts map afterwards")
 	list:AddItem(b)

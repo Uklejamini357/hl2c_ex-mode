@@ -27,6 +27,7 @@ util.AddNetworkString("hl2ce_playertimer")
 util.AddNetworkString("hl2ce_admin_teleport")
 util.AddNetworkString("hl2ce_admin_changemap")
 util.AddNetworkString("hl2ce_admin_completemaptest")
+util.AddNetworkString("hl2ce_admin_forcefailmap")
 
 
 function GM:NetworkString_UpdateStats(ply)
@@ -278,4 +279,10 @@ net.Receive("hl2ce_admin_completemaptest", function(len, ply)
     gamemode.Call("RestartMap", 0.01)
     gamemode.Call("CompleteMap", ply)
     timer.Remove("hl2c_next_map")
+end)
+
+net.Receive("hl2ce_admin_forcefailmap", function(len, ply)
+    if !ply:IsAdmin() then return end
+
+    gamemode.Call("FailMap", nil, net.ReadString())
 end)
