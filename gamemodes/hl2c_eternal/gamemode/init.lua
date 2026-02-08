@@ -2147,9 +2147,20 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 				ply:SetNoTarget(true)
 				ply:ScreenFade(SCREENFADE.OUT, color_black, 2, RESTART_MAP_TIME)
 			end
+			timer.Simple(5, function()
+				if !changingLevel then return end
+				for _,ply in ipairs(player.GetLiving()) do
+					ply:Kill()
+				end
+			end)
 			gamemode.Call("FailMap", nil, "")
 			return true
 		end
+	end
+
+	-- useless
+	if ent:GetName() == "autosave" and (input:lower() == "save" or input:lower() == "savedangerous") then
+		return true
 	end
 
 	if string.lower(input) == "sethealth" then
