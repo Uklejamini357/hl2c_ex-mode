@@ -2142,7 +2142,13 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 		if !game.SinglePlayer() then
 			return true
 		else
+			for _,ply in ipairs(player.GetLiving()) do
+				ply:Freeze(true)
+				ply:SetNoTarget(true)
+				ply:ScreenFade(SCREENFADE.OUT, color_black, 2, RESTART_MAP_TIME)
+			end
 			gamemode.Call("FailMap", nil, "")
+			return true
 		end
 	end
 
