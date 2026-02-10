@@ -106,6 +106,7 @@ LANG.x_completed_map = "%s 完成了地图。(%s) [%i of %i]"
 LANG.difficulty = "难度："
 LANG.difficulty_eff = "Effective:"
 LANG.you_lost = "你输了！"
+LANG.you_are_dead = "你死了！"
 LANG.all_players_died = "所有玩家均已阵亡！" -- (TDL,I)
 LANG.lose_fzm = "Could not hold off the fast zombies!"
 LANG.zms_released = "僵尸被释放了\n你太慢了！" -- (TDL,I)

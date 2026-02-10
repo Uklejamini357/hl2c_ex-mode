@@ -2041,7 +2041,7 @@ function GM:CheckAllPlayersDead()
 end
 
 function GM:CheckAllPlayersDeadPass()
-	gamemode.Call("FailMap", nil, "all_players_died")
+	gamemode.Call("FailMap", nil, game.SinglePlayer() and "you_are_dead" or "all_players_died")
 
 	for _,ply in ipairs(player.GetAll()) do
 		if ply:Team() ~= TEAM_ALIVE and ply:Team() ~= TEAM_COMPLETED_MAP and ply:Team() ~= TEAM_DEAD then
