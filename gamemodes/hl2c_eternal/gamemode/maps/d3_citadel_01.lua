@@ -236,6 +236,13 @@ function hl2cMapEdit()
 		for _,npc in ipairs(ents.FindByClass("npc_*")) do
 			npc:Remove() -- we never had a lifeless map didn't we?
 		end
+		for _,ent in ipairs(ents.FindByName("zapper_hurt")) do
+			ent:Input("Enable")
+		end
+		for _,ent in ipairs(ents.FindByClass("func_tracktrain")) do
+			if string.find(ent:GetName(), "pod") then continue end
+			ent:Fire("Stop")
+		end
 	elseif GAMEMODE.EXMode then
 		local ent = ents.Create("npc_combine_s")
 		ent:SetPos(Vector(10094,3364,-1470))
@@ -321,8 +328,10 @@ function hl2cAcceptInput(ent, input, caller)
 		end
 	end
 
-	if ( !game.SinglePlayer() && ( ent:GetName() == "zapper_fade" ) && ( string.lower(input) == "fade" ) ) then
-		if GAMEMODE.MapVars.Failer then
+	if ent:GetName() == "zapper_fade" and string.lower(input) == "fade" then
+		if game.SinglePlayer() then
+			gamemode.Call("FailMap", nil, "You died. End of story.")
+		elseif GAMEMODE.MapVars.Failer then
 			gamemode.Call("FailMap", GAMEMODE.MapVars.Failer, "wrong_pod_taken")
 		else
 			caller:PrintMessage(3, "No.")
@@ -357,7 +366,11 @@ function hl2cAcceptInput(ent, input, caller)
 			end)
 		end
 
-		if input:lower() ~= "use" then return true end
+		if input:lower() == "use" then return end
+		if ent:GetName() == "zapper_hurt" then return end
+		if ent:GetClass() == "func_tracktrain" and input:lower() == "stop" then return end
+
+		return true
 	elseif GAMEMODE.EXMode then
 		if ent:GetName() == "relay_crow_fly" and input:lower() == "trigger" then
 			timer.Simple(2.5, function()
@@ -411,7 +424,6 @@ hook.Add("PlayerSay", "hl2cPlayerSay", hl2cPlayerSay)
 
 -- Player entered vehicle
 function hl2cPlayerEnteredVehicle(ply, vehicle)
-	if game.SinglePlayer() then return end
 	if vehicle:GetClass() == "prop_vehicle_prisoner_pod" then
 		if IsValid(CITADEL_VEHICLE_ENTITY) then return end
 		CITADEL_VEHICLE_ENTITY = vehicle
@@ -504,6 +516,12 @@ function hl2cPlayerEnteredVehicle(ply, vehicle)
 				end
 			end
 		end
+
+		for _,pl in ipairs(player.GetLiving()) do
+			pl:GodEnable()
+		end
+
+		if game.SinglePlayer() then return end
 
 		local viewcontrol = ents.Create("point_viewcontrol")
 		viewcontrol:SetName("pod_player_viewcontrol")

@@ -1762,7 +1762,7 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 
 	self:RestartMap()
 
-	if ply and ply:IsValid() and ply:IsPlayer() then
+	if !game.SinglePlayer() and player.GetCount() > 1 and ply and ply:IsValid() and ply:IsPlayer() then
 		local xploss = ply.XP*0.1 + (ply.MapStats.XPGained or 0)*1.1
 		ply.XP = ply.XP - xploss
 
