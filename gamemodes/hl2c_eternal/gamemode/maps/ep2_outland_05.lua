@@ -36,7 +36,7 @@ function hl2cAcceptInput(ent, input, activator)
 	if !game.SinglePlayer() then
 		if ent:GetName() == "basket_up_relay" and input:lower() == "trigger" then
 			for _,ply in ipairs(player.GetLiving()) do
-				if ply == continue then return end
+				if ply == activator then continue end
 				ply:SetPos(Vector(648, 5740, 16))
 				ply:SetEyeAngles(Angle(0,0,0))
 			end
