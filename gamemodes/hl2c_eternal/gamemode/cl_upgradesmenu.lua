@@ -52,7 +52,7 @@ function GM:UpgradesMenu()
 			end
 
 			local perkname = vgui.Create("DLabel", perkpanel)
-			perkname:SetFont("TargetID")
+			perkname:SetFont("hl2ce_hudfont")
 			perkname:SetPos(0, 10)
 			perkname:SetText(v.Name)
 			perkname:SetTextColor(Color(255,255,255))
@@ -70,7 +70,7 @@ function GM:UpgradesMenu()
 			perkname:CenterHorizontal()
 
 			local perkdesc = vgui.Create("DLabel", perkpanel)
-			perkdesc:SetFont("TargetIDSmall")
+			perkdesc:SetFont("hl2ce_hudfont_small")
 			perkdesc:SetPos(0, 35)
 			local desc = string.format(isfunction(v.Description) and v.Description(ply) or v.Description,
 			infmath.Round((ply:GetEternityUpgradeEffectValue(k, 1) - 1) * 100))
@@ -91,7 +91,7 @@ function GM:UpgradesMenu()
 			perkdesc:CenterHorizontal()
 
 			local perkcost = vgui.Create("DLabel", perkpanel)
-			perkcost:SetFont("TargetIDSmall")
+			perkcost:SetFont("hl2ce_hudfont_small")
 			perkcost:SetText(Format("Cost: %s", infmath.Round(ply:GetEternityUpgradeCost(k), 2)))
 	        perkcost:SetPos(10, 72)
 			perkcost:SetSize(size_x - 20, 15)
@@ -104,7 +104,7 @@ function GM:UpgradesMenu()
 			end
 
 			local perkeffect = vgui.Create("DLabel", perkpanel)
-			perkeffect:SetFont("TargetIDSmall")
+			perkeffect:SetFont("hl2ce_hudfont_small")
 			perkeffect:SetText(Format("Current effect: %s%%", infmath.Round(ply:GetEternityUpgradeEffectValue(k)*100)))
 	        perkeffect:SetPos(10, 90)
 			perkeffect:SetSize(size_x - 20, 15)
@@ -164,7 +164,7 @@ function GM:UpgradesMenu()
 
 			local boughttimes = ply.EternityUpgradeValues[k]
 			local timesbought = vgui.Create("DLabel", perkpanel)
-			timesbought:SetFont("TargetIDSmall")
+			timesbought:SetFont("hl2ce_hudfont_small")
 			timesbought:SetText("Bought: "..boughttimes)
 			timesbought:SetSize(size_x/3 - 20, 30)
 			timesbought:SetPos(10 + size_x*2/3, size_y - 35)

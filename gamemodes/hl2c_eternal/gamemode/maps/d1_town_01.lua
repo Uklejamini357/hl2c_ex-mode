@@ -7,7 +7,7 @@ if CLIENT then
 		if !GAMEMODE.HyperEXMode then return end
 		if !GAMEMODE.MapVars.NoChaos then return end
 
-		draw.DrawText(string.format("Zombies killed: %d/%d", GAMEMODE.MapVars.ZombiesKilled, obj_amount), "TargetIDSmall", 5, 5, GAMEMODE.MapVars.ZombiesKilled > obj_amount and Color(0,255,0) or Color(255,255,0), TEXT_ALIGN_LEFT)
+		draw.DrawText(string.format("Zombies killed: %d/%d", GAMEMODE.MapVars.ZombiesKilled, obj_amount), "hl2ce_hudfont_small", 5, 5, GAMEMODE.MapVars.ZombiesKilled > obj_amount and Color(0,255,0) or Color(255,255,0), TEXT_ALIGN_LEFT)
 	end)
 
 	net.Receive("hl2ce_map_event", function()

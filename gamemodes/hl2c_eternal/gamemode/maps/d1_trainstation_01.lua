@@ -96,7 +96,7 @@ function hl2cAcceptInput(ent, input, activator, _, value)
 			end
 		end
 
-		if ent:GetClass() == "env_zoom" and inputlower == "zoom"  then
+		if ent:GetClass() == "env_zoom" and inputlower == "zoom" then
 			for _, ply in ipairs(player.GetAll()) do
 				local keyValues = ent:GetKeyValues()
 				ply:SetFOV(tonumber(keyValues.FOV), tonumber(keyValues.Rate))
@@ -124,26 +124,29 @@ function hl2cAcceptInput(ent, input, activator, _, value)
 		if TRAINSTATION_LEAVEBARNEYDOOROPEN and ent:GetName() == "barney_door_1" and inputlower == "close" then
 			return true
 		end
+	end
 
-		if ent:GetName() == "logic_start_train" and inputlower == "trigger" then
-			if GAMEMODE.EXMode then
-				timer.Simple(2.5, function()
-					PrintMessage(3, "Chapter 1")
-				end)
-				timer.Simple(math.Rand(5,6), function()
-					PrintMessage(3, "The new beginnings")
-				end)
+	if ent:GetName() == "logic_start_train" and inputlower == "trigger" then
+		if GAMEMODE.EXMode then
+			timer.Simple(2.5, function()
+				PrintMessage(3, "Chapter 1")
+			end)
+			timer.Simple(math.Rand(5,6), function()
+				PrintMessage(3, "The new beginnings")
+			end)
 
-				ents.FindByName("intro_train_1")[1]:Fire("SetSpeed", 1)
-				ents.FindByName("intro_train_2")[1]:Fire("SetSpeed", 1)
-				ents.FindByName("intro_train_3")[1]:Fire("SetSpeed", 1)
-			end
+			ents.FindByName("intro_train_1")[1]:Fire("SetSpeed", 1)
+			ents.FindByName("intro_train_2")[1]:Fire("SetSpeed", 1)
+			ents.FindByName("intro_train_3")[1]:Fire("SetSpeed", 1)
+		end
 
+		if !game.SinglePlayer() then
 			for _,pl in ipairs(player.GetLiving()) do
 				pl:SetPos(Vector(-9419, -2483, 22))
 			end
 		end
 	end
+
 
 	if GAMEMODE.EXMode then
 		if string.sub(ent:GetName(), 1, 12) == "intro_train_" and input:lower() == "setspeed" and tonumber(value or 0) < 1 then

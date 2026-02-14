@@ -38,7 +38,7 @@ function GM:PlayerConfiguration()
 
 	local function MakeButton(text, xpadding, ypadding, func, color)
 		local button = EasyButton(nil, text, xpadding, ypadding)
-		button:SetFont("TargetID")
+		button:SetFont("hl2ce_hudfont")
 		button:SetTextColor(Color(205,205,205))
 		button:SetSize(0,30)
 		button.Paint = function(this,w,h)
@@ -49,6 +49,6 @@ function GM:PlayerConfiguration()
 		return button
 	end
 
-	list:AddItem(MakeText(self.ConfigPanel, "Fyi perks do not work yet ffs I STILL NEED WORK TO GET THEM IMPLEMENTED", "TargetIDSmall"))
+	list:AddItem(MakeText(self.ConfigPanel, "Fyi perks do not work yet ffs I STILL NEED WORK TO GET THEM IMPLEMENTED", "hl2ce_hudfont_small"))
 */
 end

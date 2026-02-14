@@ -40,7 +40,7 @@ if CLIENT then
 			local _end = last + net.ReadFloat()
 			hook.Add("HUDPaint", "Hl2ce_HyperEX_maptimer", function()
 				local t = CurTime()-last
-				draw.DrawText(string.format("Time passed: %02d:%02d", math.floor(t/60), math.floor(t)%60), "TargetIDSmall", ScrW()/2, ScrH()/3, CurTime() >= _start and CurTime() < _end and Color(0,255,0) or Color(255,0,0), TEXT_ALIGN_CENTER)
+				draw.DrawText(string.format("Time passed: %02d:%02d", math.floor(t/60), math.floor(t)%60), "hl2ce_hudfont_small", ScrW()/2, ScrH()/3, CurTime() >= _start and CurTime() < _end and Color(0,255,0) or Color(255,0,0), TEXT_ALIGN_CENTER)
 			end)
 
 

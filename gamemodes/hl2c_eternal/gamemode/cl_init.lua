@@ -145,7 +145,7 @@ function GM:HUDPaint()
 	if FORCE_DIFFICULTY and cmenu then
 		colordifference = FORCE_DIFFICULTY > 1 and Color(255, 755 - FORCE_DIFFICULTY*500, 0) or FORCE_DIFFICULTY < 1 and Color(FORCE_DIFFICULTY*1020-765, 255, 0) or Color(255, 255, 0)
 		colordifference.a = 155
-		draw.DrawText(Format("Map forced difficulty bonus: %s%%", FormatNumber(math.Round(FORCE_DIFFICULTY * 100, 2))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 - 15, colordifference, TEXT_ALIGN_CENTER)
+		draw.DrawText(Format("Map forced difficulty bonus: %s%%", FormatNumber(math.Round(FORCE_DIFFICULTY * 100, 2))), "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 - 15, colordifference, TEXT_ALIGN_CENTER)
 	end
 
 	local diff_difference = infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifference)
@@ -158,7 +158,7 @@ function GM:HUDPaint()
 		local d = self:GetDifficulty() * 100
 		local d_normal = infmath.ConvertInfNumberToNormalNumber(d)
 		local s = Format(hl2ce_cl_nodifficultytext:GetBool() and "%s%%" or translate.Get("difficulty").." %s%%", FormatNumber(infmath.Round(d, 2)))
-		surface.SetFont("TargetIDSmall")
+		surface.SetFont("hl2ce_hudfont_small")
 		local len = surface.GetTextSize(s)
 		local l = 0
 
@@ -181,24 +181,24 @@ function GM:HUDPaint()
 			d:log10() > 1e9 and 0.8+math.sin(SysTime()+l/5)/5 or 1)
 
 				local _ch = utf8.sub(s, i, i)
-				draw.DrawText(_ch, "TargetIDSmall", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT)
+				draw.DrawText(_ch, "hl2ce_hudfont_small", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT)
 				l = l + surface.GetTextSize(_ch)
 			end
 		else
-			draw.DrawText(s, "TargetIDSmall", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT )
+			draw.DrawText(s, "hl2ce_hudfont_small", ScrW() / 2 - len/2 + l, ScrH() / 6, c, TEXT_ALIGN_LEFT )
 		end
 
 		if cmenu and self:GetEffectiveDifficulty(pl):log10() ~= (d/100):log10() then
-			draw.DrawText("("..translate.Get("difficulty_eff").." "..FormatNumber(self:GetEffectiveDifficulty(pl)*100).."%)", "TargetIDSmall", ScrW() / 2, ScrH() / 6 - 15, c, TEXT_ALIGN_CENTER)
+			draw.DrawText("("..translate.Get("difficulty_eff").." "..FormatNumber(self:GetEffectiveDifficulty(pl)*100).."%)", "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 - 15, c, TEXT_ALIGN_CENTER)
 		end
 
 		if !hl2ce_cl_noshowdifficultychange:GetBool() and self.DifficultyDifferenceTimeChange + 3 >= CurTime() and self.DifficultyDifference ~= 0 then
 			colordifference.a = (self.DifficultyDifferenceTimeChange+3-CurTime())*155/3
-			draw.DrawText(Format("%s%s%%", diff_difference < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifference * 100, 2)))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 15, colordifference, TEXT_ALIGN_CENTER )
+			draw.DrawText(Format("%s%s%%", diff_difference < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifference * 100, 2)))), "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 + 15, colordifference, TEXT_ALIGN_CENTER )
 
 			if self.DifficultyDifference ~= self.DifficultyDifferenceTotal and infmath.ConvertInfNumberToNormalNumber(self.DifficultyDifferenceTotal) ~= 0 then
 				colordifference = self.DifficultyDifferenceTimeChange + 3 >= CurTime() and (diff_difference_total < 0 and Color(255, 220-((self.DifficultyDifferenceTimeChange+3-CurTime())*110), 0, colordifference.a) or Color(255-((self.DifficultyDifferenceTimeChange+3-CurTime())*255/2), 220, 0, colordifference.a)) or Color(255, 220, 0, colordifference.a)
-				draw.DrawText(Format("%s%s%% total", diff_difference_total < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifferenceTotal * 100, 2)))), "TargetIDSmall", ScrW() / 2, ScrH() / 6 + 30, colordifference, TEXT_ALIGN_CENTER )
+				draw.DrawText(Format("%s%s%% total", diff_difference_total < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifferenceTotal * 100, 2)))), "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 + 30, colordifference, TEXT_ALIGN_CENTER )
 			end
 		end
 	end
@@ -212,13 +212,13 @@ function GM:HUDPaint()
 		local hp,ap = pl:Health(),pl:Armor()
 		local mhp,map = pl:GetMaxHealth(), pl:GetMaxArmor()
 
-		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Health(), pl:GetMaxHealth(), 100 * hp/mhp), "TargetIDSmall", 16, ScrH()-100, Color(255,155,155,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("health")..string.format(" %s/%s (%d%%)", pl:Health(), pl:GetMaxHealth(), 100 * hp/mhp), "hl2ce_hudfont_small", 16, ScrH()-100, Color(255,155,155,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 80, 200, 10)
 		surface.SetDrawColor(205, 25, 25, 255)
 		surface.DrawRect(16, ScrH() - 79, 198*math.Clamp(hp/mhp,0,1), 10)
 
-		draw.DrawText(translate_Get("armor")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), 100 * ap/map), "TargetIDSmall", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
+		draw.DrawText(translate_Get("armor")..string.format(" %s/%s (%d%%)", pl:Armor(), pl:GetMaxArmor(), 100 * ap/map), "hl2ce_hudfont_small", 16, ScrH()-60, Color(155,155,255,255), TEXT_ALIGN_LEFT)
 		surface.SetDrawColor(0, 0, 0, 255)
 		surface.DrawOutlinedRect(15, ScrH() - 40, 200, 10)
 		surface.SetDrawColor(25, 25, 205, 255)
@@ -235,11 +235,11 @@ function GM:HUDPaint()
 		surface.SetDrawColor(0, 0, 0)
 		surface.DrawOutlinedRect(ScrW()/2 - ScrW()/3.5, ScrH()*0.1, ScrW()/3.5*2, ScrH()*0.05)
 
-		draw.SimpleText(language.GetPhrase(boss:GetClass()), "TargetID", ScrW()/2, ScrH()*0.115, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(language.GetPhrase(boss:GetClass()), "hl2ce_hudfont", ScrW()/2, ScrH()*0.115, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		if hp > 0 then
-			draw.SimpleText(string.format("%s/%s", math.ceil(hp), math.ceil(mhp)), "TargetID", ScrW()/2, ScrH()*0.135, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(string.format("%s/%s", math.ceil(hp), math.ceil(mhp)), "hl2ce_hudfont", ScrW()/2, ScrH()*0.135, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		else
-			draw.SimpleText("DEAD!", "TargetID", ScrW()/2, ScrH()*0.14, Color(255,255,0,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText("DEAD!", "hl2ce_hudfont", ScrW()/2, ScrH()*0.14, Color(255,255,0,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 
 		bosshp = math.Approach(bosshp, hp, (hp-bosshp)*math.Round(FrameTime()*2, 3))
@@ -280,16 +280,16 @@ end
 
 function GM:PostDrawHUD()
 	cam.Start2D()
-	-- draw.SimpleText(self.Name.." "..self.Version, "TargetIDSmall", 5, 5, Color(255,255,192,25))
+	-- draw.SimpleText(self.Name.." "..self.Version, "hl2ce_hudfont_small", 5, 5, Color(255,255,192,25))
 	if self:HardcoreEnabled() then
-		draw.SimpleText("Hardcore enabled!", "TargetIDSmall", 5, 5, Color(255,0,0,150))
+		draw.SimpleText("Hardcore enabled!", "hl2ce_hudfont_small", 5, 5, Color(255,0,0,150))
 	end
 	surface.SetDrawColor(0, 0, 0, 0)
 
 	if hl2ce_cl_drawxpgaintext:GetBool() and XPColor > 0 then
-		draw.SimpleText(tostring(infmath.Round(XPGained, 2)).." XP gained", "TargetID", ScrW() / 2 + 15, (ScrH() / 2) + 15, Color(255,255,255,XPColor), 0, 1 )
+		draw.SimpleText(tostring(infmath.Round(XPGained, 2)).." XP gained", "hl2ce_hudfont", ScrW() / 2 + 15, (ScrH() / 2) + 15, Color(255,255,255,XPColor), 0, 1 )
 		if XPGainedTotal ~= XPGained then
-			draw.SimpleText("("..tostring(infmath.Round(XPGainedTotal, 2)).." XP gained total)", "TargetIDSmall", ScrW() / 2 + 15, (ScrH() / 2) + 30, Color(255,255,205,XPColor), 0, 1 )
+			draw.SimpleText("("..tostring(infmath.Round(XPGainedTotal, 2)).." XP gained total)", "hl2ce_hudfont_small", ScrW() / 2 + 15, (ScrH() / 2) + 30, Color(255,255,205,XPColor), 0, 1 )
 		end
 	else
 		XPGained = InfNumber(0)
@@ -339,7 +339,12 @@ end
 function GM:CreateFonts()
 	CreateFont("Roboto16", 16, {weight = 700, antialias = true, additive = false, font = "Roboto Bold"})
 	CreateFont("roboto32BlackItalic", 32, {weight = 900, antialias = true, additive = false, font = "Roboto Black Italic"})
-	CreateFont("hl2ce_font_small", 20, {weight = 0, font = "Roboto Black"})
+
+	CreateFont("hl2ce_hudfont_small", 20, {weight = 1000, font = "Roboto"})
+	CreateFont("hl2ce_hudfont", 24, {weight = 1000, font = "Roboto"})
+	-- CreateFont("hl2ce_hudfont_large", 32, {weight = 1000, font = "Roboto"})
+
+	CreateFont("hl2ce_font_small", 20, {weight = 800, font = "Roboto Black"})
 	CreateFont("hl2ce_font", 32, {weight = 700, font = "Roboto Black"})
 	CreateFont("hl2ce_font_big", 48, {weight = 900, font = "Roboto Black"})
 end
@@ -920,7 +925,7 @@ function GM:PostPlayerDraw( ply )
 	
 		local bonePosition = ply:GetBonePosition( ply:LookupBone( "ValveBiped.Bip01_Head1" ) || 0 ) + Vector( 0, 0, 16 )
 		cam.Start2D()
-			draw.SimpleText( ply:Name().." ("..ply:Health().."%)", "TargetIDSmall", bonePosition:ToScreen().x, bonePosition:ToScreen().y, self:GetTeamColor( ply ), TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM )
+			draw.SimpleText( ply:Name().." ("..ply:Health().."%)", "hl2ce_hudfont_small", bonePosition:ToScreen().x, bonePosition:ToScreen().y, self:GetTeamColor( ply ), TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM )
 		cam.End2D()
 	
 	end
