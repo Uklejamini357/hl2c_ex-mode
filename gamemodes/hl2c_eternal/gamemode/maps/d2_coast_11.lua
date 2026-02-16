@@ -53,9 +53,10 @@ hook.Add("PostApplyNPCVariant", "hl2cEXPostApplyNPCVariant", hl2cEXPostApplyNPCV
 local failmap = true
 local failtries = 0
 hook.Add("OnNPCKilled", "!!hl2ce_AGKilled", function(ent, attacker, inflictor)
-	if ent:GetName() == "citizen_ambush_guard" and inflictor:GetModel() == "models/props_junk/harpoon002a.mdl" then
+
+	if ent:GetName() == "citizen_ambush_guard" and inflictor:IsValid() and inflictor:GetModel() == "models/props_junk/harpoon002a.mdl" then
 		-- attacker:PrintMessage(3, "fuck yoself harpoon user")
-	elseif ent:GetName() == "citizen_ambush_guard" and inflictor:GetModel() ~= "models/props_junk/harpoon002a.mdl" then
+	elseif ent:GetName() == "citizen_ambush_guard" and (!inflictor:IsValid() or inflictor:GetModel() ~= "models/props_junk/harpoon002a.mdl") then
 		AG_DEADPOS = ent:GetPos()
 		failmap = false
 	end

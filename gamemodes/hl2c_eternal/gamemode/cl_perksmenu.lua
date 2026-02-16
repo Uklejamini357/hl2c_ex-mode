@@ -374,7 +374,7 @@ function GM:PerksMenu()
 	local function MakePerks(panel, prestige)
 		for k, v in SortedPairsByMemberValue(self.PerksData, "PrestigeReq") do
 			if prestige ~= v.PrestigeLevel then continue end
-			local prestigereq = v.PrestigeReq--isinfnumber(v.PrestigeReq) and v.PrestigeReq or InfNumber(v.PrestigeReq)
+			local prestigereq = v.PrestigeReq --isinfnumber(v.PrestigeReq) and v.PrestigeReq or InfNumber(v.PrestigeReq)
 
 			local perkpanel = vgui.Create("DPanel", perksvgui)
 			perkpanel:SetPos(5, 5)

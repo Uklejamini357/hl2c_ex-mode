@@ -207,6 +207,7 @@ hook.Add("OnNPCKilled", "HL2cEX_NPCVariantsKilled", HL2cEX_NPCVariantKilled)
 function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
 	if !GAMEMODE.EXMode or GAMEMODE.HyperEXMode then return end
 	local dmg, attacker = dmginfo:GetDamage(), dmginfo:GetAttacker()
+	if !IsValid(attacker) then return end
 	local attackerclass = attacker:GetClass()
 	if attackerclass == "npc_metropolice" then
 		if attacker.VariantType == 1 then
@@ -307,6 +308,7 @@ end
 -- Priority hook function
 function HL2cHyperEX_NPCVariantSpawn(ent)
 	if !GAMEMODE.HyperEXMode or !ent:IsNPC() then return end
+	if !IsValid(ent) then return end
 
 	local class = ent:GetClass()
 	hook.Run("ApplyNPCVariant", ent, class)
@@ -625,6 +627,7 @@ local function HL2cHyperEX_NPCVariantInflictDamage(ent, dmginfo)
 	if !GAMEMODE.HyperEXMode then return end
 
 	local dmg, attacker = dmginfo:GetDamage(), dmginfo:GetAttacker()
+	if !IsValid(attacker) then return end
 	local attackerclass = attacker:GetClass()
 	if attackerclass == "npc_metropolice" then
 		if attacker.VariantType == 1 then
@@ -690,6 +693,7 @@ hook.Add("EntityTakeDamage", "HL2cHyperEX_NPCVariantInflictDamage", HL2cHyperEX_
 
 local function HL2cHyperEX_NPCVariantTakeDamage(ent, dmginfo)
 	if !GAMEMODE.HyperEXMode then return end
+	if !IsValid(ent) then return end
 
 	local dmg, attacker = dmginfo:GetDamage(), dmginfo:GetAttacker()
 	local class = ent:GetClass()

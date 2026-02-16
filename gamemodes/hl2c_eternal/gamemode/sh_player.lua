@@ -267,8 +267,8 @@ function meta:GetMinDamageMul(dmgInfo, ent)
 		local d = attacker.PrestigePoints*0.05
 
 		damagemul = damagemul * infmath.max(1, 1.4 + (
-			d > InfNumber(1) and
-			d^(1/(d:log10())^0.5) or d))
+			d > 1 and
+			d^(1/math.log10(d)^0.5) or d))
 	end
 
 	if attacker:HasPerkActive("3_celestial") then

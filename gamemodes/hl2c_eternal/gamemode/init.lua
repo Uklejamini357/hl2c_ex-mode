@@ -418,7 +418,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 			ent.SessionStats.DamageTaken = ent.SessionStats.DamageTaken + math.min(ent:Health(), damage)
 		end
 
-		if ent:Inf_Health() > 2e9 then
+		if ent.Inf_Health and ent:Inf_Health() > 2e9 then
 			if damage < ent:Inf_Health() then
 				dmgInfo:SetDamage(math.min(damage, 2e9-1))
 			end
@@ -430,6 +430,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 end
 
 function GM:PostEntityTakeDamage(ent, dmginfo, wasdamagetaken)
+	if !ent.Inf_Health then return end
 	local tookdamage = ent:IsPlayer() and not ent:HasGodMode() and wasdamagetaken or not ent:IsPlayer() and wasdamagetaken
 	if tookdamage then
 		if ent:Inf_Health() > 2e9 then
