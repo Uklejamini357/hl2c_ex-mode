@@ -68,9 +68,11 @@ function hl2cAcceptInput(ent, input, caller)
 	local entname = ent:GetName()
 	local inputlower = input:lower()
 
-	if !game.SinglePlayer() and entname == "logic_startcraneseq" and inputlower == "trigger" then
-		ALLOWED_VEHICLE = "Jeep"
-		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
+	if entname == "logic_startcraneseq" and inputlower == "trigger" then
+		if !game.SinglePlayer() then
+			ALLOWED_VEHICLE = "Jeep"
+			PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
+		end
 
 		if GAMEMODE.EXMode then
 			timer.Simple(2.1, function()

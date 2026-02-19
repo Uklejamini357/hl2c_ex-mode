@@ -1742,7 +1742,7 @@ end
 function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, giving them a quite big penalty
 	if changingLevel then return end
 	net.Start("hl2ce_fail")
-	net.WriteString(OVERRIDE_FAIL_REASON or reason or "Map failed!")
+	net.WriteString(hook.Run("GetFailReason", ply, reason) or OVERRIDE_FAIL_REASON or reason or "Map failed!")
 	net.Broadcast()
 	OVERRIDE_FAIL_REASON = nil
 
