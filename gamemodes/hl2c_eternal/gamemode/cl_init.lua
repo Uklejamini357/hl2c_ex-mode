@@ -208,7 +208,7 @@ function GM:HUDPaint()
 		end
 	end
 
-	if pl:Alive() and pl:IsSuitEquipped() and not hl2ce_cl_nocustomhud:GetBool() then
+	if pl:Alive() and pl:IsSuitEquipped() and not hl2ce_cl_nocustomhud:GetBool() and pl:GetObserverMode() == OBS_MODE_NONE then
 		local hp,ap = pl:Health(),pl:Armor()
 		local mhp,map = pl:GetMaxHealth(), pl:GetMaxArmor()
 

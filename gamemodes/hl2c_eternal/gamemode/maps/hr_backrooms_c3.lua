@@ -32,6 +32,21 @@ hook.Add("MapEdit", "hl2cMapEdit", function()
     if e and IsValid(e) then
         e:Remove()
     end
+
+    -- I had no choice.
+    local tbl = {
+        "models/props_mining/stalactite_static01.mdl",
+        "models/props_mining/stalactite_static02.mdl",
+        "models/props_mining/stalactite_static03.mdl",
+        "models/props_mining/stalactite_static04.mdl",
+    }
+    for _,ent in ipairs(ents.FindByClass("prop_dynamic")) do
+        if table.HasValue(tbl, ent:GetModel()) then
+            ent:SetCollisionGroup(2)
+        end
+    end
+
+    RunConsoleCommand("gmod_suit", 0)
 end)
 
 function hl2cAcceptInput(ent, input)
@@ -45,8 +60,8 @@ function hl2cAcceptInput(ent, input)
         end
     end
 
-    if ent:GetName() == "try1" and input:lower() == "enable" then
-    end
+    -- if ent:GetName() == "try1" and input:lower() == "enable" then
+    -- end
 
     if ent:GetName() == "try2" and input:lower() == "enable" then
         PrintMessage(3, "What the hell was that?!")
@@ -93,23 +108,23 @@ function hl2cAcceptInput(ent, input)
         end)
         timer.Simple(1.7, function()
             if !IsValid(ent) then return end
-            gamemode.Call("FailMap", nil, "ending 1")
+            gamemode.Call("FailMap", nil, "Death ending\n\nYou were killed by a hostile entity. Death was long and painful.")
         end)
     end
 
     if ent:GetName() == "endver2" and input:lower() == "enable" then
-        gamemode.Call("FailMap", nil, "ending 2")
+        gamemode.Call("FailMap", nil, "Endless Fall Ending\n\nYou noclipped through the wrong wall and you fell into an endless void,\nnow you will fall forever until you die")
     end
 
     if ent:GetName() == "endver3" and input:lower() == "enable" then
-        gamemode.Call("FailMap", nil, "ending 3")
+        gamemode.Call("FailMap", nil, "Eaten Alive Ending\n\nYou dived too deep underwater, then choked and were devoured by a level 7 entity.")
     end
 
     if ent:GetName() == "endver4" and input:lower() == "enable" then
-        gamemode.Call("FailMap", nil, "Stuck ending")
+        gamemode.Call("FailMap", nil, "Stuck ending\n\nAfter everything you went through, you never managed to escape the backrooms.\nYou returned to level 0 and now you are stuck there forever.")
     end
 
-    if ent:GetName() == "endver5" and input:lower() == "enable" then
+    if ent:GetName() == "endver5brush" and input:lower() == "enable" then
         PrintMessage(3, "Woooooo, you survived!")
 
         for _,ply in ipairs(player.GetLiving()) do
@@ -124,8 +139,8 @@ function hl2cAcceptInput(ent, input)
         end
     end
 
-    if ent:GetName() == "went1" and input:lower() == "disable" and !ent.lol then
-        ent.lol = true
+    if ent:GetName() == "went1" and input:lower() == "disable" and !GAMEMODE.MapVars.lol then
+        GAMEMODE.MapVars.lol = true
         timer.Simple(0.7, function()
             if !IsValid(ent) then return end
             net.Start("hl2ce_map_event")
@@ -148,3 +163,4 @@ function hl2cAcceptInput(ent, input)
     -- end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+

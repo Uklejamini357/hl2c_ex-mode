@@ -49,6 +49,7 @@ end)
 net.Receive("hl2ce_finishedmap", function(length)
 	local xpgained = net.ReadInfNumber()
 	local bonusxp = net.ReadInfNumber()
+	local moneysgained = net.ReadInfNumber()
 
 
     gamemode.Call("OnMapCompleted")
@@ -57,6 +58,7 @@ net.Receive("hl2ce_finishedmap", function(length)
     local color_yellow = Color(255,255,190)
     chat.AddText(color_white, "Map summary:")
     chat.AddText(color_white, "XP Gained: ", color_yellow, tostring(xpgained), color_white, " (+", color_yellow, tostring(bonusxp), color_white, " bonus xp)")
+    chat.AddText(color_white, "Moneys Gained: ", color_yellow, tostring(moneysgained))
     -- for k,v in pairs(tbl) do
     --     chat.AddText(k, " ", v)
     -- end

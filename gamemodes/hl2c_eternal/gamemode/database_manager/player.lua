@@ -15,25 +15,27 @@ function GM:LoadPlayer(ply)
     end
     if file.Exists(self.VaultFolder.."/players/".. string.lower(string.gsub(ply:UniqueID(), ":", "_") .."/profile.txt"), "DATA") then
         local data = util.JSONToTable(file.Read(self.VaultFolder.."/players/".. string.lower(string.gsub(ply:UniqueID(), ":", "_") .."/profile.txt"), "DATA"))
- 
+
         for variable, val in pairs(data) do
-            local infnumber = isinfnumber(ply[variable])
-            ply[variable] = tonumber(val) or val  -- dump all their stats into their player table
-            
-            if istable(ply[variable]) and ply[variable].isinfnumber then
-                ply[variable] = InfNumber(ply[variable].mantissa or 1, ply[variable].exponent == "inf" and math.huge or ply[variable].exponent == "-inf" and -math.huge or ply[variable].exponent)
+            local prev_val = ply[variable]
+            local infnumber = isinfnumber(prev_val)
+            val = tonumber(val) or val
+
+            if istable(prev_val) and prev_val.mantissa and prev_val.exponent then
+                val = InfNumber(val.mantissa or 1, val.exponent == "inf" and math.huge or val.exponent == "-inf" and -math.huge or val.exponent)
             elseif infnumber then
-                ply[variable] = InfNumber(ply[variable])
+                val = InfNumber(val)
+            elseif istable(val) and val.mantissa and val.exponent then
+                val = infmath.ConvertInfNumberToNormalNumber(val)
             end
+
+            ply[variable] = val
         end
     else
         print("Created a new profile for "..ply:Nick() .." (UniqueID: "..ply:UniqueID()..")")
 
         self:SavePlayer(ply)
     end
-
-    self:NetworkString_UpdateStats(ply)
-    self:NetworkString_UpdateSkills(ply)
 end
 
 function GM:SavePlayer(ply)
@@ -47,7 +49,6 @@ function GM:SavePlayer(ply)
     local function insertdata(key, value)
         if isinfnumber(value) then
             Data[key] = {
-                isinfnumber = true,
                 mantissa = value.mantissa,
                 exponent = value.exponent == math.huge and "inf" or value.exponent == math.huge and "-inf" or value.exponent
             }

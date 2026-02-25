@@ -359,10 +359,36 @@ function hl2cAcceptInput(ent, input, caller)
 
 		if ent:GetName() == "relay_crow_fly" and input:lower() == "trigger" then
 			timer.Simple(2.5, function()
+				if !IsValid(ent) then return end
 				PrintMessage(3, GlitchedText("Chapter 12", 12*math.pi))
 			end)
-			timer.Simple(5.1, function()
-				BroadcastLua([[chat.AddText(Color(255,0,0), "[Chapter name error, please try again later.]")]])
+			timer.Simple(8.1, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,0,0), "Chapter name error, please try again later.")]])
+			end)
+			timer.Simple(12.6, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,255,255), "> query(\"chapter_12_name\")")]])
+			end)
+			timer.Simple(22.6, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,0,0), "Failed to load chapter name, retrying.")]])
+			end)
+			timer.Simple(25.6, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,255,255), "> query(\"chapter_12_name\")")]])
+			end)
+			timer.Simple(35.6, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,0,0), "Failed to load chapter name, retrying.")]])
+			end)
+			timer.Simple(38.6, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,255,255), "> query(\"chapter_12_name\")")]])
+			end)
+			timer.Simple(48.6, function()
+				if !IsValid(ent) then return end
+				BroadcastLua([[chat.AddText(Color(255,0,0), "Failed to load chapter name. [ERR_CONNECTION_TIMED_OUT]")]])
 			end)
 		end
 
@@ -374,9 +400,11 @@ function hl2cAcceptInput(ent, input, caller)
 	elseif GAMEMODE.EXMode then
 		if ent:GetName() == "relay_crow_fly" and input:lower() == "trigger" then
 			timer.Simple(2.5, function()
+				if !IsValid(ent) then return end
 				PrintMessage(3, "Chapter 12")
 			end)
 			timer.Simple(5.1, function()
+				if !IsValid(ent) then return end
 				PrintMessage(3, "The near end.")
 			end)
 		end

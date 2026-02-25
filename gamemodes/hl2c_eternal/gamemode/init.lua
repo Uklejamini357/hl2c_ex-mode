@@ -750,7 +750,6 @@ function GM:PlayerCompletedMap(ply)
 	if infmath.ConvertInfNumberToNormalNumber(gain) > 0 then
 		ply.MoneysGain = 0
 		ply.Moneys = ply.Moneys + gain
-		ply:PrintTranslatedMessage(3, "gained_moneys", tostring(gain))
 	end
 
 	local stats = ply.MapStats
@@ -758,6 +757,7 @@ function GM:PlayerCompletedMap(ply)
 		net.Start("hl2ce_finishedmap")
 		net.WriteInfNumber(stats.GainedXP or InfNumber(0))
 		net.WriteInfNumber(txp)
+		net.WriteInfNumber(gain)
 		net.Send(ply)
 	end
 

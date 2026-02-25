@@ -19,7 +19,7 @@ local function NewButton(pnl, text, func)
 end
 
 local function InitializePanel(pnl, list)
-	local b = NewButton(pnl, "Teleport to checkpoint...")
+	local b = NewButton(pnl, "Teleport to...")
 	list:AddItem(b)
 	b.DoClick = function()
 		pnl:MakeNewList(function(pnl, list)
@@ -34,6 +34,16 @@ local function InitializePanel(pnl, list)
 					list:AddItem(NewButton(nil, "Checkpoint #"..k, function()
 						net.Start("hl2ce_admin_teleport")
 						net.WriteString("checkpoint_"..k)
+						net.SendToServer()
+					end))
+				end
+			end
+
+			if TELEPORT_POSITIONS then
+				for k,location in pairs(TELEPORT_POSITIONS) do
+					list:AddItem(NewButton(nil, k, function()
+						net.Start("hl2ce_admin_teleport")
+						net.WriteString("tppos_"..k)
 						net.SendToServer()
 					end))
 				end

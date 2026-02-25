@@ -235,12 +235,17 @@ net.Receive("hl2ce_admin_teleport", function(len, ply)
             end
         end
     elseif string.sub(str, 1, 10) == "checkpoint" then
-        local num = tonumber(str:sub(12))
+        local num = tonumber(str:sub(12)) or str:sub(12)
         if !TRIGGER_CHECKPOINT[num] then return end
 
         local pos = (TRIGGER_CHECKPOINT[num][1] + TRIGGER_CHECKPOINT[num][2]) / 2
         pos.z = math.min(TRIGGER_CHECKPOINT[num][1].z, TRIGGER_CHECKPOINT[num][2].z)
         ply:SetPos(pos)
+    elseif string.sub(str, 1, 5) == "tppos" then
+        local num = tonumber(str:sub(7)) or str:sub(7)
+        if !TELEPORT_POSITIONS[num] then return end
+
+        ply:SetPos(TELEPORT_POSITIONS[num])
     end
 end)
 
