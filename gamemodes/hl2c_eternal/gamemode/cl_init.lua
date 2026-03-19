@@ -333,7 +333,7 @@ end
 
 local function CreateFont(id, size, tbl)
 	tbl = tbl or {}
-	tbl.size = size*BetterScreenScale()
+	tbl.size = size--*BetterScreenScale()
 	surface.CreateFont(id, tbl)
 end
 function GM:CreateFonts()
@@ -638,6 +638,17 @@ Expanded by Uklejamini]])
 	text:SetText([[-= OTHER NOTES =-
 Once you're dead you cannot respawn until the next map.]])
 	text:SetTextColor(Color(155,155,255))
+	text:SetContentAlignment(5)
+	text:SizeToContents()
+	text:SetWrap(true)
+	list:AddItem(text)
+
+	local text = vgui.Create("DLabel", list)
+	text:SetText([[While this gamemode is still unfinished, I had a lot of fun in the process of coding and playing it.
+If there are lua errors or bugs, please do report them on the addon page.
+
+Anyway, enjoy the craziness if you are playing on EX mode :)]])
+	text:SetTextColor(Color(145,196,208))
 	text:SetContentAlignment(5)
 	text:SizeToContents()
 	text:SetWrap(true)

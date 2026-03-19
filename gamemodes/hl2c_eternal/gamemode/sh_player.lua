@@ -90,7 +90,8 @@ function meta:CanPrestige()
 end
 
 function meta:CanEternity() -- higher prestige ignores CanPrestige requireent
-	return self.PrestigePoints >= InfNumber(2)^31
+	return self.Prestige >= MAX_PRESTIGE
+	-- return self.PrestigePoints >= InfNumber(2)^31
 end
 
 function meta:CanCelestiality()
@@ -110,7 +111,9 @@ function meta:HasCelestialityUnlocked()
 end
 
 function meta:GetPrestigeGainMul()
-	return infmath.floor(infmath.max(self.XPUsedThisPrestige / GAMEMODE:CalculateXPNeededForLevels(MAX_LEVEL) * 0.6, 1))
+	return infmath.ConvertInfNumberToNormalNumber(
+		infmath.floor(infmath.max(self.XPUsedThisPrestige / GAMEMODE:CalculateXPNeededForLevels(MAX_LEVEL) * 0.6, 1))
+	)
 --[[
 	return infmath.floor(infmath.Clamp(
 		self.XPUsedThisPrestige / GAMEMODE:CalculateXPNeededForLevels(MAX_LEVEL) * 0.6,
@@ -131,7 +134,7 @@ function meta:GetMaxLevel()
 end
 
 function meta:GetMaxPrestige()
-	return self:HasEternityUnlocked() and 30 or MAX_PRESTIGE
+	return self:HasCelestialityUnlocked() and 200 or self:HasEternityUnlocked() and 30 or MAX_PRESTIGE
 end
 
 function meta:GetMaxEternity()
@@ -145,7 +148,7 @@ end
 function meta:GetMaxSkillLevel(perk)
 	if GAMEMODE.SkillsDisabled then return 0 end
 
-	return self:HasEternityUnlocked() and (self:HasPerkActive("2_skills_improver") and 80 or 60) or self:HasPrestigeUnlocked() and 35 or 20
+	return self:HasCelestialityUnlocked() and 200 or self:HasEternityUnlocked() and (self:HasPerkActive("2_skills_improver") and 80 or 60) or self:HasPrestigeUnlocked() and 35 or 20
 end
 
 -- Large function! (Can go up to more than 1e12!) [Expectation, when all prestiges and perks are done]

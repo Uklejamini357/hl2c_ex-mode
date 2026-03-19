@@ -129,11 +129,11 @@ NPC_EXCLUDE_LAG_COMPENSATION = {
 
 
 -- Play Episode 1 after HL2 [false = No, true = Yes] (Default: false)
-PLAY_EPISODE_1 = false
+PLAY_EPISODE_1 = true
 
 
 -- Play Episode 2 after Episode 1 [false = No, true = Yes] (Default: false)
-PLAY_EPISODE_2 = false
+PLAY_EPISODE_2 = true
 
 
 -- Seconds before the map is restarted (Default: 12)
@@ -897,6 +897,7 @@ RegisterMapChapter(ch, "ep2_outland_12")
 ch = RegisterChapter("ep2_c7", "[EP2] Chapter 7", "ep2_outland_12a")
 
 
+-- i never done this yet.
 GM.PlayerConfigurables = {
 	["AutoPrestige"] = {"number", 0, "AutoPrestige", "When to prestige?", 0, function(ply) return 1e6 end}, -- #1 type, #2 default, #3 name, #4 description, #5 min (func), #6 max (func)
 	["ShouldNotifyPrestige"] = {"bool", 0, 1},

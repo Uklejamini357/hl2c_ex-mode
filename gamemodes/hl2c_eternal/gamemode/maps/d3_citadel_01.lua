@@ -518,10 +518,7 @@ function hl2cPlayerEnteredVehicle(ply, vehicle)
 
 									ply:TakeDamageInfo(dmg)
 
-									if !ply:Alive() then
-										local eff = EffectData()
-
-									end
+									local eff = EffectData()
 								end
 							end
 						end)

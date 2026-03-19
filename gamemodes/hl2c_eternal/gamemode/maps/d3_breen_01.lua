@@ -16,7 +16,7 @@ else
 end
 
 OVERRIDE_PLAYER_RESPAWNING = true
-MAP_FORCE_CHANGELEVEL_ON_MAPRESTART = false
+MAP_FORCE_CHANGELEVEL_ON_MAPRESTART = true
 
 CITADEL_ENDING = false
 
@@ -345,44 +345,143 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 		end
 
 		if ent:GetName() == "logic_portal_final_end_2" and string.lower(input) == "trigger" then
-			hook.Add("AcceptInput", "!!goodbye", function() return true end, HOOK_HIGH)
+			if GAMEMODE.HyperEXMode then
+				hook.Add("AcceptInput", "!!goodbye", function() return true end, HOOK_HIGH)
 
-			net.Start("hl2ce_map_event")
-			net.WriteString("citadel_explode")
-			net.Broadcast()
+				for _,ply in ipairs(player.GetAll()) do
+					ply:RemoveSuit()
+				end
 
-			for _,ply in ipairs(player.GetAll()) do
-				ply:SetPos(Vector(math.random(-1e5,1e5), math.random(-1e5,1e5), math.random(5e4,1e5)))
-				ply:StripWeapons()
-				ply:RemoveSuit()
-			end
-			local dontremove = {"logic_portal_final_end_2", "credits", "song3"}
-			for _,ent in ipairs(ents.GetAll()) do
-				if table.HasValue(dontremove, ent:GetName()) then continue end
-				ent:Remove()
-			end
-
-			timer.Simple(40, function()
-				if !IsValid(ent) then return end
-
-				gamemode.Call("NextMap")
-				gamemode.Call("OnCampaignCompleted")
-
-				if not completed then
-					completed = true
-					for _,ply in ipairs(player.GetAll()) do
-						gamemode.Call("PlayerCompletedCampaign", ply)
+				local i = 0
+				local _e = ent
+				for _,ent in ipairs(ents.GetAll()) do
+					if _e == ent then continue end
+					if ent:GetClass():sub(1, 6) == "logic_" then
+						ent:Remove()
+					else
+						ent:SetColor(HSVToColor(math.random(360), math.Rand(0,1), math.Rand(0,1)))
+						i = i + 1
+						timer.Simple(i*0.06, function()
+							if !IsValid(ent) then return end
+							ent:Remove()
+						end)
 					end
 				end
 
-				gamemode.Call("PostOnCampaignCompleted")
+				timer.Simple(2.7, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "No...")
+				end)
 
-				hook.Remove("AcceptInput", "!!goodbye")
-				ents.FindByName("credits")[1]:Fire("rolloutrocredits")
-				ents.FindByName("song3")[1]:Fire("playsound")
-			end)
+				timer.Simple(4.1, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "No...")
+				end)
 
-			return true
+				for i=0,3 do
+					timer.Simple(5.7+i, function()
+					if !IsValid(ent) then return end
+						PrintMessage(3, "I won't let you win...")
+					end)
+				end
+				timer.Simple(10.4, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "I won't let...")
+				end)
+				timer.Simple(12.7, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "I won't...")
+				end)
+				timer.Simple(16.9, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "You...")
+				end)
+				timer.Simple(20, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "...doomed us all...")
+				end)
+				timer.Simple(24, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "...goodbye...")
+				end)
+				timer.Simple(28.6, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, "...forever......")
+				end)
+				timer.Simple(33.8, function()
+					if !IsValid(ent) then return end
+					PrintMessage(3, ".........F.O.R.E.V.E.R............")
+				end)
+
+				timer.Simple(35, function()
+					if !IsValid(ent) then return end
+					for _,pl in ipairs(player.GetAll()) do
+						pl:SetPos(Vector(math.random(-1e5,1e5), math.random(-1e5,1e5), 1e5))
+					end
+				end)
+
+
+				timer.Simple(40, function()
+					if !IsValid(ent) then return end
+
+					gamemode.Call("NextMap")
+					gamemode.Call("OnCampaignCompleted")
+
+					if not completed then
+						completed = true
+						for _,ply in ipairs(player.GetAll()) do
+							gamemode.Call("PlayerCompletedCampaign", ply)
+						end
+					end
+
+					gamemode.Call("PostOnCampaignCompleted")
+
+					hook.Remove("AcceptInput", "!!goodbye")
+					-- ents.FindByName("credits")[1]:Fire("rolloutrocredits")
+					-- ents.FindByName("song3")[1]:Fire("playsound")
+				end)
+
+				return true
+			else
+				hook.Add("AcceptInput", "!!goodbye", function() return true end, HOOK_HIGH)
+
+				net.Start("hl2ce_map_event")
+				net.WriteString("citadel_explode")
+				net.Broadcast()
+
+				for _,ply in ipairs(player.GetAll()) do
+					ply:SetPos(Vector(math.random(-1e5,1e5), math.random(-1e5,1e5), math.random(5e4,1e5)))
+					ply:StripWeapons()
+					ply:RemoveSuit()
+				end
+				local dontremove = {"logic_portal_final_end_2", "credits", "song3"}
+				for _,ent in ipairs(ents.GetAll()) do
+					if table.HasValue(dontremove, ent:GetName()) then continue end
+					ent:Remove()
+				end
+
+				timer.Simple(40, function()
+					if !IsValid(ent) then return end
+
+					gamemode.Call("NextMap")
+					gamemode.Call("OnCampaignCompleted")
+
+					if not completed then
+						completed = true
+						for _,ply in ipairs(player.GetAll()) do
+							gamemode.Call("PlayerCompletedCampaign", ply)
+						end
+					end
+
+					gamemode.Call("PostOnCampaignCompleted")
+
+					hook.Remove("AcceptInput", "!!goodbye")
+					ents.FindByName("credits")[1]:Fire("rolloutrocredits")
+					ents.FindByName("song3")[1]:Fire("playsound")
+				end)
+
+				return true
+			end
 		end
 	end
 

@@ -1,6 +1,7 @@
 EX Mode NPC variants:
 
 Sorry, still work in progress! At least I'm working on it.
+edit: nope. not working on it anymore. consider unfinished. lol
 
 Metropolice:
 Variant 1: Overpowered - 1.3x HP & 1.5x damage, 1.2x XP gain.
