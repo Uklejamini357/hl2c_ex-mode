@@ -13,7 +13,7 @@ in case of multiple tags:
 LANG.test = "Test!" -- (TDL,T,I)
 ]]
 
-translate.AddLanguage("zh-tw", "繁體中文") -- Chinese (Simplified)
+translate.AddLanguage("zh-tw", "繁體中文") -- Chinese (Traditional)
 
 -- HUD
 LANG.health = "健康:"
