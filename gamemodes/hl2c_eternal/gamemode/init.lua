@@ -173,7 +173,8 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	end
 
 
-	if attacker:IsNPC() then
+	local cl = attacker.GetClass and attacker:GetClass()
+	if attacker:IsNPC() or attacker:IsNextBot() or cl == "trigger_hurt" then
 		net.Start("hl2ce_playerkilled")
 		net.WriteBit(0)
 		net.WriteString(attacker:GetClass())
@@ -220,7 +221,7 @@ end
 -- Called when entities are created
 function GM:OnEntityCreated(ent)
 	-- NPC Lag Compensation
-	if self.LagCompensation and ent:IsNPC() and !table.HasValue(NPC_EXCLUDE_LAG_COMPENSATION, ent:GetClass()) then
+	if self.LagCompensation and (ent:IsNPC() or ent:IsNextBot()) and !table.HasValue(NPC_EXCLUDE_LAG_COMPENSATION, ent:GetClass()) then
 		ent:SetLagCompensated(true)
 	end
 
@@ -237,7 +238,7 @@ function GM:OnEntityCreated(ent)
 		ent.passengerSeat.allowWeapons = true
 	end
 
-	if ent:IsNPC() and not ent:IsFriendlyNPC() and not table.HasValue(GODLIKE_NPCS, ent:GetClass()) then
+	if (ent:IsNPC() or ent:IsNextBot()) and not ent:IsFriendlyNPC() and not table.HasValue(GODLIKE_NPCS, ent:GetClass()) then
 		local diff = self:GetDifficulty()^0.1
 		local diff2 = infmath.min(1e200, infmath.max(1, diff/1e10)^0.1)
 
@@ -248,11 +249,11 @@ function GM:OnEntityCreated(ent)
 	end
 
 	ent.spawnTime = CurTime()
-	if ent:IsNPC() then
+	if ent:IsNPC() or ent:IsNextBot() then
 		ent.PlyAttackers = {}
 	end
 	timer.Simple(0, function()
-		if !ent:IsNPC() then return end
+		if !ent:IsNPC() and !ent:IsNextBot() then return end
 		if ent.ent_MaxHealthMul then
 			ent:SetMaxHealth(infmath.ConvertInfNumberToNormalNumber(ent.ent_MaxHealthMul * ent:Health()))
 		end
@@ -309,7 +310,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		attacker = attacker:GetDriver()
 	end
 
-	if attacker.NextDamageMul and (ent:IsNPC() or ent:IsPlayer()) then
+	if attacker.NextDamageMul and (ent:IsNPC() or ent:IsNextBot() or ent:IsPlayer()) then
 		damage = damage * attacker.NextDamageMul
 		attacker.NextDamageMul = nil
 	end
@@ -332,7 +333,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		damage = damage * math.max(1, ent:GetMaxHealth()*0.01) * eff_difficulty^0.2
 	end
 
-	if (ent:IsPlayer() or ent:IsNPC() and ent:IsFriendlyNPC()) and attacker:IsNPC() and not attacker:IsFriendlyNPC() then
+	if (ent:IsPlayer() or ent:IsNPC() or ent:IsNextBot() and ent:IsFriendlyNPC()) and (attacker:IsNPC() or attacker:IsNextBot()) and not attacker:IsFriendlyNPC() then
 		if not ispoisonheadcrab then
 			damage = damage * eff_difficulty^0.7
 		elseif ent:IsPlayer() and ent:HasPerkActive("1_antipoison") then
@@ -340,13 +341,13 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		end
 	end
 
-	if ent:IsNPC() and not ent:IsFriendlyNPC() and (attacker:IsFriendlyNPC() or attacker:IsPlayer()) then
+	if (ent:IsNPC() or ent:IsNextBot()) and not ent:IsFriendlyNPC() and (attacker:IsFriendlyNPC() or attacker:IsPlayer()) then
 		if ent:GetClass() ~= "npc_combinegunship" then
 			damage = damage / eff_difficulty^0.55
 		end
 	end
 
-	if ent:IsPlayer() and attacker:IsNPC() and not dmgdirect then
+	if ent:IsPlayer() and (attacker:IsNPC() or attacker:IsNextBot()) and not dmgdirect then
 		local chance = (10 + math.max(0, (ent:GetMaxHealth()*0.75 - ent:Health())/ent:GetMaxHealth()*10)) / math.Clamp(1.1^math.max(0, ent.UnoReverseTimesActivated), 0, 100)
 		if ent:HasPerkActive("3_uno_reverse") and ent:Health() <= ent:GetMaxHealth()*0.75 and math.Rand(1,100) <= chance then
 			local d = DamageInfo()
@@ -384,8 +385,9 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		end
 	end
 
+	-- print(damage)
 
-	if ent ~= attacker and ent:IsNPC() and attacker:IsNPC() and (not attacker:IsFriendlyNPC() and not ent:IsFriendlyNPC()) then
+	if ent ~= attacker and (ent:IsNPC() or ent:IsNextBot()) and (attacker:IsNPC() or attacker:IsNextBot()) and (not attacker:IsFriendlyNPC() and not ent:IsFriendlyNPC()) then
 		local diff = difficulty^0.1
 		local diff2 = infmath.min(1e200, infmath.max(1, diff/1e10)^0.1)
 
@@ -399,7 +401,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		PrintMessage(3, tostring(attacker).." "..(ent:IsPlayer() and ent:Nick() or ent:GetClass()).." "..tostring(damage))
 	end
 
-	if ent:IsNPC() and NPC_NONPCKILL_HOOK[ent:GetClass()] then
+	if (ent:IsNPC() or ent:IsNextBot()) and NPC_NONPCKILL_HOOK[ent:GetClass()] then
 		ent.m_LastAttacker = attacker
 		ent.m_LastInflictor = inflictor
 		ent.m_LastAttackTime = CurTime()
@@ -1114,7 +1116,7 @@ function GM:OnNPCKilled(npc, killer, weapon)
 end
 
 function GM:EntityRemoved(ent)
-	if ent:IsNPC() and NPC_NONPCKILL_HOOK[ent:GetClass()] and ent.m_LastAttacker and ent.m_LastAttackTime == CurTime() then
+	if (ent:IsNPC() or ent:IsNextBot()) and NPC_NONPCKILL_HOOK[ent:GetClass()] and ent.m_LastAttacker and ent.m_LastAttackTime == CurTime() then
 		hook.Run("OnNPCKilled", ent, ent.m_LastAttacker, ent.m_LastInflictor)
 	end
 end
@@ -1976,7 +1978,7 @@ function GM:Think()
 	if SecondTick < CurTime() then
 		SecondTick = CurTime() + 1
 
-		for _,ply in ipairs(player.GetAll()) do
+		for _,ply in player.Iterator() do
 			if ply:HasPerkActive("2_hyper_armor") then
 				if ply:WaterLevel() < 3 and ply:GetSuitPower() < 100 then
 					ply:SetSuitPower(math.min(100, ply:GetSuitPower() + 1))
@@ -2165,7 +2167,7 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 	end
 
 	if string.lower(input) == "sethealth" then
-		if value == "0" and (ent:IsPlayer() or ent:IsNPC()) then
+		if value == "0" and (ent:IsPlayer() or ent:IsNPC() or ent:IsNextBot()) then
 			ent:SetHealth(0)
 			ent:TakeDamage(0)
 		elseif value == "100" and ent:IsPlayer() then -- fucking instakills on trigger

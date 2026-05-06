@@ -281,6 +281,12 @@ function GM:PlayerPostThink(ply)
 	end
 end
 
+function GM:PlayerSwitchWeapon(ply, old, new)
+	if new:GetClass() == "weapon_rpg" then
+		new:SetNextPrimaryFire(CurTime())
+	end
+end
+
 -- why i'm using GlobalString instead of Float value:
 -- Allows to be broadcasted to client with numbers like 2^128 (3.40e38) and above until 2^1024 (1.79e308) values
 -- break infinity update: NOW UP TO 10^(1.79e308)!!!!!
@@ -346,6 +352,11 @@ function GM:GetEffectiveDifficulty(ply)
 	return self:GetDifficulty()^power
 end
 
+function GM:GetDifficultyText(diff)
+	if !diff then diff = self:GetDifficulty() end
+
+	return "Normal"
+end
 
 function FormatNumber(val, roundval)
 	local log10_value = math.floor(isinfnumber(val) and val:log10() or math.log10(val))

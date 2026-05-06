@@ -167,7 +167,12 @@ net.Receive("hl2ce_playerkilled", function(len)
             pl:EmitSound(snd)
         end
     else
-        chat.AddText("Killed by ", Color(255,0,0), language.GetPhrase(net.ReadString()))
+        local cl = net.ReadString()
+        if cl == "trigger_hurt" then
+            chat.AddText("You died a ", Color(255,0,0), "stupid death", color_white, ".")
+        else
+            chat.AddText("Killed by ", Color(255,0,0), language.GetPhrase(cl))
+        end
     end
 end)
 
