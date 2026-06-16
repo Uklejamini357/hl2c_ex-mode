@@ -28,13 +28,6 @@ Turns Hl2c into extremely unbalanced and one of the most unfair gamemodes of all
 GM.EndlessMode = true
 
 
---[[No Progression Advantage:
-- All skills and perks effects are disabled.
-
-Only if you want to play the game normally or with no progression advantages
-]]
-GM.NoProgressionAdvantage = false
-
 -- Difficulty Level
 -- Difficulty that increases specific stats after certain amount of difficulty
 --[[

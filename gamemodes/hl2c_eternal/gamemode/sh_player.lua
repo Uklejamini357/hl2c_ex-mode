@@ -57,16 +57,19 @@ function meta:GetMaxDifficultyMoneyGainMul()
 end
 
 function meta:GetSkillAmount(stat)
-	if GAMEMODE.NoProgressionAdvantage then return 0 end
+	if GAMEMODE.SkillsDisabled then return 0 end
+
 	return math.Clamp(self.Skills[stat] or 0, 0, GAMEMODE.EndlessMode and 1e6 or 10)
 end
 
 function meta:HasPerkUnlocked(perk)
+	if GAMEMODE.SkillsDisabled then return false end
+
 	return self.UnlockedPerks[perk]
 end
 
 function meta:HasPerkActive(perk)
-	if GAMEMODE.NoProgressionAdvantage then return false end
+	if GAMEMODE.SkillsDisabled then return false end
 
 	local perkdata = GAMEMODE.PerksData[perk]
 	return self:HasPerkUnlocked(perk) and not table.HasValue(self.DisabledPerks, perk) and (GAMEMODE.EndlessMode or perkdata.PrestigeLevel < 2)
@@ -183,7 +186,7 @@ end
 
 -- Eternity Upgrades
 function meta:GetEternityUpgradeEffectValue(upg, forcevalue)
-	if GAMEMODE.NoProgressionAdvantage then return 1 end
+	if GAMEMODE.SkillsDisabled then return 1 end
 	local upgrade = GAMEMODE.UpgradesEternity[upg]
 	if not upgrade then return 1 end
 	
