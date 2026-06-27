@@ -162,8 +162,9 @@ end
 t.FormatText = function(self, roundto)
     local e = self.exponent
     local abs_e = e
+    if not (e >= -math_huge) then return "nan" end
     if e == -math_huge then return "0" end
-    if e == math_huge then return "inf" end
+    if e == math_huge then return (self.mantissa < 0 and "-" or "").."inf" end
     local e_negative = e < 0
     if e_negative then
         abs_e = math_abs(abs_e)

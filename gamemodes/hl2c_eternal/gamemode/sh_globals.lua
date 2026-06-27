@@ -125,3 +125,5 @@ if SERVER then
 
 	end
 end
+
+COLOR_WHITE = Color(255,255,255)

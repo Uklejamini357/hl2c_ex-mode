@@ -192,6 +192,11 @@ function GM:HUDPaint()
 			draw.DrawText("("..translate.Get("difficulty_eff").." "..FormatNumber(self:GetEffectiveDifficulty(pl)*100).."%)", "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 - 15, c, TEXT_ALIGN_CENTER)
 		end
 
+		if cmenu then
+			local name,col = self:GetDifficultyNameCol(d/100)
+			draw.DrawText(name, "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 - 30, col, TEXT_ALIGN_CENTER)
+		end
+
 		if !hl2ce_cl_noshowdifficultychange:GetBool() and self.DifficultyDifferenceTimeChange + 3 >= CurTime() and self.DifficultyDifference ~= 0 then
 			colordifference.a = (self.DifficultyDifferenceTimeChange+3-CurTime())*155/3
 			draw.DrawText(Format("%s%s%%", diff_difference < 0 and "-" or "+", FormatNumber(infmath.abs(infmath.Round(self.DifficultyDifference * 100, 2)))), "hl2ce_hudfont_small", ScrW() / 2, ScrH() / 6 + 15, colordifference, TEXT_ALIGN_CENTER )

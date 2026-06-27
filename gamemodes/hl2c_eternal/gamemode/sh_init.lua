@@ -337,6 +337,109 @@ function GM:GetDifficulty(noncvar, noadditionalmul)
 	return value
 end
 
+-- most of them were taken from https://jtohs-joke-towers.fandom.com/wiki/Main_Difficulty_Chart
+-- Some from ULTRAKILL.
+local rgb = Color
+function GM:GetDifficultyNameCol(diff)
+	local d = isinfnumber(diff) and infmath.ConvertInfNumberToNormalNumber(diff) or diff
+	local dlog10 = isinfnumber(diff) and diff:log10() or math.log10(diff)
+
+	if d < 0 then -- section NULL: Blah
+		if diff.exponent >= MAX_NUMBER then
+			return "NEGATIVE INFINITY", HSVToColor(0, 0, (SysTime()*66)%1)
+		elseif d < -MAX_NUMBER then
+			return "Absolute Negativity", HSVToColor(0, 0, math.floor(SysTime()*math.pi)%2)
+		else
+			return "Negativity", HSVToColor(0, 0, math.floor(SysTime()*(1/math.pi))%2)
+		end
+	elseif d < 1 then -- section 0: EASY difficulties
+		if d == 0 then
+			return "Blessing", rgb(0, 232, 186)
+		elseif d < 0.01 then
+			return "Effortlessless", rgb(154, 245, 209)
+		elseif d < 0.1 then
+			return "Harmless", rgb(0, 255, 0)
+		elseif d < 0.2 then
+			return "Effortless", rgb(0, 110, 0)
+		elseif d < 0.4 then
+			return "Lenient", rgb(80, 255, 0) -- also known as Simple
+		elseif d < 0.7 then
+			return "Easy", rgb(112, 250, 0)
+		elseif d < 0.9 then
+			return "Calm", rgb(193, 252, 53)
+		else
+			return "Medium", rgb(138, 138, 17)
+		end
+	elseif d < 10 then -- section 1: Hard Difficulties (100+%)
+		if d < 1.2 then
+			return "Normal", rgb(240, 240, 0) -- also known as STANDARD
+		elseif d < 1.5 then
+			return "Intermediate", rgb(255, 187, 0)
+		elseif d < 1.75 then
+			return "Extraordinary", rgb(255, 149, 0)
+		elseif d < 2 then
+			return "Hard", rgb(255, 128, 0)
+		elseif d < 2.5 then
+			return "Violent", rgb(255, 64, 0)
+		elseif d < 3 then
+			return "Tricky", rgb(255, 42, 0)
+		elseif d < 3.5 then
+			return "Difficult", rgb(250, 0, 0)
+		elseif d < 4.5 then
+			return "BRUTAL", rgb(210, 0, 0)
+		elseif d < 5.5 then
+			return "Menacing", rgb(255, 166, 166)
+		elseif d < 6.5 then
+			return "Maniacal", rgb(240, 240, 0)
+		elseif d < 7.5 then
+			return "Hectic", rgb(255, 252, 254)
+		elseif d < 8.5 then
+			return "Intense", rgb(252, 254, 255)
+		else
+			return "Hellish", rgb(252, 199, 255)
+		end
+	elseif d < 1e2 then -- section 2: Soul-crushing Difficulties (1K+%)
+		if d < 15 then
+			return "Remorseless", rgb(255, 173, 254)
+		elseif d < 20 then
+			return "Relentless", rgb(72, 0, 255)
+		elseif d < 25 then
+			return "Insane", rgb(0, 0, 255)
+		elseif d < 30 then
+			return "Madness", rgb(0, 119, 255)
+		elseif d < 40 then
+			return "Extreme", rgb(31, 139, 255)
+		elseif d < 50 then
+			return "Absurd", rgb(0, 221, 255)
+		elseif d < 65 then
+			return "Terrifying", rgb(0, 255, 255)
+		elseif d < 80 then
+			return "Horrifying", rgb(0, 184, 184)
+		else
+			return "Petrifying", rgb(0, 135, 135)
+		end
+	elseif d < 1e4 then -- section 3: Humanly-Impossible Difficulties (10K+%)
+		if d < 150 then
+			return "Catastrophic", rgb(0, 0, 0)
+		elseif d < 250 then
+			return "Dorcelessness", rgb(209, 0, 237):Lerp(rgb(115, 0, 140), 0.5 + math.sin(SysTime())/2)
+		else
+			return "Champion's Road", rgb(0, 145, 158):Lerp(rgb(158, 58, 77), 0.5 + math.sin(SysTime()*1.5)/2)
+		end
+	elseif d < 1e7 then -- section 4: Hypothetically impossible Difficulties (1M+%)
+		-- if d < 1.2 then
+			return "WTH", rgb(240, 240, 0)
+		-- end
+	elseif d >= math.huge then -- section ???: TRULY IMPOSSIBLE. (1.79e310% difficulty and ABOVE)
+		return "TRULY IMPOSSIBLE", rgb(255, 0, 0)
+	else
+		return "", color_black
+	end
+
+
+	return "NULL", COLOR_WHITE
+end
+
 function GM:OnDifficultyChanged(old, new)
 end
 
