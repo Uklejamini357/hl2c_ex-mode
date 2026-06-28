@@ -23,6 +23,7 @@ util.AddNetworkString("hl2ce_fail")
 util.AddNetworkString("hl2ce_map_event")
 util.AddNetworkString("hl2ce_playerkilled")
 util.AddNetworkString("hl2ce_playertimer")
+util.AddNetworkString("hl2ce_dmgnum")
 
 util.AddNetworkString("hl2ce_admin_teleport")
 util.AddNetworkString("hl2ce_admin_changemap")

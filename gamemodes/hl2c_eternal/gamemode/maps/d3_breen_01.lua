@@ -111,6 +111,14 @@ if CLIENT then
 				table.insert(tbl, s[i])
 			end
 			chat.AddText(unpack(tbl))
+		elseif t == "musicstart" then
+			local sound = "#*hl2c_eternal/music/hl2_finale.wav"
+
+			if net.ReadBool() then
+				ply:EmitSound(sound, 0, 100, 1, CHAN_STATIC, SND_DELAY, 0)
+			else
+				ply:EmitSound(sound, 0, 100, 1, CHAN_STATIC, SND_DELAY + SND_STOP, 0)
+			end
 		end
 	end)
 
@@ -482,6 +490,19 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 
 				return true
 			end
+		elseif ent:GetName() == "music_finalelevator" and input:lower() == "playsound" then
+			return true
+		elseif ent:GetName() == "citadel_scene_al_theresbreen" and input:lower() == "start" then
+			net.Start("hl2ce_map_event")
+			net.WriteString("musicstart")
+			net.WriteBool(true)
+			net.Broadcast()
+
+			ents.FindByClass("citadel_relay_startbreensascent")[1]:Fire("Trigger")
+
+			PrintMessage(3, "CITADEL EXPLODES IN: 3 MINUTES.")
+		elseif ent:GetName() == "lcs_al_ascent" and input:lower() == "start" then
+			return true
 		end
 	end
 

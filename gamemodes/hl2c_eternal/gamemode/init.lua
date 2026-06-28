@@ -427,6 +427,15 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 
 			ent:Inf_SetHealth(ent:Inf_Health() - damage)
 		end
+
+		if attacker:IsPlayer() then
+			if attacker.DamagedEntsTick[ent] then -- if the player is already dealing dmg to the entity...
+				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + damage
+				attacker.DamagedEntsTick[ent][2] = dmgInfo:GetDamagePosition()
+			else
+				attacker.DamagedEntsTick[ent] = {damage, dmgInfo:GetDamagePosition()}
+			end
+		end
 	else return true
 	end
 end
@@ -435,11 +444,22 @@ function GM:PostEntityTakeDamage(ent, dmginfo, wasdamagetaken)
 	if !ent.Inf_Health then return end
 	local tookdamage = ent:IsPlayer() and not ent:HasGodMode() and wasdamagetaken or not ent:IsPlayer() and wasdamagetaken
 	if tookdamage then
-		if ent:Inf_Health() > 2e9 then
+		if ent:Inf_Health() > 2.1e9 then
 			ent:OldSetHealthEX(2.1e9)
 		end
 		ent:Inf_SetHealth(math.max(ent:OldHealthEX(), ent:Inf_Health()))
 	end
+end
+
+function GM:DamageFloater(attacker, victim, dmgpos, dmg)
+	if attacker == victim then return end
+	if dmgpos == vector_origin then dmgpos = victim:NearestPoint(attacker:EyePos()) end
+
+	net.Start("hl2ce_dmgnum")
+	net.WriteDouble(dmg)
+	net.WriteVector(dmgpos)
+	net.WriteBool(victim:IsPlayer())
+	net.Send(attacker)
 end
 
 
@@ -1116,6 +1136,16 @@ function GM:OnNPCKilled(npc, killer, weapon)
 end
 
 function GM:EntityRemoved(ent)
+	for _,pl in player.Iterator() do
+		if pl.DamagedEntsTick[ent] then
+			-- pcall(function()
+			self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][2], pl.DamagedEntsTick[ent][1])
+			-- end)
+
+			pl.DamagedEntsTick[ent] = nil
+		end
+	end
+
 	if (ent:IsNPC() or ent:IsNextBot()) and NPC_NONPCKILL_HOOK[ent:GetClass()] and ent.m_LastAttacker and ent.m_LastAttackTime == CurTime() then
 		hook.Run("OnNPCKilled", ent, ent.m_LastAttacker, ent.m_LastInflictor)
 	end
@@ -1283,6 +1313,7 @@ function GM:PlayerInitialSpawn(ply)
 
 	ply.ConfigData = {}
 
+	ply.DamagedEntsTick = {}
 	ply.MapStats = {}
 	ply.SessionStats = {}
 
@@ -2031,6 +2062,18 @@ function GM:Think()
 		end
 
 		delayedDMGTick = CurTime()
+	end
+end
+
+function GM:Tick()
+	for _,pl in player.Iterator() do
+		for ent,dmg in pairs(pl.DamagedEntsTick or {}) do
+			pcall(function()
+				self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][2], pl.DamagedEntsTick[ent][1])
+			end)
+
+			pl.DamagedEntsTick[ent] = nil
+		end
 	end
 end
 

@@ -176,3 +176,17 @@ net.Receive("hl2ce_playerkilled", function(len)
     end
 end)
 
+local hl2ce_cl_nodmgnum = GetConVar("hl2ce_cl_nodmgnum")
+net.Receive("hl2ce_dmgnum", function(len)
+	local dmg = net.ReadDouble()
+	local pos = net.ReadVector()
+	local pl = net.ReadBool()
+
+	if hl2ce_cl_nodmgnum:GetBool() then return end
+	local effectdata = EffectData()
+	effectdata:SetOrigin(pos)
+	effectdata:SetMagnitude(dmg)
+	effectdata:SetScale(0)
+    GAMEMODE.LastDamageDealt = dmg
+	util.Effect("hl2ce_dmg", effectdata)
+end)

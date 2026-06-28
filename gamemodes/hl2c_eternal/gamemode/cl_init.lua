@@ -13,23 +13,22 @@ include("cl_config.lua")
 include("cl_upgradesmenu.lua")
 include("cl_admin.lua")
 
+
 local translate_Get = translate.Get
 local translate_Format = translate.Format
 
-local hl2ce_cl_noearringing = CreateClientConVar("hl2ce_cl_noearringing", 0, true, true, "Disables annoying tinnitus sound when taking damage from explosions", 0, 1)
-local hl2ce_cl_nohuddifficulty = CreateClientConVar("hl2ce_cl_nohuddifficulty", 0, true, false, "Disables Difficulty text from HUD if not having CMenu Open", 0, 1)
-local hl2ce_cl_nodifficultytext = CreateClientConVar("hl2ce_cl_nodifficultytext", 0, true, false, "Displays only the % on difficulty", 0, 1)
-local hl2ce_cl_noshowdifficultychange = CreateClientConVar("hl2ce_cl_noshowdifficultychange", 0, true, false, "Displays when difficulty changed", 0, 1)
-local hl2ce_cl_nocustomhud = CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, false, "Disables the HL2 Health and Armor Bars", 0, 1)
-local hl2ce_cl_drawxpgaintext = CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)
-local hl2ce_cl_noplrdeathsound = CreateClientConVar("hl2ce_cl_noplrdeathsound", 0, true, false, "Disable player death sounds.", 0, 1)
-local hl2ce_cl_showmaptimer = CreateClientConVar("hl2ce_cl_showmaptimer", 0, true, false, "Show how much time you spent on this map.", 0, 1)
-local hl2ce_cl_noepilepsy = CreateClientConVar("hl2ce_cl_noepilepsy", 1, true, false, "Greatly weakens violently flashing lights, or disables them.", 0, 1)
-GM.NoEpilepsy = hl2ce_cl_noepilepsy:GetBool()
-cvars.AddChangeCallback("hl2ce_cl_noepilepsy", function(cvar, old, new)
-	GAMEMODE.NoEpilepsy = tobool(new)
-end, "hl2ce_cl_noepilepsy")
-local hl2ce_cl_noshowlosetext = CreateClientConVar("hl2ce_cl_noshowlosetext", 0, true, false, "Don't show the lose screen.", 0, 1)
+local hl2ce_cl_noearringing = GetConVar("hl2ce_cl_noearringing")
+local hl2ce_cl_nohuddifficulty = GetConVar("hl2ce_cl_nohuddifficulty")
+local hl2ce_cl_nodifficultytext = GetConVar("hl2ce_cl_nodifficultytext")
+local hl2ce_cl_noshowdifficultychange = GetConVar("hl2ce_cl_noshowdifficultychange")
+local hl2ce_cl_nocustomhud = GetConVar("hl2ce_cl_nocustomhud")
+local hl2ce_cl_nokillfeed = GetConVar("hl2ce_cl_nokillfeed")
+local hl2ce_cl_nodmgnum = GetConVar("hl2ce_cl_nodmgnum")
+local hl2ce_cl_drawxpgaintext = GetConVar("hl2ce_cl_drawxpgaintext")
+local hl2ce_cl_noplrdeathsound = GetConVar("hl2ce_cl_noplrdeathsound")
+local hl2ce_cl_showmaptimer = GetConVar("hl2ce_cl_showmaptimer")
+local hl2ce_cl_noepilepsy = GetConVar("hl2ce_cl_noepilepsy")
+local hl2ce_cl_noshowlosetext = GetConVar("hl2ce_cl_noshowlosetext")
 
 -- Create data folders
 if !file.IsDir(GM.VaultFolder, "DATA") then file.CreateDir(GM.VaultFolder) end
@@ -104,6 +103,14 @@ hook.Add("OnDifficultyChanged", "InfNumber.blah", function(old, new)
 	timer.Create("InfNumber.DifficultyTotal.Reset", 3, 1, function()
 		gm.DifficultyDifferenceTotal = 0
 	end)
+end)
+
+hook.Add("AddDeathNotice", "hl2ce.DisableDeathNotice", function()
+	if hl2ce_cl_nokillfeed:GetBool() then return true end
+end)
+
+hook.Add("DrawDeathNotice", "hl2ce.DisableDeathNotice", function()
+	if hl2ce_cl_nokillfeed:GetBool() then return true end
 end)
 
 local bosshp = 0
@@ -352,6 +359,8 @@ function GM:CreateFonts()
 	CreateFont("hl2ce_font_small", 20, {weight = 800, font = "Roboto Black"})
 	CreateFont("hl2ce_font", 32, {weight = 700, font = "Roboto Black"})
 	CreateFont("hl2ce_font_big", 48, {weight = 900, font = "Roboto Black"})
+
+	CreateFont("hl2ce_dmgfont", 72, {weight = 900, font = "Roboto Black"})
 end
 
 function GM:CreateScoreboardFonts(large)

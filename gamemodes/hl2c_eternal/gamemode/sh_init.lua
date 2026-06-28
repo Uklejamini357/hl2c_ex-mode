@@ -371,7 +371,7 @@ function GM:GetDifficultyNameCol(diff)
 			return "Medium", rgb(138, 138, 17)
 		end
 	elseif d < 10 then -- section 1: Hard Difficulties (100+%)
-		if d < 1.2 then
+		if d < 1.2 then -- add: veteran, master, legend here
 			return "Normal", rgb(240, 240, 0) -- also known as STANDARD
 		elseif d < 1.5 then
 			return "Intermediate", rgb(255, 187, 0)
@@ -419,7 +419,7 @@ function GM:GetDifficultyNameCol(diff)
 			return "Petrifying", rgb(0, 135, 135)
 		end
 	elseif d < 1e4 then -- section 3: Humanly-Impossible Difficulties (10K+%)
-		if d < 150 then
+		if d < 150 then -- add: impossible here
 			return "Catastrophic", rgb(0, 0, 0)
 		elseif d < 250 then
 			return "Dorcelessness", rgb(209, 0, 237):Lerp(rgb(115, 0, 140), 0.5 + math.sin(SysTime())/2)
