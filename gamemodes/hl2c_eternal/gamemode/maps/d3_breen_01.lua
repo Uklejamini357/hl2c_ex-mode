@@ -2,6 +2,8 @@ INFO_PLAYER_SPAWN = {Vector(-2489, -1292, 580), 90}
 GM.XpGainOnNPCKillMul = 0.35
 GM.DifficultyGainOnNPCKillMul = 0.5
 
+-- If only I knew how to skip this whole dr.breen cutscene thing
+
 NEXT_MAP_PERCENT = 1
 NEXT_MAP_INSTANT_PERCENT = 101
 
@@ -190,7 +192,7 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 
 	if !game.SinglePlayer() then
 		if ent:GetClass() == "point_viewcontrol" then
-			if ( ent:GetName() == "blackout_viewcontroller" ) then
+			if ent:GetName() == "blackout_viewcontroller" and input:lower() ~= "disable" then
 				return true
 			end
 
@@ -350,11 +352,13 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 			end)
 		end
 
-		if ent:GetName() == "citadel_scene_br_dead1" and string.lower(input) == "trigger" then
+		if ent:GetName() == "logic_portal_final_end" and string.lower(input) == "trigger" then
 			net.Start("hl2ce_map_event")
 			net.WriteString("musicstart")
 			net.WriteBool(false)
 			net.Broadcast()
+
+			ents.FindByName("relay_breenwins")[1]:Remove()
 		end
 
 		if ent:GetName() == "logic_portal_final_end_2" and string.lower(input) == "trigger" then
@@ -504,6 +508,8 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 			net.Broadcast()
 
 			ents.FindByName("citadel_relay_startbreensascent")[1]:Fire("Trigger")
+			ents.FindByName("citadel_relay_overwatch")[1]:Fire("Trigger", nil, 5)
+			ents.FindByName("relay_breenwins")[1]:Fire("Trigger", nil, 185)
 
 			PrintMessage(3, "CITADEL EXPLODES IN: 3 MINUTES.")
 		elseif ent:GetName() == "lcs_al_ascent" and input:lower() == "start" then
