@@ -114,6 +114,7 @@ if CLIENT then
 		elseif t == "musicstart" then
 			local sound = "#*hl2c_eternal/music/hl2_finale.wav"
 
+			local ply = LocalPlayer()
 			if net.ReadBool() then
 				ply:EmitSound(sound, 0, 100, 1, CHAN_STATIC, SND_DELAY, 0)
 			else
@@ -350,6 +351,10 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 		end
 
 		if ent:GetName() == "citadel_scene_br_dead1" and string.lower(input) == "trigger" then
+			net.Start("hl2ce_map_event")
+			net.WriteString("musicstart")
+			net.WriteBool(false)
+			net.Broadcast()
 		end
 
 		if ent:GetName() == "logic_portal_final_end_2" and string.lower(input) == "trigger" then
@@ -498,7 +503,7 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
 			net.WriteBool(true)
 			net.Broadcast()
 
-			ents.FindByClass("citadel_relay_startbreensascent")[1]:Fire("Trigger")
+			ents.FindByName("citadel_relay_startbreensascent")[1]:Fire("Trigger")
 
 			PrintMessage(3, "CITADEL EXPLODES IN: 3 MINUTES.")
 		elseif ent:GetName() == "lcs_al_ascent" and input:lower() == "start" then

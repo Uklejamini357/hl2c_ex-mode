@@ -420,6 +420,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 			ent.SessionStats.DamageTaken = ent.SessionStats.DamageTaken + math.min(ent:Health(), damage)
 		end
 
+		local hp = ent:Health()
 		if ent.Inf_Health and ent:Inf_Health() > 2e9 then
 			if damage < ent:Inf_Health() then
 				dmgInfo:SetDamage(math.min(damage, 2e9-1))
@@ -428,7 +429,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 			ent:Inf_SetHealth(ent:Inf_Health() - damage)
 		end
 
-		if attacker:IsPlayer() then
+		if attacker:IsPlayer() and hp > 0 then
 			if attacker.DamagedEntsTick[ent] then -- if the player is already dealing dmg to the entity...
 				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + damage
 				attacker.DamagedEntsTick[ent][2] = dmgInfo:GetDamagePosition()

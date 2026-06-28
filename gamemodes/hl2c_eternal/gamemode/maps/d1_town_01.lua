@@ -1,5 +1,6 @@
 NEXT_MAP = "d1_town_01a"
 
+-- why the hell this map crashes for me on restart past reaching a certain point (EX Mode and HyperEX Mode)
 
 local obj_amount = 404
 if CLIENT then

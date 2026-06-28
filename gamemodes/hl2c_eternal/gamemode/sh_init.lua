@@ -423,12 +423,22 @@ function GM:GetDifficultyNameCol(diff)
 			return "Catastrophic", rgb(0, 0, 0)
 		elseif d < 250 then
 			return "Dorcelessness", rgb(209, 0, 237):Lerp(rgb(115, 0, 140), 0.5 + math.sin(SysTime())/2)
-		else
+		elseif d < 400 then
 			return "Champion's Road", rgb(0, 145, 158):Lerp(rgb(158, 58, 77), 0.5 + math.sin(SysTime()*1.5)/2)
+		elseif d < 600 then
+			return "Horrific", rgb(109, 90, 219)
+		elseif d < 1000 then
+			return "Harrowing", rgb(227, 154, 206)
+		elseif d < 2000 then
+			return "Unreal", rgb(190, 176, 255)
+		elseif d < 5000 then
+			return "Treacherous", rgb(226, 212, 250)
+		else
+			return "Prodigious", rgb(119, 166, 191)
 		end
-	elseif d < 1e7 then -- section 4: Hypothetically impossible Difficulties (1M+%)
+	elseif d < math.huge then -- section 4: Hypothetically impossible Difficulties (1M+%)
 		-- if d < 1.2 then
-			return "WTH", rgb(240, 240, 0)
+			return "ETERNALS MUST DIE", rgb(100, 240, 255)
 		-- end
 	elseif d >= math.huge then -- section ???: TRULY IMPOSSIBLE. (1.79e310% difficulty and ABOVE)
 		return "TRULY IMPOSSIBLE", rgb(255, 0, 0)

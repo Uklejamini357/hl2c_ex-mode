@@ -24,3 +24,4 @@ What does this have? A lot of changes, including fixes for things that cause une
 - EP1 partially works, EP2 isn't expected to work fully.
 - As this gamemode is still in development, expect random instability to occur update after update.
 - This gamemode is maintained mostly for multiplayer, so if I break the gamemode in singleplayer, sorry about that.
+- This is highly unstable. Expect bugs!!!

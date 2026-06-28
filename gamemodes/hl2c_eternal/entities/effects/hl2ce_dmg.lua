@@ -27,7 +27,7 @@ hook.Add("PostDrawTranslucentRenderables", "hl2ce_DrawDMG", function()
 			col.a = math.Clamp(particle.DieTime - curtime, 0, 1) * 220
 
 			cam.Start3D2D(particle:GetPos(), ang, 0.1 * 1)
-            draw.SimpleText(math.Round(particle.Amount, 1), "hl2ce_dmgfont", 0, 0, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+            draw.SimpleText(FormatNumber(particle.Amount), "hl2ce_dmgfont", 0, 0, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 			cam.End3D2D()
 		end
 	end
