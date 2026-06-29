@@ -67,6 +67,7 @@ LANG.cant_spawn_vehicle_cooldown = "你已经生成了一个载具！ 请在 %d 
 LANG.cant_spawn_vehicle_nearby_plrs = "你周围有玩家！找个空地。"
 LANG.cant_spawn_vehicle_no_space = "没有足够的空间用来生成载具。"
 LANG.cant_spawn_vehicle_airborne = "你不能在空中生成载具。"
+LANG.cant_spawn_vehicle_underwater = "You can't spawn a vehicle while underwater!"
 LANG.cant_remove_vehicle = "你现在不能移除载具。"
 
 LANG.gained_moneys = "你获得了 %s 金钱"

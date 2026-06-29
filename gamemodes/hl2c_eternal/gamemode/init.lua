@@ -1900,7 +1900,12 @@ function GM:ShowSpare1(ply)
 		end
 	end
 
-	if !ply:IsOnGround() then
+	if ply:WaterLevel() == 3 then
+		-- ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle_underwater")
+		-- return
+	end
+
+	if !ply:IsOnGround() and not ((ALLOWED_VEHICLE == "Airboat" or ALLOWED_VEHICLE == "Airboat Gun") and (ply:WaterLevel() == 2 or ply:WaterLevel() == 2)) then
 		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_spawn_vehicle_airborne")
 		return
 	end

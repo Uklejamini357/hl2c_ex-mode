@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^^inf" -- WHY...
-GM.DateVer = "28-06-2026"
+GM.Version = "0.inf^^inf.inf" -- WHY...
+GM.DateVer = "29-06-2026"
 
 -- even crazier things inbound... beware!
 
@@ -134,7 +134,12 @@ end)
 
 -- Player input changes
 function GM:StartCommand(ply, ucmd)
-	if (ucmd:KeyDown(IN_SPEED) && IsValid(ply) && !ply:IsSuitEquipped()) then
+	-- if ucmd:KeyDown(IN_SPEED) and (ply:GetMoveType() == MOVETYPE_NOCLIP or ply:GetObserverMode() == OBS_MODE_ROAMING) then
+	-- 	ucmd:RemoveKey(IN_SPEED)
+	-- 	ply.m_InSpeedNoclip = true
+	-- end
+
+	if ucmd:KeyDown(IN_SPEED) and !ply:IsSuitEquipped() then
 		ucmd:RemoveKey(IN_SPEED)
 	end
 
@@ -143,9 +148,16 @@ function GM:StartCommand(ply, ucmd)
 	end
 end
 
--- function GM:Move(ply, mv)
-	-- print(mv:GetFinalIdealVelocity())
--- end
+function GM:SetupMove(ply, mv, ucmd)
+end
+
+function GM:Move(ply, mv)
+	-- if ply.m_InSpeedNoclip then
+	-- 	mv:SetVelocity(mv:GetVelocity()*3)
+	-- end
+
+	-- ply.m_InSpeedNoclip = nil
+end
 
 
 -- Players should never collide with each other or NPC's
