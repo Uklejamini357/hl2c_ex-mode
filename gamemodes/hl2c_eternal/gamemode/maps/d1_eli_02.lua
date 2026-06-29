@@ -128,6 +128,8 @@ function hl2cAcceptInput(ent, input, activator)
 
 			PrintMessage(3, ">:))))))")
 
+			ents.FindByName("logic_alyx_failsafe_letout")[1]:Remove()
+
 			timer.Simple(6, func)
 			timer.Simple(36, func)
 			timer.Simple(66, func)
