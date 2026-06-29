@@ -242,8 +242,8 @@ function GM:OnEntityCreated(ent)
 		local diff = self:GetDifficulty()^0.1
 		local diff2 = infmath.min(1e200, infmath.max(1, diff/1e10)^0.1)
 
-		ent.ent_MaxHealthMul = (ent.ent_MaxHealthMul or 1) * infmath.min(diff, 1e5) * diff2
-		ent.ent_HealthMul = (ent.ent_HealthMul or 1) * infmath.min(diff, 1e5) * diff2
+		ent.ent_MaxHealthMul = (ent.ent_MaxHealthMul or 1) * infmath.min(diff, 1e5) * diff2 * self.EnemyNPCHealthMul
+		ent.ent_HealthMul = (ent.ent_HealthMul or 1) * infmath.min(diff, 1e5) * diff2 * self.EnemyNPCHealthMul
 
 		-- ent:EnableCustomCollisions(true)
 	end
@@ -279,6 +279,29 @@ function GM:EntityKeyValue(ent, key, value)
 end
 
 
+-- Give high priority
+hook.Add("EntityTakeDamage", "!!hl2ce_NoDMGNPCs", function(ent, dmginfo)
+	local attacker = dmginfo:GetAttacker()
+
+	-- Godlike NPCs take no damage ever
+	if table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
+		dmginfo:SetDamage(0)
+		return true
+	end
+	
+	-- NPCs cannot be damaged by friends
+	if (ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
+		dmginfo:SetDamage(0)
+		return true
+	end
+	
+	-- invulnerable npc's :)
+	if ent.dontDIE then
+		dmginfo:SetDamage(0)
+		return true
+	end
+end, HOOK_HIGH)
+
 -- Called when an entity has received damage
 function GM:EntityTakeDamage(ent, dmgInfo)
 	-- Gets the attacker
@@ -288,20 +311,6 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	local difficulty = self:GetDifficulty()
 	local eff_difficulty = ent:IsPlayer() and self:GetEffectiveDifficulty(ent) or attacker:IsPlayer() and self:GetEffectiveDifficulty(attacker) or difficulty
 
-	-- Godlike NPCs take no damage ever
-	if table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
-		return true
-	end
-
-	-- NPCs cannot be damaged by friends
-	if (ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
-		return true
-	end
-
-	-- invulnerable npc's :)
-	if ent.dontDIE then
-		return true
-	end
 
 	-- Vehicle driver isn't accounted for any damage, so fix it
 	if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer() then
@@ -432,9 +441,10 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		if attacker:IsPlayer() and hp > 0 then
 			if attacker.DamagedEntsTick[ent] then -- if the player is already dealing dmg to the entity...
 				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + damage
-				attacker.DamagedEntsTick[ent][2] = dmgInfo:GetDamagePosition()
+				attacker.DamagedEntsTick[ent][2] = dmgInfo:GetDamageType()
+				attacker.DamagedEntsTick[ent][3] = (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2
 			else
-				attacker.DamagedEntsTick[ent] = {damage, dmgInfo:GetDamagePosition()}
+				attacker.DamagedEntsTick[ent] = {damage, dmgInfo:GetDamageType(), (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2}
 			end
 		end
 	else return true
@@ -452,12 +462,13 @@ function GM:PostEntityTakeDamage(ent, dmginfo, wasdamagetaken)
 	end
 end
 
-function GM:DamageFloater(attacker, victim, dmgpos, dmg)
+function GM:DamageFloater(attacker, victim, dmgpos, dmg, dmgtype)
 	if attacker == victim then return end
 	if dmgpos == vector_origin then dmgpos = victim:NearestPoint(attacker:EyePos()) end
 
 	net.Start("hl2ce_dmgnum")
 	net.WriteDouble(dmg)
+	net.WriteUInt(dmgtype, 32)
 	net.WriteVector(dmgpos)
 	net.WriteBool(victim:IsPlayer())
 	net.Send(attacker)
@@ -1140,7 +1151,7 @@ function GM:EntityRemoved(ent)
 	for _,pl in player.Iterator() do
 		if pl.DamagedEntsTick[ent] then
 			-- pcall(function()
-			self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][2], pl.DamagedEntsTick[ent][1])
+			self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
 			-- end)
 
 			pl.DamagedEntsTick[ent] = nil
@@ -2075,7 +2086,7 @@ function GM:Tick()
 	for _,pl in player.Iterator() do
 		for ent,dmg in pairs(pl.DamagedEntsTick or {}) do
 			pcall(function()
-				self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][2], pl.DamagedEntsTick[ent][1])
+				self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
 			end)
 
 			pl.DamagedEntsTick[ent] = nil

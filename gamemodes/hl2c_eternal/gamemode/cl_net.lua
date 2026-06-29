@@ -179,6 +179,7 @@ end)
 local hl2ce_cl_nodmgnum = GetConVar("hl2ce_cl_nodmgnum")
 net.Receive("hl2ce_dmgnum", function(len)
 	local dmg = net.ReadDouble()
+	local dmgtype = net.ReadUInt(32)
 	local pos = net.ReadVector()
 	local pl = net.ReadBool()
 
@@ -188,5 +189,6 @@ net.Receive("hl2ce_dmgnum", function(len)
 	effectdata:SetMagnitude(dmg)
 	effectdata:SetScale(0)
     GAMEMODE.LastDamageDealt = dmg
+    GAMEMODE.LastDamageTypeDealt = dmgtype
 	util.Effect("hl2ce_dmg", effectdata)
 end)

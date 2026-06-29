@@ -90,12 +90,12 @@ cvars.AddChangeCallback("hl2ce_server_force_difficulty", function(convar, old, n
 	GAMEMODE.ForceDifficulty = new
 end, "hl2ce_server_force_difficulty")
 
-GM.SkillsDisabled = CreateConVar("hl2ce_server_skills_disabled", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetBool()
+GM.SkillsDisabled = CreateConVar("hl2ce_server_skills_disabled", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2ce_server_skills_disabled", function(convar, old, new)
 	GAMEMODE.SkillsDisabled = tobool(new)
 end, "hl2ce_server_skills_disabled")
 
-GM.PlayerMedkitOnSpawn = CreateConVar("hl2ce_server_player_medkit", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE, "Give medkits for players on spawn"):GetBool()
+GM.PlayerMedkitOnSpawn = CreateConVar("hl2ce_server_player_medkit", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE, "Give medkits for players on spawn"):GetBool()
 cvars.AddChangeCallback("hl2ce_server_player_medkit", function(convar, old, new)
 	GAMEMODE.PlayerMedkitOnSpawn = tobool(new)
 end, "hl2ce_server_player_medkit")
@@ -144,3 +144,7 @@ if GM.BHopEnabled then
 	callback()
 end
 
+GM.EnemyNPCHealthMul = CreateConVar("hl2ce_server_npchpmul", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetFloat()
+cvars.AddChangeCallback("hl2ce_server_npchpmul", function(convar, old, new)
+	GAMEMODE.EnemyNPCHealthMul = tonumber(new)
+end, "hl2ce_server_npchpmul")

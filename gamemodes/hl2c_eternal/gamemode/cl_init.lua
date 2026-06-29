@@ -482,7 +482,7 @@ end
 
 -- Called when a bind is pressed
 function GM:PlayerBindPress(ply, bind, down)
-	if !GAMEMODE.AdminMode and bind == "+menu" and down then
+	if !input.IsButtonDown(KEY_LALT) and bind == "+menu" and down then
 		RunConsoleCommand("lastinv")
 		return true
 	end
@@ -671,7 +671,9 @@ Anyway, enjoy the craziness if you are playing on EX mode :)]])
 	if pl:IsAdmin() then
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[Admin tip:
-Press R + F2 to open admin menu!]])
+Press R + F2 to open admin menu!
+Holding ALT then pressing the spawnmenu (Q) key will open up the spawnmenu, otherwise it will switch to previosuly used weapon.
+Also, holding ALT then pressing the context menu (C) key will open up the contextmenu.]])
 		text:SetTextColor(Color(155,255,255))
 		text:SetContentAlignment(5)
 		text:SizeToContents()
@@ -772,31 +774,6 @@ It's much more insane than the regular EX mode.]])
 		text:SizeToContents()
 		text:SetWrap(true)
 		list:AddItem(text)
-	end
-
-	local adminbutton
-	if pl:IsValid() and pl:IsAdmin() then
-		adminbutton = vgui.Create("DButton", list)
-	end
-
-	if adminbutton and adminbutton:IsValid() then
-		adminbutton:SetSize(120, 20)
-		adminbutton:SetText("Admin Mode")
-		adminbutton:SetTextColor(Color(0,0,255))
-		adminbutton.DoClick = function()
-			GAMEMODE.AdminMode = !GAMEMODE.AdminMode
-
-			chat.AddText(GAMEMODE.AdminMode and "enabled" or "disabled")
-
-			helpMenu:Remove()
-		end
-		adminbutton.Paint = function(self, width, height)
-			surface.SetDrawColor(Color(0,0,155,100))
-			surface.DrawRect(0, 0, width, height)
-		end
-		list:AddItem(adminbutton)
-		adminbutton:Dock(BOTTOM)
-		adminbutton:DockMargin(400, 0, 400, 0)
 	end
 
 end
@@ -1008,14 +985,14 @@ end
 
 function GM:OnSpawnMenuOpen()
 	local pl = LocalPlayer()
-	if self.AdminMode then
+	if input.IsButtonDown(KEY_LALT) then
 		SpawnMenuOpen(self)
 	end
 end
 
 function GM:OnSpawnMenuClose()
 	local pl = LocalPlayer()
-	if self.AdminMode then
+	if g_SpawnMenu:IsVisible() then
 		SpawnMenuClose(self)
 	end
 end
@@ -1023,7 +1000,7 @@ end
 
 
 function GM:OnContextMenuOpen()
-	if self.AdminMode then
+	if input.IsButtonDown(KEY_LALT) then
 		ContextMenuOpen(self)
 	else
 		self:CMenu()
@@ -1031,10 +1008,11 @@ function GM:OnContextMenuOpen()
 end
 
 function GM:OnContextMenuClose()
-	
-	if self.AdminMode then
+	if g_ContextMenu:IsVisible() then
 		ContextMenuClose(self)
-	elseif ContextMenu and ContextMenu:IsValid() then
+	end
+
+	if ContextMenu and ContextMenu:IsValid() then
 		ContextMenu:Close()
 	end
 end
