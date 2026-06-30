@@ -194,3 +194,12 @@ net.Receive("hl2ce_dmgnum", function(len)
     GAMEMODE.LastDamageTypeDealt = dmgtype
 	util.Effect("hl2ce_dmg", effectdata)
 end)
+
+
+net.Receive("hl2ce_vote", function(len)
+    local typ = net.ReadUInt(4)
+
+    
+    -- local mostvoted[1
+    -- local votecount,
+end)

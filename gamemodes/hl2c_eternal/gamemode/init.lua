@@ -2319,7 +2319,76 @@ function GM:PlayerSpawnVehicle(ply, model, name, tbl)
 end
 
 function GM:AddResources()
-	resource.AddFile("sound/hl2c_eternal/music/chopper_fight.wav")
+	resource.AddFile("sound/hl2c_eternal/music/chopper_fight.wav") -- Castle Crashers: Barbarian Boss theme
+	resource.AddFile("sound/hl2c_eternal/music/zombie_survival.wav") -- Resident Evil (idk which one): Main menu theme
+	resource.AddFile("sound/hl2c_eternal/music/hl2_finale.wav") -- Deltarune: Black Knife
+	resource.AddFile("sound/hl2c_eternal/music/chaos_defense.wav") -- Terraria 1.4.5: Skeletron Prime
+end
+
+function GM:StartVote(caller, title, text, duration, minVotes, options, callback)
+	if self.CurrentVote then return end
+
+	self.CurrentVote = {
+		Title = title,
+		Desc = text,
+		Duration = duration,
+		MinVotes = minVotes,
+		CalledBy = caller,
+		Callback = callback,
+		Options = options or {"Yes", "No"},
+		Votes = {},
+		Votescount = 0
+	}
+
+
+	timer.Create("hl2ce_votetimer", duration, 1, function()
+		local v = self.CurrentVote
+		local mostvoted = table.Copy(v.Votes)
+		table.sort(mostvoted, function(a, b) return a > b end)
+
+		local votecount = 0
+		for k,c in pairs(v.Votes) do
+			votecount = votecount + c
+		end
+
+		pcall(function()
+			callback(self.CurrentVote.Votes, mostvoted, votecount)
+
+			net.Start("hl2ce_vote")
+			net.WriteUInt(HL2CE_NETVOTETYPE_ENDVOTE, 4)
+			net.WriteUInt(mostvoted[1], 4)
+			net.WriteUInt(votecount, 8)
+			net.Broadcast()
+		end)
+
+		self.PreviousVote = self.CurrentVote
+		self.CurrentVote = nil
+	end)
+
+	net.Start("hl2ce_vote")
+	net.WriteUInt(HL2CE_NETVOTETYPE_STARTVOTE, 4)
+	net.WriteString(title)
+	net.WriteString(text)
+	net.WriteFloat(CurTime() + duration)
+	net.WriteUInt(minVotes, 8)
+	net.WriteTable(options)
+	net.Broadcast()
+end
+
+function GM:CancelVote(pl)
+	if !self.CurrentVote then return end
+	timer.Remove("hl2ce_votetimer")
+
+	PrintMessage(3, "Vote has been cancelled.")
+end
+
+function GM:DoVote(pl, option)
+	if !self.CurrentVote then return end
+
+	net.Start("hl2ce_vote")
+	net.WriteUInt(HL2CE_NETVOTETYPE_DOVOTE, 4)
+	net.WriteTable(self.CurrentVote.Votes, 4)
+	net.Broadcast()
 end
 
 -- Jeep

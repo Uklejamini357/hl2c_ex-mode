@@ -238,7 +238,7 @@ function GM:HUDPaint()
 	end
 
 
-	local boss = GAMEMODE.EnemyBoss
+	local boss = self:GetCurrentBoss()
 	if boss and IsValid(boss) then
 		local hp,mhp = boss:Health(),boss:GetMaxHealth()
 

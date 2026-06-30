@@ -18,7 +18,7 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf^^^inf" -- IT'S GONNA GO UNSTABLE!!!
+GM.Version = "0.inf^^^^inf" -- NOOOOO STOP!!!! (nah)
 GM.DateVer = "30-06-2026"
 
 -- even crazier things inbound... beware!
@@ -190,6 +190,10 @@ end
 
 -- Called when a player is being attacked
 function GM:PlayerShouldTakeDamage(ply, attacker)
+	if ply:HasGodMode() then
+		return false
+	end
+
 	if ply.invulnerableTime and ply.invulnerableTime > CurTime() then
 		return false
 	end
@@ -562,6 +566,14 @@ function GlitchedText(text, chance)
 	end
 
 	return str
+end
+
+function GM:GetCurrentBoss()
+	return GetGlobalEntity("HL2CE.Boss", self.EnemyBoss or NULL)
+end
+
+function GM:SetCurrentBoss(ent)
+	SetGlobalEntity("HL2CE.Boss", ent)
 end
 
 /*

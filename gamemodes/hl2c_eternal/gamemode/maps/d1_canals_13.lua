@@ -55,6 +55,7 @@ end)
 
 hook.Add("AcceptInput", "hl2cAcceptInput", function(ent, input)
 	if ent:GetName() == "canals_npc_reservoircopter01" and input:lower() == "activate" then
+		GAMEMODE:SetCurrentBoss(ent)
 		net.Start("hl2ce_boss")
 		net.WriteEntity(ent)
 		net.Broadcast()

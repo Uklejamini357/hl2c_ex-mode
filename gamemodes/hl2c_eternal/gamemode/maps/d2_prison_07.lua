@@ -4,7 +4,22 @@ TRIGGER_CHECKPOINT = {
 	{Vector(3488, -3472, -544), Vector(3664, -3312, -416)}
 }
 
-if CLIENT then return end
+if CLIENT then
+	net.Receive("hl2ce_music", function()
+		local bool = net.ReadBool()
+		local sound = "#hl2c_eternal/music/chaos_defense.wav"
+		local ply = LocalPlayer()
+
+		if bool then
+			GAMEMODE.MusicSound = CreateSound(ply, sound)
+			GAMEMODE.MusicSound:SetSoundLevel(0)
+			GAMEMODE.MusicSound:Play()
+		else
+			GAMEMODE.MusicSound:FadeOut(3)
+		end
+	end)
+	return
+end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
@@ -30,6 +45,8 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
+	SECOND_DEFENSEROOM_COMPLETE = nil
+	
 	ents.FindByName("global_newgame_template_ammo")[1]:Remove()
 	ents.FindByName("global_newgame_template_base_items")[1]:Remove()
 	ents.FindByName("global_newgame_template_local_items")[1]:Remove()
@@ -121,25 +138,43 @@ function hl2cAcceptInput(ent, input)
 
 
 		if ent:GetName() == "lcs_message_room5_incoming" and input:lower() == "start" then
---[[ -- cowardly boss doesn't want to come out, sometimes doesn't get networked for some reason
-			FORCE_NPCVARIANT = 2
-			local npc = ents.Create("npc_combine_s")
-			npc.ent_MaxHealthMul = (npc.ent_MaxHealthMul or 1) * 150
-			npc.ent_HealthMul = (npc.ent_HealthMul or 1) * 150
-			npc.ent_Color = Color(255,0,0)
-			npc:SetPos(Vector(4717, -5001, -544))
-			npc:Give("weapon_ar2")
-			npc:Spawn()
-			npc:SetLastPosition(Vector(4161, -3966, -519))
-			npc:SetSchedule(SCHED_FORCED_GO_RUN)
+			if GAMEMODE.HyperEXMode then
+				FORCE_NPCVARIANT = 2
+				local npc = ents.Create("npc_combine_s")
+				npc.ent_MaxHealthMul = (npc.ent_MaxHealthMul or 1) * 150
+				npc.ent_HealthMul = (npc.ent_HealthMul or 1) * 150
+				npc.ent_Color = Color(255,0,0)
+				npc:SetModelScale(1.1)
+				npc:SetPos(Vector(4717, -5001, -544))
+				npc:Give("weapon_ar2")
+				npc:Spawn()
+				npc:SetLastPosition(Vector(4161, -3966, -519))
+				npc:SetSchedule(SCHED_FORCED_GO_RUN)
+				GAMEMODE:SetCurrentBoss(npc)
 
-			timer.Simple(1, function()
-				if !IsValid(npc) then return end
-				net.Start("hl2ce_boss")
-				net.WriteEntity(npc)
+				timer.Simple(1, function()
+					if !IsValid(npc) then return end
+					npc:SetLastPosition(Vector(4161, -3966, -519))
+					npc:SetSchedule(SCHED_FORCED_GO_RUN)
+
+					local tbl = {}
+					for _,pl in ipairs(player.GetLiving()) do
+						tbl[#tbl+1] = {pl, pl:GetPos():Distance(npc:GetPos())}
+					end
+					table.sort(tbl, function(a,b) return a[2] < b[2] end)
+
+					npc:SetEnemy(tbl[1][1])
+
+					net.Start("hl2ce_boss")
+					net.WriteEntity(npc)
+					net.Broadcast()
+				end)
+
+				net.Start("hl2ce_music")
+				net.WriteBool(true)
 				net.Broadcast()
-			end)
-]]
+			end
+
 
 			SpawnCombines(true, true)
 			SpawnCombines(true, true)
@@ -154,11 +189,13 @@ function hl2cAcceptInput(ent, input)
 
 		if ent:GetName() == "lcs_al_moresoldiers01" and input:lower() == "start" then
 			local ag = ents.Create("npc_antlionguard")
+			ag:AddFlags(FL_NOTARGET)
 			ag:SetPos(Vector(3240, -4336, -400))
 			ag.dontDIE = true
 			ag:Spawn()
 
 			local ag = ents.Create("npc_antlionguard")
+			ag:AddFlags(FL_NOTARGET)
 			ag:SetPos(Vector(3480, -4108, -400))
 			ag:SetAngles(Angle(0,-90,0))
 			ag.dontDIE = true
@@ -187,7 +224,37 @@ function hl2cAcceptInput(ent, input)
 			end
 		end
 
-		if ent:GetName() == "lcs_message_room5_done" then
+		if ent:GetName() == "lcs_message_room5_done" and input:lower() == "start" then
+		end
+
+		if ent:GetName() == "logic_room5_assault_finished" and input:lower() == "trigger" then
+			if !SECOND_DEFENSEROOM_COMPLETE then
+				timer.Create("checkCombines", 1, 0, function()
+					if !IsValid(ent) then timer.Remove("checkCombines") return end
+
+					for _,e in ipairs(ents.FindInBox(Vector(3160,-5264-553), Vector(4880,-3010,-32))) do
+						local class = e:GetClass()
+						if class == "npc_combine_s" or class == "npc_metropolice" or class == "npc_manhack" then return end
+					end
+
+					SECOND_DEFENSEROOM_COMPLETE = true
+
+					timer.Remove("checkCombines")
+					ent:Fire("Trigger")
+				end)
+				return true
+			end
+
+			for k,v in ipairs(ents.FindByClass("npc_antlionguard")) do
+				v.dontDIE = nil
+				v:SetHealth(0)
+				v:Dissolve()
+				v:TakeDamage(9e999)
+			end
+
+			net.Start("hl2ce_music")
+			net.WriteBool(false)
+			net.Broadcast()
 		end
 	end
 end

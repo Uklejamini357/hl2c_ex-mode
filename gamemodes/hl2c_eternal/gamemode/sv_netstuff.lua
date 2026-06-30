@@ -24,6 +24,7 @@ util.AddNetworkString("hl2ce_map_event")
 util.AddNetworkString("hl2ce_playerkilled")
 util.AddNetworkString("hl2ce_playertimer")
 util.AddNetworkString("hl2ce_dmgnum")
+util.AddNetworkString("hl2ce_vote")
 
 util.AddNetworkString("hl2ce_admin_teleport")
 util.AddNetworkString("hl2ce_admin_changemap")
@@ -291,4 +292,29 @@ net.Receive("hl2ce_admin_forcefailmap", function(len, ply)
     if !ply:IsAdmin() then return end
 
     gamemode.Call("FailMap", nil, net.ReadString())
+end)
+
+net.Receive("hl2ce_vote", function(len, ply)
+    local t = net.ReadUInt(4)
+
+
+    local vote = vote
+    if t == HL2CE_NETVOTETYPE_STARTVOTE then
+        if vote then ply:PrintMessage(3, "A vote is already active!") return end
+        local votetype = net.ReadString()
+        local vote = GAMEMODE.VotesList[votetype]
+        if !vote then ply:PrintMessage(3, "Invalid vote!") return end
+
+        GAMEMODE:StartVote(ply, vote.Title, vote.Description, 20, 0, vote.Options, vote.Callback)
+    elseif t == HL2CE_NETVOTETYPE_CANCELVOTE then
+        if !ply:IsAdmin() then ply:PrintMessage(3, "You are not an admin, you cannot do this.") return end
+        if vote then ply:PrintMessage(3, "A vote is not currently active!") return end
+
+        GAMEMODE:CancelVote(ply)
+    elseif t == HL2CE_NETVOTETYPE_DOVOTE then
+        local option = net.ReadUInt(4)
+        if vote then ply:PrintMessage(3, "A vote is not currently active!") return end
+
+        GAMEMODE:DoVote(ply, option)
+    end
 end)

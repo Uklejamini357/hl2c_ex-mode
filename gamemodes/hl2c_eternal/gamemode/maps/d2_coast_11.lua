@@ -209,6 +209,7 @@ function hl2cAcceptInput(ent, input)
 		end
 
 		timer.Simple(1, function()
+			GAMEMODE:SetCurrentBoss(ent)
 			net.Start("hl2ce_boss")
 			net.WriteEntity(ent)
 			net.Broadcast()
