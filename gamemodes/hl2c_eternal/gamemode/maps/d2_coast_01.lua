@@ -19,6 +19,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 	ALLOWED_VEHICLE = nil
+	ALLOWED_SPAWNVEHICLE_TRIGGER = nil
 
 	game.SetGlobalState( "no_seagulls_on_jeep", GLOBAL_ON )
 
@@ -69,11 +70,6 @@ function hl2cAcceptInput(ent, input, caller)
 	local inputlower = input:lower()
 
 	if entname == "logic_startcraneseq" and inputlower == "trigger" then
-		if !game.SinglePlayer() then
-			ALLOWED_VEHICLE = "Jeep"
-			PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
-		end
-
 		if GAMEMODE.EXMode then
 			timer.Simple(2.1, function()
 				PrintMessage(3, "Chapter 7")
@@ -82,6 +78,11 @@ function hl2cAcceptInput(ent, input, caller)
 				PrintMessage(3, "The Coast of death")
 			end)
 		end
+	end
+
+	if !game.SinglePlayer() and ALLOWED_SPAWNVEHICLE_TRIGGER and entname == "jeep_escape_relay" and inputlower == "trigger" then
+		ALLOWED_VEHICLE = "Jeep"
+		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
 	end
 
 	if !game.SinglePlayer() and entname == "push_car_superjump_01" and inputlower == "disable" then
@@ -95,6 +96,8 @@ function hl2cAcceptInput(ent, input, caller)
 		end
 
 		if entname == "logic_jeepflipped" and inputlower == "trigger" then
+			ALLOWED_SPAWNVEHICLE_TRIGGER = true
+
 			for i=1,166 do
 				timer.Simple(i/27, function()
 					local ent = ents.Create("npc_antlion")
