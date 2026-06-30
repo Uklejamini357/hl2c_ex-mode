@@ -127,3 +127,5 @@ if SERVER then
 end
 
 COLOR_WHITE = Color(255,255,255)
+
+DMGCUSTOM_PENETRATEARMOR = 1 -- ignores player's armor
