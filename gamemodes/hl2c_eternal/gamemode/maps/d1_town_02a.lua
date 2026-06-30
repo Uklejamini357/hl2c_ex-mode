@@ -64,27 +64,29 @@ function hl2cAcceptInput(ent, input)
 
 	if GAMEMODE.EXMode then
 		if entname == "graveyard_fz_1_seq" and inputlower == "beginsequence" then
-			for i=1,20 do
+			local monk = ents.FindByName("monk")[1]
+			for i=1,math.min(20, 8+player.GetCount()*2) do
 				SpawnNPC("npc_fastzombie", Vector(-7250-(i-1)*30, 2000-(i-1)*30, -2800), Angle(0,-45,0), function(ent)
-					local enemy = ents.FindByName("monk")[1]
-					ent:SetEnemy(enemy)
-					ent:UpdateEnemyMemory(enemy, enemy:GetPos())
+					ent:SetEnemy(monk)
+					ent:UpdateEnemyMemory(monk, monk:GetPos())
 
 					timer.Simple(10, function()
 						if !IsValid(ent) then return end
+						if !IsValid(monk) then return end
 
-						local enemy = ents.FindByName("monk")[1]
-						ent:SetEnemy(enemy)
-						ent:UpdateEnemyMemory(enemy, enemy:GetPos())
+						ent:SetEnemy(monk)
+						ent:UpdateEnemyMemory(monk, monk:GetPos())
 					end)
 				end)
 			end
 
+			monk.allowDIE = true
+
 			PrintMessage(3, "Guard Father Grigori... OR YOU FAIL!")
 		end
 
-		if entname == "graveyard_zombies_sched" and inputlower == "startschedule" then
-		end
+		-- if entname == "graveyard_zombies_sched" and inputlower == "startschedule" then
+		-- end
 
 		if entname == "graveyard_monk_scene_b4" and inputlower == "start" then
 			for i=1,10 do
@@ -96,3 +98,17 @@ function hl2cAcceptInput(ent, input)
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+hook.Add("EntityTakeDamage", "hl2cEntTakeDmg", function(ent, dmginfo)
+	local atk = dmginfo:GetAttacker()
+	if ent:GetName() == "monk" and (!atk:IsValid() or !atk:IsNPC() and !atk:IsNextBot()) then
+		dmginfo:SetDamage(0)
+		return true
+	end
+end)
+
+hook.Add("OnNPCKilled", "hl2cNPCKilled", function(ent, dmginfo)
+	if ent:GetName() == "monk" then
+		gamemode.Call("FailMap", nil, "You failed to protect Father Grigori!")
+	end
+end)

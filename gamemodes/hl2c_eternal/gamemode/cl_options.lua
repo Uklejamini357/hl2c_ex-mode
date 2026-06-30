@@ -10,14 +10,16 @@ function GM:MakeOptions()
 	-- Window:SetDeleteOnClose(true)
 	Window:MakePopup()
 	Window:SetKeyBoardInputEnabled(false)
-	Window.Think = function(this)
-		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
-			timer.Simple(0, function()
-				this:Close()
-			end)
-			gui.HideGameUI()
-		end
+	Window.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
 	end
+	hook.Add("OnPauseMenuShow", Window, function()
+		if Window and Window:IsValid() then
+			Window:Remove()
+			return false
+		end
+	end)
+
 
 	local list = vgui.Create("DPanelList", Window)
 	list:EnableVerticalScrollbar()

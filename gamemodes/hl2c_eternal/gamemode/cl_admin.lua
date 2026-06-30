@@ -133,14 +133,15 @@ function GM:OpenAdminMenu()
 	self.AdminMenu = pnl24
 	pnl:SetTitle("Admin panel")
 	pnl:SetSize(ScrW(), ScrH())
-	pnl.Think = function(this)
-		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
-			timer.Simple(0, function()
-				this:Remove()
-			end)
-			gui.HideGameUI()
-		end
+	pnl.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
 	end
+	hook.Add("OnPauseMenuShow", pnl, function()
+		if pnl and pnl:IsValid() then
+			pnl:Remove()
+			return false
+		end
+	end)
 	pnl.Paint = function(_, w, h)
 		surface.SetDrawColor(0, 0, 0, 155)
 		surface.DrawRect(0, 0, w, h)

@@ -89,7 +89,7 @@ local dmgcols = {
 	[DMG_SLOWBURN] = Color(230, 60, 60),
 	[DMG_PLASMA] = Color(255, 0, 200),
 	[DMG_AIRBOAT] = Color(253, 255, 135),
-	[DMG_DISSOLVE] = Color(45, 0, 108),
+	[DMG_DISSOLVE] = Color(145, 0, 208),
 	[DMG_BLAST_SURFACE] = Color(210, 210, 90)
 }
 

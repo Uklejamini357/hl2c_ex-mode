@@ -20,14 +20,16 @@ function GM:UpgradesMenu()
 		surface.SetDrawColor(150, 150, 150,255)
 		surface.DrawOutlinedRect(0, 0, this:GetWide(), this:GetTall())
 	end
-	upgradesvgui.Think = function(this)
-		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
-			timer.Simple(0, function()
-				this:Remove()
-			end)
-			gui.HideGameUI()
-		end
+	upgradesvgui.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
 	end
+	hook.Add("OnPauseMenuShow", upgradesvgui, function()
+		if upgradesvgui and upgradesvgui:IsValid() then
+			upgradesvgui:Remove()
+			return false
+		end
+	end)
+
 
 
 	local upgradeslist = vgui.Create("DPanelList", upgradesvgui)

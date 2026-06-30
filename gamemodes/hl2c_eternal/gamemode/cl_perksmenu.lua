@@ -280,14 +280,16 @@ function GM:PerksMenu()
 		surface.SetDrawColor(50, 50, 50, 255)
 		surface.DrawOutlinedRect(0, 0, this:GetWide(), this:GetTall())
 	end
-	perksvgui.Think = function(this)
-		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
-			timer.Simple(0, function()
-				this:Remove()
-			end)
-			gui.HideGameUI()
-		end
+	perksvgui.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
 	end
+	hook.Add("OnPauseMenuShow", perksvgui, function()
+		if perksvgui and perksvgui:IsValid() then
+			perksvgui:Remove()
+			return false
+		end
+	end)
+
 
 	local sheet = vgui.Create("DPropertySheet", perksvgui)
 	sheet:SetPos(5, 25)
@@ -510,14 +512,16 @@ function GM:MakePrestigePanel()
 		surface.SetDrawColor(150, 50, 0, 255)
 		surface.DrawOutlinedRect(0, 0, w, h)
 	end
-	self.PrestigePanel.Think = function(this)
-		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
-			timer.Simple(0, function()
-				this:Remove()
-			end)
-			gui.HideGameUI()
-		end
+	self.PrestigePanel.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
 	end
+	hook.Add("OnPauseMenuShow", self.PrestigePanel, function()
+		if self.PrestigePanel and self.PrestigePanel:IsValid() then
+			self.PrestigePanel:Remove()
+			return false
+		end
+	end)
+
 
 	local list = vgui.Create("DPanelList", self.PrestigePanel)
 	list:EnableVerticalScrollbar()

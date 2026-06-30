@@ -1678,7 +1678,7 @@ end
 
 -- Called automatically and by the console command
 function GM:RestartMap(overridetime, noplayerdatasave)
-	if changingLevel then return end
+	if changingLevel and overridetime ~= 0 then return end
 
 	overridetime = overridetime or RESTART_MAP_TIME
 	changingLevel = true
@@ -1750,17 +1750,16 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 
 	if overridetime == 0 then
 		restart()
+		if timer.Exists("hl2c_restart_map") then
+			timer.Remove("hl2c_restart_map")
+		end
 	else
 		timer.Create("hl2c_restart_map", overridetime, 1, restart)
 	end
 end
 concommand.Add("hl2ce_restart_map", function(ply)
 	if IsValid(ply) and ply:IsAdmin() then
-		if changingLevel then
-			timer.Adjust("hl2c_restart_map", 0, 1)
-		else
-			gamemode.Call("RestartMap", 0)
-		end
+		gamemode.Call("RestartMap", 0)
 	end
 end)
 

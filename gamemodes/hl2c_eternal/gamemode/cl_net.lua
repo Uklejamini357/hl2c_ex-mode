@@ -81,6 +81,7 @@ net.Receive("hl2ce_fail", function(len)
     local x,y = surface.GetTextSize(s1)
 
     local failtext = vgui.Create("DLabel")
+    GAMEMODE.UITextFailed1 = failtext
     failtext:SetFont("hl2ce_font_big")
     failtext:SetTextColor(Color(255,0,0))
     failtext:SetSize(x, y)
@@ -110,6 +111,7 @@ net.Receive("hl2ce_fail", function(len)
     local x,y = surface.GetTextSize(s2)
 
     local failtext = vgui.Create("DLabel")
+    GAMEMODE.UITextFailed2 = failtext
     failtext:SetFont("hl2ce_font")
     failtext:SetTextColor(Color(220,100,100))
     failtext:SetSize(x, y)

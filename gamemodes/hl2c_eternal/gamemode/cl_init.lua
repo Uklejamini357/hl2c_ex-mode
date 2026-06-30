@@ -579,6 +579,19 @@ end
 net.Receive("RestartMap", RestartMap)
 
 function GM:OnMapRestart()
+	if self.UITextFailed1 and self.UITextFailed1:IsValid() then
+		self.UITextFailed1:AlphaTo(0, 1, 0, function()
+			self.UITextFailed1:Remove()
+			self.UITextFailed1 = nil
+		end)
+	end
+
+	if self.UITextFailed2 and self.UITextFailed2:IsValid() then
+		self.UITextFailed2:AlphaTo(0, 1, 0, function()
+			self.UITextFailed2:Remove()
+			self.UITextFailed2 = nil
+		end)
+	end
 end
 
 function GM:PostOnMapRestart()
@@ -616,6 +629,15 @@ function ShowHelp()
 	end
 	helpMenu:Center()
 	helpMenu:MakePopup()
+	helpMenu.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
+	end
+	hook.Add("OnPauseMenuShow", helpMenu, function()
+		if helpMenu and helpMenu:IsValid() then
+			helpMenu:Remove()
+			return false
+		end
+	end)
 
 	local list = vgui.Create("DPanelList", helpMenu) -- i ain't using other panels, despite this one being deprecated.
 	list:SetSize(1000, 700)
@@ -815,14 +837,16 @@ function GM:ShowSkills()
 	skillsMenu:SetTitle("Your skills")
 	skillsMenu:Center()
 	skillsMenu:MakePopup()
-	skillsMenu.Think = function(this)
-		if input.IsKeyDown(KEY_ESCAPE) and gui.IsGameUIVisible() then
-			timer.Simple(0, function()
-				this:Remove()
-			end)
-			gui.HideGameUI()
-		end
+	skillsMenu.OnRemove = function(self)
+		hook.Remove("OnPauseMenuShow", self)
 	end
+	hook.Add("OnPauseMenuShow", skillsMenu, function()
+		if skillsMenu and skillsMenu:IsValid() then
+			skillsMenu:Remove()
+			return false
+		end
+	end)
+
 
 	skillsForm:SetSize(278, 175)
 	skillsForm:SetPos(5, 50)
