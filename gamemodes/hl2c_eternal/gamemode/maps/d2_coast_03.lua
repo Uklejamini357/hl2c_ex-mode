@@ -89,7 +89,7 @@ function hl2cAcceptInput(ent, input, activator)
 
 		for _, ply in ipairs(player.GetLiving()) do
 			if ply == activator then continue end
-			if IsValid(ply.vehicle) or !ply:InVehicle() then
+			if IsValid(ply.vehicle) or ply:InVehicle() then
 				ply:ExitVehicle()
 				ply:RemoveVehicle()
 			end

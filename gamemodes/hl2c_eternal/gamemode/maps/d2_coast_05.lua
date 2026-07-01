@@ -1,6 +1,9 @@
-ALLOWED_VEHICLE = "Jeep"
-
 INFO_PLAYER_SPAWN = {Vector(7824, -12136, 1856), 180}
+
+TELEPORT_POSITIONS = {
+    ["Checkpoint 1"] = Vector(-4358, -12522, 704),
+    ["Crossbow"] = Vector(-3652, -4246, 1266),
+}
 
 NEXT_MAP = "d2_coast_07"
 
@@ -23,6 +26,7 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
+	ALLOWED_VEHICLE = "Jeep"
 	game.SetGlobalState("no_seagulls_on_jeep", GLOBAL_ON)
 
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
@@ -32,17 +36,21 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput(ent, input)
+function hl2cAcceptInput(ent, input, activator)
     if !game.SinglePlayer() and ent:GetName() == "gas_station_patrol_spawner" and string.lower(input) == "forcespawn" then
 		ALLOWED_VEHICLE = nil
         PrintMessage(HUD_PRINTTALK, "Vehicle spawning has been disabled.")
 
 		for _, ply in ipairs(player.GetAll()) do
-			if !IsValid(ply.vehicle) and !ply:InVehicle() then
-				ply:SetVelocity(Vector(0, 0, 0))
-				ply:SetPos(Vector(-4727, -4647, 1128))
-				ply:SetEyeAngles(Angle(0, 90, 0))
+			if ply == activator then continue end
+			if IsValid(ply.vehicle) or ply:InVehicle() then
+				ply:ExitVehicle()
+				ply:RemoveVehicle()
 			end
+
+			ply:SetVelocity(Vector(0, 0, 0))
+			ply:SetPos(Vector(-4727, -4647, 1128))
+			ply:SetEyeAngles(Angle(0, 90, 0))
 		end
 		GAMEMODE:CreateSpawnPoint(Vector(-4727, -4647, 1128), 90)
 	end

@@ -285,7 +285,7 @@ hook.Add("EntityTakeDamage", "!!hl2ce_NoDMGNPCs", function(ent, dmginfo)
 	-- Vehicle driver isn't accounted for any damage, so fix it
 	if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer() then
 		attacker = attacker:GetDriver()
-		dmginfo:SetAttacker(attacker:GetDriver())
+		dmginfo:SetAttacker(attacker)
 		dmginfo:SetInflictor(attacker)
 	end
 
