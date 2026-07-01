@@ -1,15 +1,9 @@
 ALLOWED_VEHICLE = "Jeep"
 
+INFO_PLAYER_SPAWN = {Vector(-6695, 6144, 1630), 0}
+NEXT_MAP = "d2_coast_08"
+
 if CLIENT then return end
-
-if file.Exists("hl2c_eternal/d2_coast_08.txt", "DATA") then
-	INFO_PLAYER_SPAWN = {Vector(3151, 5233, 1552), 180}
-	NEXT_MAP = "d2_coast_09"
-else
-	INFO_PLAYER_SPAWN = {Vector(-6695, 6144, 1630), 0}
-	NEXT_MAP = "d2_coast_08"
-end
-
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
@@ -33,7 +27,10 @@ function hl2cMapEdit()
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
 	ents.FindByName("jeep_filter")[1]:Fire("AddOutput", "filterclass prop_vehicle_jeep_old")
 
-	if file.Exists("hl2c_eternal/d2_coast_08.txt", "DATA") then
+	if GAMEMODE.CampaignMapVars.ForceFieldDeactivated then
+		INFO_PLAYER_SPAWN = {Vector(3151, 5233, 1552), 180}
+		NEXT_MAP = "d2_coast_09"
+
 		for _, ent in ipairs(ents.FindByName("bridge_field_02")) do
 			ent:Remove()
 		end

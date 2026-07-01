@@ -1,5 +1,9 @@
 INFO_PLAYER_SPAWN = {Vector( 3326, 4990, 1536), -90}
 
+TRIGGER_CHECKPOINT = {
+	{Vector(2846,-3537,1920), Vector(3036,-3360,1938)}
+}
+
 NEXT_MAP = "d2_coast_07"
 
 if CLIENT then return end
@@ -37,20 +41,36 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 
 -- Accept input
-function hl2cAcceptInput(ent, input)
+function hl2cAcceptInput(ent, input, activator)
 	if !game.SinglePlayer() and ent:GetName() == "button_press" and string.lower(input) == "trigger" then
 		ents.FindByName("prop_block")[1]:Remove()
 
-		for _, ply in ipairs(player.GetAll()) do
-			ply:SetVelocity(-ply:GetVelocity())
-			ply:SetPos(Vector(2991, -3426, 1932))
-			ply:SetEyeAngles(Angle(0, 0, 0))
-		end
+		-- for _, ply in ipairs(player.GetAll()) do
+		-- 	if ply == activator then continue end
+
+		-- 	ply:SetVelocity(-ply:GetVelocity())
+		-- 	ply:SetPos(Vector(2991, -3426, 1932))
+		-- 	ply:SetEyeAngles(Angle(0, 0, 0))
+		-- end
 		GAMEMODE:CreateSpawnPoint(Vector(2991, -3426, 1932), 0)
 
-		if !file.Exists("hl2c_eternal/d2_coast_08.txt", "DATA") then
-			file.Write( "hl2c_eternal/d2_coast_08.txt", "We have been to d2_coast_08 and pressed the button." )
-		end
+		GAMEMODE.CampaignMapVars.ForceFieldDeactivated = true
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+hook.Add("CompleteMap", "hl2c_PreventMapCompletion", function(pl)
+	if !GAMEMODE.CampaignMapVars.ForceFieldDeactivated then
+		pl:PrintMessage(3, "Nuh uh")
+		pl:SetPos(Vector( 3326, 4990, 1536))
+		pl:SetEyeAngles(Angle(0,-90,0))
+		pl:SetVelocity(-pl:GetVelocity())
+		return false
+	end
+end)
+
+hook.Add("OnCheckpointActivated", "hl2c_Checkpoint_activated", function(pl)
+	for _,ply in ipairs(player.GetLiving()) do
+		ply:SetPos(pl:GetPos())
+	end
+end)

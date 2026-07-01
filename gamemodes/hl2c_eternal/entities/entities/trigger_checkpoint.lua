@@ -70,6 +70,8 @@ function ENT:StartTouch( ent )
 			PrintMessage(HUD_PRINTTALK, ent:Nick().." has activated checkpoint!")
 		end
 
+		hook.Run("OnCheckpointActivated", ent)
+
 		-- Update checkpoints on the client
 		if checkpointPositions[1] then
 			net.Start( "SetCheckpointPosition" )

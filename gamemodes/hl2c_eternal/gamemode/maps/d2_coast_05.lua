@@ -27,10 +27,16 @@ hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 -- Initialize entities
 function hl2cMapEdit()
 	ALLOWED_VEHICLE = "Jeep"
+	ALLOW_MAP_COMPLETE = nil
+
 	game.SetGlobalState("no_seagulls_on_jeep", GLOBAL_ON)
 
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
 	ents.FindByName("jeep_filter")[1]:Fire("AddOutput", "filterclass prop_vehicle_jeep_old")
+
+	for k,v in ipairs(ents.FindByClass("trigger_delaymapload")) do
+		v:SetCollisionGroup(COLLISION_GROUP_NONE)
+	end
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
@@ -57,7 +63,23 @@ function hl2cAcceptInput(ent, input, activator)
 
     if !game.SinglePlayer() and ent:GetName() == "logic_gate_shutdown" and string.lower(input) == "trigger" then
 		ALLOWED_VEHICLE = "Jeep"
+		ALLOW_MAP_COMPLETE = true
 		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
+
+		for k,v in ipairs(ents.FindByClass("trigger_delaymapload")) do
+			v:SetCollisionGroup(COLLISION_GROUP_WORLD)
+		end
+
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+hook.Add("CompleteMap", "hl2c_PreventMapCompletion", function(pl)
+	if !ALLOW_MAP_COMPLETE then
+		pl:PrintMessage(3, "Aren't you forgetting something?")
+		pl:SetPos(Vector(1414, 4778, 1344))
+		pl:SetEyeAngles(Angle(0,-105,0))
+		pl:SetVelocity(-pl:GetVelocity())
+		return false
+	end
+end)
