@@ -22,8 +22,6 @@ function hl2cPlayerSpawn(ply)
 end
 hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
 
-
--- Initialize entities
 function hl2cMapEdit()
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()
 	ents.FindByName("jeep_filter")[1]:Fire( "AddOutput", "filterclass prop_vehicle_jeep_old" )
