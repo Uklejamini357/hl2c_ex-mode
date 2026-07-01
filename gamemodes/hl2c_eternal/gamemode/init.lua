@@ -284,9 +284,9 @@ hook.Add("EntityTakeDamage", "!!hl2ce_NoDMGNPCs", function(ent, dmginfo)
 	local attacker = dmginfo:GetAttacker()
 	-- Vehicle driver isn't accounted for any damage, so fix it
 	if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) and attacker:GetDriver():IsPlayer() then
-		dmgInfo:SetAttacker(attacker:GetDriver())
-		dmgInfo:SetInflictor(attacker)
 		attacker = attacker:GetDriver()
+		dmginfo:SetAttacker(attacker:GetDriver())
+		dmginfo:SetInflictor(attacker)
 	end
 
 	-- Godlike NPCs take no damage ever

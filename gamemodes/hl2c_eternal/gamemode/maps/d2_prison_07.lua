@@ -5,6 +5,23 @@ TRIGGER_CHECKPOINT = {
 }
 
 if CLIENT then
+	net.Receive("hl2ce_map_event", function(len)
+		local t = net.ReadString()
+
+		if t == "2nddefroom" then
+			chat.AddText(Color(255,0,0), "PREPARE FOR HELL.")
+			chat.AddText(Color(255,120,0), "COMBINE ARRIVES IN... 15")
+			
+			for i=1,14 do
+				timer.Simple(i, function()
+					chat.AddText(Color(255,120,0), 15-i)
+				end)
+			end
+		elseif t == "2nddefroomstart" then
+			chat.AddText(Color(190,0,0), "HERE THEY COME!!!")
+		end
+	end)
+
 	net.Receive("hl2ce_music", function()
 		local bool = net.ReadBool()
 		local sound = "#hl2c_eternal/music/chaos_defense.wav"
@@ -95,13 +112,15 @@ local function TriggerEventDelayed(ent, time, func)
 end
 
 -- Accept input
-function hl2cAcceptInput(ent, input)
+function hl2cAcceptInput(ent, input, activator)
 	if !game.SinglePlayer() and ent:GetName() == "door_croom2_gate" and string.lower(input) == "close" then
 		return true
 	end
 
 	if !game.SinglePlayer() and ent:GetName() == "logic_room5_entry" and string.lower(input) == "trigger" then
 		for _, ply in ipairs(player.GetAll()) do
+			if ply == activator then continue end
+
 			ply:SetVelocity(Vector(0, 0, 0))
 			ply:SetPos(Vector(4161, -3966, -519))
 			ply:SetEyeAngles(Angle(0, -90, 0))
@@ -136,14 +155,25 @@ function hl2cAcceptInput(ent, input)
 			ents.FindByName("relationship_turret_vs_player_like")[1]:Fire("ApplyRelationship")
 		end
 
+		if ent:GetName() == "logic_room5_turretsdeployed" and input:lower() == "trigger" then
+			net.Start("hl2ce_map_event")
+			net.WriteString("2nddefroom")
+			net.Broadcast()
+		end
+
 
 		if ent:GetName() == "lcs_message_room5_incoming" and input:lower() == "start" then
+			net.Start("hl2ce_map_event")
+			net.WriteString("2nddefroomstart")
+			net.Broadcast()
+
 			if GAMEMODE.HyperEXMode then
 				FORCE_NPCVARIANT = 2
 				local npc = ents.Create("npc_combine_s")
 				npc.ent_MaxHealthMul = (npc.ent_MaxHealthMul or 1) * 150
 				npc.ent_HealthMul = (npc.ent_HealthMul or 1) * 150
 				npc.ent_Color = Color(255,0,0)
+				npc:AddEFlags(EFL_NO_DISSOLVE)
 				npc:SetModelScale(1.1)
 				npc:SetPos(Vector(4717, -5001, -544))
 				npc:Give("weapon_ar2")
