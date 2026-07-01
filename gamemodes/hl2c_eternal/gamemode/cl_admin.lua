@@ -164,9 +164,10 @@ function GM:OpenAdminMenu()
 				this:MakeNewList(this.LastFunc)
 				this.LastFunc = this.PrevFunc
 				this.PrevFunc = nil
-
 			else
 				InitializePanel(pnl, pnl.ListPnl)
+				this.LastFunc = nil
+				this.PrevFunc = nil
 			end
 		end)
 		this.ListPnl:AddItem(b)
