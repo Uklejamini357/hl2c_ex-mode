@@ -382,6 +382,7 @@ function GM:Initialize()
 	self.EXMode = self.EnableEXMode
 	self.HyperEXMode = self.EnableHyperEXMode
 
+	self.MapRestarts = 0
 	self.MapVars = {}
 	self.MapVarsPersisting = {}
 	if InitMapVars then
@@ -593,6 +594,8 @@ function GM:OnMapRestart()
 			self.UITextFailed2 = nil
 		end)
 	end
+
+	self.MapRestarts = self.MapRestarts + 1
 end
 
 function GM:PostOnMapRestart()

@@ -119,17 +119,20 @@ if CLIENT then
 		elseif event == "hl2c_hyperex_objectiveprogress" then
 			GAMEMODE.MapVars.ZombiesKilled = net.ReadUInt(16)
 		elseif event == "hl2c_ex_mapstart" then
-			LocalPlayer():EmitSound("music/hl2_song7.mp3", 0, 70)
-			LocalPlayer():EmitSound("music/ravenholm_1.mp3", 0, 170)
+			LocalPlayer():EmitSound("#*hl2c_eternal/music/ravenholm.mp3")
+			local restarts = GAMEMODE.MapRestarts
 
-			for i=1,4 do
-				sound.PlayFile("sound/music/ravenholm_1.mp3", "", function(station)
-					if station then
-						station:SetVolume(math.Rand(0.5,0.9))
-						station:SetPlaybackRate(math.Rand(2.5,5))
-					end
-				end)
-			end
+			timer.Simple(2, function() if restarts ~= GAMEMODE.MapRestarts then return end chat.AddText("Chapter 6") end)
+			timer.Simple(4, function()
+				if restarts ~= GAMEMODE.MapRestarts then return end
+				local s = "WelcomeToHell"
+				for i=1,#s do
+					timer.Simple((i^1.75)*0.1, function()
+						if restarts ~= GAMEMODE.MapRestarts then return end
+						chat.AddText(HSVToColor(90*(#s-i)/#s, 1, 1), s[i])
+					end)
+				end
+			end)
 		end
 	end)
 
@@ -295,15 +298,7 @@ function hl2cAcceptInput(ent, input)
 				return true
 			end
 
-			timer.Simple(2, function() PrintMessage(3, "Chapter 6") end)
-			timer.Simple(4, function()
-				local s = "WELCOMETOHELL"
-				for i=1,#s do
-					timer.Simple(i*0.1, function()
-						PrintMessage(3, s[i])
-					end)
-				end
-			end)
+
 
 			for i=1,3 do
 				for j=1,3 do

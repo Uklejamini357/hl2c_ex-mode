@@ -8,22 +8,23 @@ TRIGGER_DELAYMAPLOAD = {
 
 local bossfight
 if CLIENT then
-	net.Receive("d1_canals_13.playmusic", function()
-		local bool = net.ReadBool()
-		local sound = "#*hl2c_eternal/music/chopper_fight.wav"
-		local ply = LocalPlayer()
+	net.Receive("hl2ce_map_event", function()
+		local event = net.ReadString()
+		if event == "playmusic" then
+			local play = net.ReadBool()
+			local snd = "#*hl2c_eternal/music/chopper_fight.mp3"
+			local ply = LocalPlayer()
 
-		if bool then
-			ply:EmitSound(sound, 0, 100, 1, CHAN_STATIC, SND_DELAY, 0)
-		else
-			ply:EmitSound(sound, 0, 100, 1, CHAN_STATIC, SND_DELAY + SND_STOP, 0)
+			if play then
+				ply:EmitSound(snd, 0, 100, 1, CHAN_STATIC, SND_DELAY, 0)
+			else
+				ply:EmitSound(snd, 0, 100, 1, CHAN_STATIC, SND_DELAY + SND_STOP, 0)
+			end
 		end
 	end)
 
 	return
 end
-
-util.AddNetworkString("d1_canals_13.playmusic")
 
 local activated = true
 local sk_helicopter_health = GetConVar("sk_helicopter_health")
@@ -47,7 +48,8 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 hook.Add("PlayerReady", "d1_canals_13.playmusic", function(pl)
 	if bossfight then
-		net.Start("d1_canals_13.playmusic")
+		net.Start("hl2ce_map_event")
+		net.WriteString("playmusic")
 		net.WriteBool(true)
 		net.Broadcast()
 	end
@@ -70,7 +72,8 @@ hook.Add("AcceptInput", "hl2cAcceptInput", function(ent, input)
 			end
 
 			bossfight = true
-			net.Start("d1_canals_13.playmusic")
+			net.Start("hl2ce_map_event")
+			net.WriteString("playmusic")
 			net.WriteBool(true)
 			net.Broadcast()
 
@@ -82,7 +85,8 @@ hook.Add("AcceptInput", "hl2cAcceptInput", function(ent, input)
 
 	if !GAMEMODE.EXMode then return end
 	if ent:GetName() == "relay_achievement_heli_1" and input:lower() == "trigger" then
-		net.Start("d1_canals_13.playmusic")
+		net.Start("hl2ce_map_event")
+		net.WriteString("playmusic")
 		net.WriteBool(false)
 		net.Broadcast()
 		bossfight = false
@@ -90,10 +94,10 @@ hook.Add("AcceptInput", "hl2cAcceptInput", function(ent, input)
 		print("heli died yipee")
 	end
 
-	if !bossfight then
-		if ent:GetName() == "gate3_wheel" and input:lower() == "use" then
+	if ent:GetName() == "gate3_wheel" and input:lower() == "use" then
+		if !bossfight then
 			ents.FindByName("door_lock2_2")[1]:Fire("setposition", 1)
-			return true
 		end
+		return true
 	end
 end)

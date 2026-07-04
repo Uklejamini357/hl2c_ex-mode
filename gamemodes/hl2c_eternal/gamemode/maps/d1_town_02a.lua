@@ -1,6 +1,15 @@
 NEXT_MAP = "d1_town_04"
 
-if CLIENT then return end
+if CLIENT then
+	net.Receive("hl2ce_map_event", function()
+		local event = net.ReadString()
+		if event == "hl2ce_event_grigoribye" then
+			LocalPlayer():EmitSound("#*hl2c_eternal/music/requiem_for_ravenholm.mp3")
+		end
+	end)
+
+	return
+end
 
 local function SpawnNPC(class, pos, ang, func)
 	local ent = ents.Create(class)
@@ -94,6 +103,14 @@ function hl2cAcceptInput(ent, input)
 					ent:SetHealth(2^128)
 				end)
 			end
+		end
+
+		if entname == "goodbye_grigori_music" and inputlower == "playsound" then
+			net.Start("hl2ce_map_event")
+			net.WriteString("hl2ce_event_grigoribye")
+			net.Broadcast()
+
+			return true
 		end
 	end
 end
