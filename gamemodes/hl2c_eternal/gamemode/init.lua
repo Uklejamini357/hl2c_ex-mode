@@ -2373,6 +2373,8 @@ function GM:StartVote(caller, title, text, duration, minVotes, options, callback
 	net.WriteUInt(minVotes, 8)
 	net.WriteTable(options)
 	net.Broadcast()
+
+	gamemode.Call("OnVoteStart", caller, title, text, duration, minVotes, options, callback)
 end
 
 function GM:CancelVote(pl)

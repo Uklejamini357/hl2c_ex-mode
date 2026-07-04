@@ -157,7 +157,7 @@ local function hl2cHyperEXApplyNPCVariant(ent)
 		ent.VariantType = 2
 	end
 end
-hook.Add("ApplyNPCVariant", "hl2cHyperEXApplyNPCVariant", hl2cHyperEXApplyNPCVariant)
+hook.Add("PreApplyNPCVariant", "hl2cHyperEXApplyNPCVariant", hl2cHyperEXApplyNPCVariant)
 
 local function hl2cHyperEXOnNPCKilled(ent)
 	if !GAMEMODE.HyperEXMode then return end

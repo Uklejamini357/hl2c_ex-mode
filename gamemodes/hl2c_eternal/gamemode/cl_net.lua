@@ -199,7 +199,15 @@ end)
 net.Receive("hl2ce_vote", function(len)
     local typ = net.ReadUInt(4)
 
-    
+    if typ == HL2CE_NETVOTETYPE_STARTVOTE then
+        local title = net.ReadString()
+        local text = net.ReadString()
+        local endtime = net.ReadFloat()
+        local minVotes = net.ReadUInt(8)
+        local options = net.ReadTable()
+
+        GAMEMODE:OnVoteStart(title, text, endtime, minVotes, options)
+    end
     -- local mostvoted[1
     -- local votecount,
 end)

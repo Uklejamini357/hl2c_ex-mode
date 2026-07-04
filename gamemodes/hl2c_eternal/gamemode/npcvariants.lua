@@ -44,13 +44,14 @@ end
 function HL2cEX_NPCVariantSpawn(ent)
 	if !GAMEMODE.EXMode or GAMEMODE.HyperEXMode or !ent:IsNPC() then return end
 
-	hook.Run("ApplyNPCVariant", ent)
+	hook.Run("PreApplyNPCVariant", ent)
 	if FORCE_NPCVARIANT then
 		ent.VariantType = FORCE_NPCVARIANT
 		FORCE_NPCVARIANT = nil
 	elseif not ent.VariantType then
 		ent.VariantType = math.random(1,2)
 	end
+	hook.Run("ApplyNPCVariant", ent)
 	if ent:GetClass() == "npc_metropolice" then -- Elite variant - Increased damage and Health.
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(128,128,255)
@@ -311,13 +312,15 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 	if !IsValid(ent) then return end
 
 	local class = ent:GetClass()
-	hook.Run("ApplyNPCVariant", ent, class)
+	hook.Run("PreApplyNPCVariant", ent, class)
 	if FORCE_NPCVARIANT then
 		ent.VariantType = FORCE_NPCVARIANT
 		FORCE_NPCVARIANT = nil
 	elseif not ent.VariantType then
-		ent.VariantType = math.random(1,3)
+		ent.VariantType = math.random(3)
 	end
+	hook.Run("ApplyNPCVariant", ent, class)
+
 	if not ent.NPCStrengthTier then
 		ent.NPCStrengthTier = 1 -- mostly, just keep it at 1
 	end
@@ -404,6 +407,10 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 		end
 	elseif class == "npc_manhack" then
 	elseif class == "npc_zombie" then
+		if ent.VariantType == 2 then
+			ent.VariantType = math.random(3) -- roll it again, making it a 1/9 chance.
+		end
+
 		if ent.VariantType == 1 then -- Volatile variant - Violently explodes on death!
 			ent.ent_Color = Color(254,54,54)
 			ent.ent_MaxHealthMul = 1.4

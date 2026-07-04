@@ -356,6 +356,7 @@ function GM:CreateFonts()
 	CreateFont("hl2ce_hudfont", 24, {weight = 1000, font = "Roboto"})
 	-- CreateFont("hl2ce_hudfont_large", 32, {weight = 1000, font = "Roboto"})
 
+	CreateFont("hl2ce_font_smaller", 14, {weight = 800, font = "Roboto Black"})
 	CreateFont("hl2ce_font_small", 20, {weight = 800, font = "Roboto Black"})
 	CreateFont("hl2ce_font", 32, {weight = 700, font = "Roboto Black"})
 	CreateFont("hl2ce_font_big", 48, {weight = 900, font = "Roboto Black"})
@@ -493,7 +494,7 @@ function GM:PlayerBindPress(ply, bind, down)
 		if ply:IsAdmin() and input.IsKeyDown(KEY_R) then
 			self:OpenAdminMenu()
 		else
-			ShowTeam()
+			showNav = !showNav
 		end
 	end
 
@@ -944,32 +945,71 @@ function GM:OnReloaded()
 	end)
 end
 
+function GM:OnVoteStart(title, text, endtime, minVotes, options)
+	self.CurrentVote = {
+		Title = title,
+		Desc = text,
+		EndTime = endtime,
+		MinVotes = minVotes,
+		Options = options,
+		Votes = {},
+		VotesCount = 0
+	}
+
+	self.VotePanel = vgui.Create("Panel")
+	self.VotePanel:SetSize(ScrH()*0.4, ScrH()*0.15)
+	self.VotePanel:SetPos(0,ScrH()*0.85)
+	self.VotePanel:CenterHorizontal()
+	self.VotePanel.Paint = function(pnl,w,h)
+		surface.SetDrawColor(75,75,75,185)
+		surface.DrawRect(0,0,w,h)
+		surface.SetDrawColor(255,0,0,85)
+		surface.DrawOutlinedRect(0,0,w,h)
+	end
+
+	self.VotePanel.Text = vgui.Create("DLabel", self.VotePanel)
+	self.VotePanel.Text:SetFont("hl2ce_font")
+	self.VotePanel.Text:SetText(title)
+	self.VotePanel.Text:CenterHorizontal()
+	self.VotePanel.Text:Dock(TOP)
+
+	self.VotePanel.Desc = vgui.Create("DLabel", self.VotePanel)
+	self.VotePanel.Desc:SetFont("hl2ce_font_small")
+	self.VotePanel.Desc:SetText(text)
+	self.VotePanel.Desc:CenterHorizontal()
+	self.VotePanel.Desc:Dock(TOP)
+
+	self.VotePanel.Options = vgui.Create("DScrollPanel", self.VotePanel)
+	self.VotePanel.Options:Dock(FILL)
+	self.VotePanel.Options.Paint = function(pnl, w, h)
+	end
+
+	for c,op in ipairs(options) do
+		local o = vgui.Create("DButton", self.VotePanel.Options)
+		o:SetText(c..". "..op)
+		o:SetFont("hl2ce_font_smaller")
+		o:Dock(TOP)
+		o.Paint = function(pnl, w, h)
+		end
+	end
+end
+
 -- Called when the player is drawn
 function GM:PostPlayerDraw( ply )
-
 	if ( showNav && IsValid( ply ) && ply:Alive() && ( ply:Team() == TEAM_ALIVE ) && ( ply != LocalPlayer() ) ) then
-	
 		local bonePosition = ply:GetBonePosition( ply:LookupBone( "ValveBiped.Bip01_Head1" ) || 0 ) + Vector( 0, 0, 16 )
 		cam.Start2D()
 			draw.SimpleText( ply:Name().." ("..ply:Health().."%)", "hl2ce_hudfont_small", bonePosition:ToScreen().x, bonePosition:ToScreen().y, self:GetTeamColor( ply ), TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM )
 		cam.End2D()
-	
 	end
-
 end
 
-
--- Called by ShowTeam
-function ShowTeam()
-	showNav = !showNav
-end
+-- function GM:
 
 
 -- Called by server
 function SetCheckpointPosition( len )
-
 	checkpointPosition = net.ReadVector()
-
 end
 net.Receive("SetCheckpointPosition", SetCheckpointPosition )
 
