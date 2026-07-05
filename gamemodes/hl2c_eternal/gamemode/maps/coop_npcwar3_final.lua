@@ -6,7 +6,7 @@ FORCE_DIFFICULTY = 7.5
 
 if CLIENT then return end
 
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", function(ply)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", function(ply)
 	ply:Give("weapon_crowbar")
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_357")

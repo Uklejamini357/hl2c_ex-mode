@@ -19,7 +19,7 @@ local allowunlock
 function hl2cPlayerSpawn(ply)
 	ply:Freeze(not GAMEMODE.MapVars.ShouldNotFreezePlayer)
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 function hl2cPlayerPostThink(ply)
     if GAMEMODE.MapVars.ShouldNotFreezePlayer then return end

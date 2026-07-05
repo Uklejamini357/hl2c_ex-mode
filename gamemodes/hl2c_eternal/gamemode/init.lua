@@ -1503,6 +1503,8 @@ function GM:PlayerSpawn(ply)
 		end
 	else
 		ply:SetHealth(maxhp)
+
+		hook.Run("PlayerSpawnLoadout", ply)
 	end
 	ply:SetMaxHealth(maxhp)
 	ply:SetMaxArmor(maxap)
@@ -2320,8 +2322,9 @@ end
 
 function GM:AddResources()
 	resource.AddFile("sound/hl2c_eternal/music/chopper_fight.mp3") -- Half-life: Diabolical Adrenaline Guitar Remix (https://youtu.be/qLViLO_EwqM)
-	resource.AddFile("sound/hl2c_eternal/music/ravenholm.mp3") -- ravenholm - ravenholm reprise / requiem for ravenholm remix (https://youtu.be/sxDtDcxwRfU)
-	resource.AddFile("sound/hl2c_eternal/music/requiem_for_ravenholm.mp3") -- same as above but for the last part
+	resource.AddFile("sound/hl2c_eternal/music/ravenholm.mp3") -- ravenholm reprise remix (https://www.youtube.com/watch?v=csm-oFeMRO8)
+	resource.AddFile("sound/hl2c_eternal/music/requiem_for_ravenholm.mp3") -- requiem for ravenholm remix (https://www.youtube.com/watch?v=MQKDcEvYZUs)
+
 	resource.AddFile("sound/hl2c_eternal/music/zombie_survival.wav") -- Resident Evil (idk which one): Main menu theme
 	resource.AddFile("sound/hl2c_eternal/music/hl2_finale.wav") -- Deltarune: Black Knife
 	resource.AddFile("sound/hl2c_eternal/music/chaos_defense.wav") -- Terraria 1.4.5: Skeletron Prime

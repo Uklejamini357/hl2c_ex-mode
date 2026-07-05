@@ -2,10 +2,34 @@ NEXT_MAP = "ep2_outland_12a"
 
 if CLIENT then return end
 
+-- This map is planned to take up to nearly an hour to beat, in EX mode... why though?
+-- There will be 12 waves, with the following:
+-- Wave 1: 1 Strider (Introduction wave)
+-- Wave 2: 1 Strider, 2 hunters
+-- Wave 3: 1 Strider, 3 hunters
+-- Wave 4: 2 striders, 2 hunters
+-- Wave 5: 1 gunship, 1 strider
+-- Wave 6: 3 striders, 5 hunters
+-- Wave 7: 4 striders, 2 hunters
+-- Wave 8: 5 striders
+-- Wave 9: 1 helicopter, 1 strider
+-- Wave 10: 1 strider boss (Must damage them with 40 explosives, or attach 5 magnusson bombs and blow them up ALL AT ONCE!), 5 hunters 
+-- Wave 11: 6 striders, 8 hunters (Each 2 hunters goes with a strider, until there are enough hunters spawned.)
+-- Wave 12: 2 strider bosses
+
+-- And the final 3, ridiculously difficult waves...
+-- Wave 13: 10 striders, 15 hunters
+-- Wave 14: 5 striders, 30 combine soldiers, 10 hunters. (The Combine soldiers are random, and always has 1 elite with them.)
+-- Wave 15: 3 strider bosses, with 5 hunters for each srider...
+
+-- In addition to the waves, there will be RPG crates near the base.
+-- And to also include health/suit chargers near the base.
+-- This is to make things a little bit easier, just in case.
+
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 
 -- Initialize entities
@@ -19,7 +43,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 function hl2cAcceptInput(ent, input)
 	if ent:GetName() == "base_destroy_relay" and input:lower() == "trigger" then
 		if GAMEMODE.EXMode then
-		gamemode.Call("FailMap", nil, [[It starts with one
+			gamemode.Call("FailMap", nil, [[It starts with one
 
 One thing, I don't know why
 It doesn't even matter how hard you try
@@ -41,8 +65,8 @@ I tried so hard and got so far
 But in the end, it doesn't even matter
 I had to fall to lose it all
 But in the end, it doesn't even matter]])
-	else
-		gamemode.Call("FailMap", nil, "You let the striders destroy the rocket!")
+		else
+			gamemode.Call("FailMap", nil, "You let the striders destroy the rocket!")
 		end
 	end
 end

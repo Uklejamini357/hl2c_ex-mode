@@ -153,10 +153,6 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 			ent2:Spawn()
 			ent2:Activate()
 			ent2:Fire("explode")
-			local effectdata = EffectData()
-			effectdata:SetOrigin(ent:GetPos() + Vector(0, 0, 60))
-			util.Effect("zw_master_strike", effectdata)
-			ent:EmitSound("ambient/machines/thumper_hit.wav", 120, 70)
 		elseif ent.VariantType == 2 and math.random(1,100) < 35 then
 			local ent2 = ents.Create("npc_headcrab")
 			ent2:SetPos(ent:GetPos() + Vector(0, 0, 10))
@@ -503,11 +499,6 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 			ent2:Spawn()
 			ent2:Activate()
 			ent2:Fire("explode")
-
-			local effectdata = EffectData()
-			effectdata:SetOrigin(ent:GetPos() + Vector(0, 0, 60))
-			util.Effect("zw_master_strike", effectdata)
-			ent:EmitSound("ambient/machines/thumper_hit.wav", 120, 70)
 		elseif ent.VariantType == 2 and math.random(1,100) <= 95 then
 			FORCE_NPCVARIANT = 2
 			local ent2 = ents.Create("npc_zombie")

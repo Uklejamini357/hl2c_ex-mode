@@ -12,7 +12,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_pistol")
 	ply:Give("weapon_smg1")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 local function CreateMetropolice(pos, ang, wep, target)
 	local npc = ents.Create("npc_metropolice")

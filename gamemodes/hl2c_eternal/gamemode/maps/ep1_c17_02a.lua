@@ -18,7 +18,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_frag")
 	ply:Give("weapon_rpg")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 function hl2cPlayerInitialSpawn(ply)
 end

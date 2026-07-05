@@ -25,7 +25,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_crossbow")
 	ply:Give("weapon_bugbait")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 
 local times = 0
@@ -46,6 +46,7 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 function hl2cAcceptInput(ent, input, activator)
 	if !GAMEMODE.EXMode then return end
 
+	-- wtf the door doesn't appear for me
 	if ent:GetName() == "entrance_music" and input:lower() == "playsound" then
 		timer.Simple(math.Rand(2,2.5), function()
 			if !IsValid(ent) then return end
@@ -103,6 +104,7 @@ end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 
 function hl2cEntityTakeDamage(ent, dmginfo)
+	if !GAMEMODE.EXMode then return end
 	local attacker = dmginfo:GetAttacker()
 	if attacker:GetClass() == "npc_turret_floor" then
 		attacker.NextDamageMul = math.huge

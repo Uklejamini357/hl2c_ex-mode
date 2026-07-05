@@ -7,7 +7,7 @@ INFO_PLAYER_SPAWN = {Vector(-232, 208, -24), 0}
 
 if CLIENT then return end
 
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", function(ply)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", function(ply)
 end)
 
 hook.Add("PlayerReady", "hl2cPlayerReady", function(ply)

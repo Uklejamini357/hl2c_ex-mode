@@ -74,6 +74,7 @@ net.Receive("hl2ce_fail", function(len)
 
     local s1 = translate.Get("you_lost")
     local len = utf8.len(s1)
+    local sub = len > 50 and utf8.sub or string.sub
     local font = "hl2ce_font_big"
     local createtime = CurTime()
 
@@ -87,7 +88,7 @@ net.Receive("hl2ce_fail", function(len)
     failtext:SetSize(x, y)
     failtext:Center()
     failtext.Think = function(self)
-        local str = utf8.sub(s1, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/5, 1.5)))))
+        local str = sub(s1, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/5, 1.5)))))
         if str == self:GetText() then return end
         self:SetText(str)
         surface.PlaySound("buttons/lightswitch2.wav")
@@ -104,6 +105,7 @@ net.Receive("hl2ce_fail", function(len)
     end
 
     local len = utf8.len(s2)
+    local sub = len > 50 and utf8.sub or string.sub
     local font = "hl2ce_font"
     local createtime = CurTime()
 
@@ -122,7 +124,7 @@ net.Receive("hl2ce_fail", function(len)
     -- local 
     failtext.Think = function(self)
         if self.NoMoreUpdate then return end
-        local str = utf8.sub(s2, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10)))))
+        local str = sub(s2, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10)))))
         if str == self:GetText() then return end
         self:SetText(str)
         surface.PlaySound("buttons/lightswitch2.wav")

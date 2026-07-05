@@ -1,0 +1,49 @@
+ex mode:
+
+d1_trainstation_01: Free win
+d1_trainstation_02: Hard
+d1_trainstation_03: Tricky
+d1_trainstation_04: Easy
+d1_trainstation_05: Free win
+d1_trainstation_06: Easy
+d1_canals_01: Medium
+d1_canals_01a: Normal
+d1_canals_02: Medium
+d1_canals_03: Intermediate
+d1_canals_05: Normal
+
+d1_canals_06: Normal
+d1_canals_07: Hard
+d1_canals_08: Tricky
+d1_canals_09: Medium
+d1_canals_10: Normal
+d1_canals_11: Normal
+d1_canals_12: Intermediate
+d1_canals_13: Intermediate (Boss)
+
+d1_eli_01: Difficult
+d1_eli_02: Violent
+
+d1_town_01: Tricky
+d1_town_01a: Normal
+d1_town_02: Normal
+d1_town_03: Intermediate
+d1_town_02 (Part2): Hard
+d1_town_02a: Intermediate
+d1_town_04: Medium
+d1_town_05: Hard (Avoid snipers...)
+
+d2_coast_01: Hard (Difficult to get away from the antlions if not fast enough)
+d2_coast_03: 
+d2_coast_04: 
+d2_coast_05: 
+d2_coast_07: 
+d2_coast_08: 
+d2_coast_07: 
+d2_coast_09: 
+d2_coast_10: Intermediate (Dropships)
+d2_coast_11: Violent (Always has antlions spawning)
+d2_coast_12: Tricky
+
+d2_prison_01: Difficult
+d2_prison_02: Intermediate (Avoid being shot by turrets at all costs.)

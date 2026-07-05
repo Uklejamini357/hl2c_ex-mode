@@ -12,7 +12,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_shotgun")
 	ply:Give("weapon_frag")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 
 -- Initialize entities

@@ -14,7 +14,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_357")
 	ply:Give("weapon_frag")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 
 local function SpawnNPC(class, pos, ang, func)

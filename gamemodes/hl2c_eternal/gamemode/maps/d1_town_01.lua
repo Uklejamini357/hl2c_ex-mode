@@ -126,10 +126,12 @@ if CLIENT then
 			timer.Simple(4, function()
 				if restarts ~= GAMEMODE.MapRestarts then return end
 				local s = "WelcomeToHell"
+				local spaces = ""
 				for i=1,#s do
 					timer.Simple((i^1.75)*0.1, function()
 						if restarts ~= GAMEMODE.MapRestarts then return end
-						chat.AddText(HSVToColor(90*(#s-i)/#s, 1, 1), s[i])
+						chat.AddText(HSVToColor(90*(#s-i)/#s, 1, 1), spaces..s[i])
+						spaces = spaces.." "
 					end)
 				end
 			end)
@@ -151,7 +153,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_frag")
 	ply:Give("weapon_physcannon")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 local function hl2cHyperEXApplyNPCVariant(ent)
 	if !GAMEMODE.HyperEXMode then return end

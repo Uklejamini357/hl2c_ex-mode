@@ -20,7 +20,7 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_ar2")
 	ply:Give("weapon_rpg")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 function hl2cMapEdit()
 	ents.FindByName("player_spawn_items_maker")[1]:Remove()

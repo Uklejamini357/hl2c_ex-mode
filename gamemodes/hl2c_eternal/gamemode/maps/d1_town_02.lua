@@ -42,7 +42,7 @@ if file.Exists("hl2c_eternal/d1_town_03.txt", "DATA") then
 		ply:Give("weapon_physcannon")
 		ply:Give("weapon_shotgun")
 	end
-	hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+	hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 
 	function hl2cAcceptInput(ent, input, activator)
@@ -122,7 +122,7 @@ else
 		ply:Give("weapon_frag")
 		ply:Give("weapon_physcannon")
 	end
-	hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+	hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 	
 	
 	-- Accept input

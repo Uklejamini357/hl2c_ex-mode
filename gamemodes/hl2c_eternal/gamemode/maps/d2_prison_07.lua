@@ -51,7 +51,10 @@ function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_rpg")
 	ply:Give("weapon_crossbow")
 	ply:Give("weapon_bugbait")
+end
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
+local function hl2cPlayerSpawn(ply)
 	local turret_ai = ents.FindByName("relationship_turret_vs_player_like")[1]
 	if IsValid(turret_ai) then
 		turret_ai:Fire("ApplyRelationship")

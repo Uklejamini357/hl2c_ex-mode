@@ -9,7 +9,7 @@ if CLIENT then return end
 function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_physcannon")
 end
-hook.Add("PlayerSpawn", "hl2cPlayerSpawn", hl2cPlayerSpawn)
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 hook.Add("Think", "hl2cThink", function()
 	if game.GetGlobalState("super_phys_gun") == GLOBAL_ON then
