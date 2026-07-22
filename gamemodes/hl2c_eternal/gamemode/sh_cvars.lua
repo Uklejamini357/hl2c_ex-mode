@@ -98,6 +98,18 @@ end, "hl2ce_server_skills_disabled")
 GM.PlayerMedkitOnSpawn = CreateConVar("hl2ce_server_player_medkit", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE, "Give medkits for players on spawn"):GetBool()
 cvars.AddChangeCallback("hl2ce_server_player_medkit", function(convar, old, new)
 	GAMEMODE.PlayerMedkitOnSpawn = tobool(new)
+
+	if SERVER then
+		if GAMEMODE.PlayerMedkitOnSpawn then
+			for _,pl in ipairs(player.GetLiving()) do
+				pl:Give("weapon_hl2ce_medkit")
+			end
+		else
+			for _,pl in ipairs(player.GetLiving()) do
+				pl:StripWeapon("weapon_hl2ce_medkit")
+			end
+		end
+	end
 end, "hl2ce_server_player_medkit")
 
 local function callback()

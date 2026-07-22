@@ -61,7 +61,7 @@ function SWEP:PrimaryAttack()
 		need = math.min(ent:GetMaxHealth() - ent:Health(), need)
 	end
 
-	if IsValid(ent) and self:Clip1() >= need and (ent:IsPlayer() or ent:IsNPC()) and ent:Health() < ent:GetMaxHealth() then
+	if IsValid(ent) and self:Clip1() >= need and (ent:IsPlayer() or ent:IsFriendlyNPC()) and ent:Health() < ent:GetMaxHealth() then
 		self:TakePrimaryAmmo(need)
 		if SERVER then
 			ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + need))
@@ -69,8 +69,8 @@ function SWEP:PrimaryAttack()
 				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.25))
 				owner:GiveXP(need * 0.35)
 			elseif ent:IsFriendlyNPC() then
-				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.2))
-				owner:GiveXP(need * 0.28)
+				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.25/2))
+				owner:GiveXP(need * 0.35/2)
 			end
 		end
 
