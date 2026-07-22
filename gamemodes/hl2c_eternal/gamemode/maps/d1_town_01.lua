@@ -274,7 +274,7 @@ function hl2cAcceptInput(ent, input)
 								return
 							end
 						
-							changingLevel = nil
+							self:SetGameState(GAMESTATE_RUNNING)
 							GAMEMODE.DisableDataSave = true
 							gamemode.Call("FailMap", nil, GlitchedText("All players have died!!!", 100-tonumber(timer.RepsLeft("HAHAHAHAHAHAHA"))))
 							for _,ply in pairs(player.GetAll()) do

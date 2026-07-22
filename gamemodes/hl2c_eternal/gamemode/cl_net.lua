@@ -70,6 +70,8 @@ end)
 
 net.Receive("hl2ce_fail", function(len)
     if GetConVar("hl2ce_cl_noshowlosetext"):GetBool() then return end
+
+    gamemode.Call("OnMapFailed")
     local time = math.min(15, RESTART_MAP_TIME)
 
     local s1 = translate.Get("you_lost")
@@ -137,6 +139,9 @@ net.Receive("hl2ce_fail", function(len)
 
 
     chat.AddText(Color(255,0,0), s1, " - ", Color(200,50,50), s2)
+
+
+    gamemode.Call("PostOnMapFailed")
 end)
 
 net.Receive("hl2ce_playertimer", function(len)
@@ -173,9 +178,9 @@ net.Receive("hl2ce_playerkilled", function(len)
     else
         local cl = net.ReadString()
         if cl == "trigger_hurt" then
-            chat.AddText("You died a ", Color(255,0,0), "stupid death", color_white, ".")
+            chat.AddText(color_white, "You died a ", Color(255,0,0), "stupid death", color_white, ".")
         else
-            chat.AddText("Killed by ", Color(255,0,0), language.GetPhrase(cl))
+            chat.AddText(color_white, "Killed by ", Color(255,0,0), language.GetPhrase(cl))
         end
     end
 end)

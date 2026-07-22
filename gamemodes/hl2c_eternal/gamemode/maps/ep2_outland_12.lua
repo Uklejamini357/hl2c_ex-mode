@@ -27,16 +27,55 @@ if CLIENT then return end
 -- This is to make things a little bit easier, just in case.
 
 -- Player spawns
+-- Player spawns
 function hl2cPlayerSpawn(ply)
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_shotgun")
+	ply:Give("weapon_357")
+	ply:Give("weapon_frag")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_ar2")
+	ply:Give("weapon_rpg")
+	ply:Give("weapon_crossbow")
 end
 hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 
+hook.Add("OnEntityCreated", "hl2cOnEntityCreated", function(ent)
+	if ent:GetClass() == "weapon_striderbuster" then
+		ent:EnableCustomCollisions()
+		ent:Input("AddOutput", nil, nil, "OnAttachToStrider magbomb_manager:RunCode::-1")
+	end
+end)
+
 -- Initialize entities
 function hl2cMapEdit()
+	-- ents.FindByName("startitems_template")[1]:Remove() -- bugs starting cutscene, again.
 
+	if IsValid(GAMEMODE.MagBombManager) then GAMEMODE.MagBombManager:Remove() end
+	GAMEMODE.MagBombManager = ents.Create("lua_run")
+	GAMEMODE.MagBombManager:SetName("magbomb_manager")
+	-- GAMEMODE.MagBombManager:SetKeyValue("Code", [[ACTIVATOR.DontCollideWithOtherMagbombs = true ACTIVATOR:CollisionRulesChanged()]])
+	GAMEMODE.MagBombManager:SetKeyValue("Code", [[ACTIVATOR:SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER)]])
+	GAMEMODE.MagBombManager:Spawn()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
+
+
+-- hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
+-- 	local class = ent:GetClass()
+-- 	if class == "npc_strider" then
+-- 		-- return true
+-- 	end
+
+-- 	local inflictor = dmginfo:GetInflictor()
+-- 	if class == "weapon_striderbuster" and inflictor:GetClass() == "weapon_striderbuster" then
+-- 		-- print("i am not destroying this mag bomb!")
+-- 		return true
+-- 	end
+-- end)
 
 
 -- Accept input

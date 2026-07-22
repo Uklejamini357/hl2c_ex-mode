@@ -31,14 +31,14 @@ function ENT:StartTouch( ent )
 	
 		-- Run on touch
 		if self.OnTouchRun then
-			self:OnTouchRun()
+			self:OnTouchRun(ent)
 		end
 
 		-- Get the touching entity angles
 		local ang = ent:GetAngles()
 		-- Skip creating a spawn point
 		if !self.skipSpawnpoint then
-			GAMEMODE:CreateSpawnPoint(self.ipsLocation, ang.y)
+			GAMEMODE:CreateSpawnPoint(self.ipsLocation, ent.AngleYaw or ang.y)
 		end
 	
 		-- Each individual player

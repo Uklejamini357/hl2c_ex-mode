@@ -1,7 +1,7 @@
 NEXT_MAP = "d2_prison_08"
 
 TRIGGER_CHECKPOINT = {
-	{Vector(3488, -3472, -544), Vector(3664, -3312, -416)}
+	{Vector(3488, -3472, -544), Vector(3664, -3312, -416), nil, nil, -90}
 }
 
 if CLIENT then
@@ -10,11 +10,11 @@ if CLIENT then
 
 		if t == "2nddefroom" then
 			chat.AddText(Color(255,0,0), "PREPARE FOR HELL.")
-			chat.AddText(Color(255,120,0), "COMBINE ARRIVES IN... 15")
+			chat.AddText(Color(255,120,0), "COMBINE ARRIVES IN... 14")
 			
-			for i=1,14 do
+			for i=1,13 do
 				timer.Simple(i, function()
-					chat.AddText(Color(255,120,0), 15-i)
+					chat.AddText(Color(255,120,0), 14-i)
 				end)
 			end
 		elseif t == "2nddefroomstart" then
@@ -196,16 +196,21 @@ function hl2cAcceptInput(ent, input, activator)
 					end
 					table.sort(tbl, function(a,b) return a[2] < b[2] end)
 
-					npc:SetEnemy(tbl[1][1])
+					if tbl[1] and tbl[1][1] then
+						npc:SetEnemy(tbl[1][1])
+					end
 
 					net.Start("hl2ce_boss")
 					net.WriteEntity(npc)
 					net.Broadcast()
 				end)
 
-				net.Start("hl2ce_music")
-				net.WriteBool(true)
-				net.Broadcast()
+				timer.Simple(1, function()
+					if !IsValid(ent) then return end
+					net.Start("hl2ce_music")
+					net.WriteBool(true)
+					net.Broadcast()
+				end)
 			end
 
 
@@ -292,3 +297,9 @@ function hl2cAcceptInput(ent, input, activator)
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+hook.Add("OnMapFailed", "hl2c_MapFail", function()
+	net.Start("hl2ce_music")
+	net.WriteBool(false)
+	net.Broadcast()
+end)

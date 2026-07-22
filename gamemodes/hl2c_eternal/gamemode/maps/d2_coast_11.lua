@@ -63,7 +63,7 @@ hook.Add("OnNPCKilled", "!!hl2ce_AGKilled", function(ent, attacker, inflictor)
 end, HOOK_HIGH)
 
 hook.Add("EntityRemoved", "NOANTLIONGUARDREMOVE", function(ent)
-	if failmap and ent:GetName() == "citizen_ambush_guard" and not changingLevel then
+	if failmap and ent:GetName() == "citizen_ambush_guard" and self:IsGameState(GAMESTATE_RUNNING) then
 		ents.FindByName("relay_guarddead")[1]:Fire("kill")
 		if failtries > 10 then
 			PrintMessage(3, "...")

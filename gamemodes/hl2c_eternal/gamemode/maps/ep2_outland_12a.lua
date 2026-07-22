@@ -40,7 +40,7 @@ hook.Add("OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled)
 -- Accept input
 function hl2cAcceptInput(ent, input)
     if ent:GetName() == "credits" and string.lower(input) == "rolloutrocredits" then
-		if changingLevel then return end
+		if !self:GameStateIsRunning() then return end
         gamemode.Call("NextMap")
         gamemode.Call("OnCampaignCompleted")
 

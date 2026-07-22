@@ -569,7 +569,7 @@ function GM:GrabAndSwitch(instant)
 	if blah then return end
 	blah = true
 
-	changingLevel = true
+	self:SetGameState(GAMESTATE_CHANGINGLEVEL)
 	timer.Remove("hl2c_next_map")
 
 	gamemode.Call("ClearPlayerDataFolder")
@@ -680,10 +680,13 @@ end
 -- Called immediately after starting the gamemode  
 function GM:Initialize()
 	deadPlayers = {}
-	changingLevel = false
 	checkpointPositions = {}
 	nextAreaOpenTime = 0
 	startingWeapons = {}
+
+
+	self.FailCounts = self.FailCounts or 0
+	self.LastFailed = self.LastFailed or 0
 
 	self.MapCompleteTest = nil
 
@@ -699,6 +702,7 @@ function GM:Initialize()
 
 	self.XP_REWARD_ON_MAP_COMPLETION = self.XP_REWARD_ON_MAP_COMPLETION or 1 -- because it would call true if it was false, we use other values
 	self:SetDifficulty(1)
+	self:SetGameState(GAMESTATE_RUNNING)
 	self.EXMode = self.EnableEXMode
 	self.HyperEXMode = self.EnableHyperEXMode
 
@@ -783,7 +787,7 @@ function GM:CompleteMap(ply)
 	end
 
 	-- Start the nextmap countdown
-	if !changingLevel and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
+	if self:IsGameState(GAMESTATE_RUNNING) and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
 		self:NextMap()
 	end
 
@@ -941,6 +945,7 @@ function GM:MapEntitiesSpawned()
 			tcp.pos = tcp.max - ((tcp.max - tcp.min) / 2)
 			tcp.skipSpawnpoint = tcpInfo[3]
 			tcp.OnTouchRun = tcpInfo[4]
+			tcp.AngleYaw = tcpInfo[5]
 		
 			tcp:SetPos(tcp.pos)
 			tcp:Spawn()
@@ -998,9 +1003,9 @@ end
 
 -- Called automatically or by the console command
 function GM:NextMap(instant)
-	if changingLevel then return end
+	if self:IsGameState(GAMESTATE_COMPLETED) and !instant then return end
 
-	changingLevel = true
+	self:SetGameState(GAMESTATE_COMPLETED)
 
 	if instant then
 		self:GrabAndSwitch(instant)
@@ -1020,14 +1025,15 @@ concommand.Add("hl2ce_next_map", function(ply)
 		return
 	end
 
-	if changingLevel then
-		timer.Adjust("hl2c_next_map", 0, 1)
+	if self:IsGameState(GAMESTATE_COMPLETED) then
+		timer.Remove("hl2c_next_map")
+		self:GrabAndSwitch(true)
 	else
 		hook.Run("NextMap", true)
 	end
 end)
 concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
-	if IsValid(ply) && ply:IsAdmin() && (!ply:Alive() || table.HasValue(deadPlayers, ply:SteamID()) or args[1] == "force") && !changingLevel then
+	if IsValid(ply) && ply:IsAdmin() && (!ply:Alive() || table.HasValue(deadPlayers, ply:SteamID()) or args[1] == "force") && self:GameStateIsRunning() then
 		table.RemoveByValue(deadPlayers, ply:SteamID())
 		ply:SetTeam(TEAM_ALIVE)
 		timer.Simple(0, function()
@@ -1040,7 +1046,7 @@ concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_admin")
 		elseif ply:Alive() || !table.HasValue(deadPlayers, ply:SteamID()) then
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_dead")
-		elseif changingLevel then
+		elseif self:IsGameState(GAMESTATE_CHANGINGLEVEL) then
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "mapchange_cantrespawn")
 		end
 	end
@@ -1510,7 +1516,7 @@ function GM:PlayerSpawn(ply)
 	ply:SetMaxArmor(maxap)
 
 	-- Players should avoid players
-	ply:SetCustomCollisionCheck(!game.SinglePlayer())
+	ply:SetCustomCollisionCheck(true)
 	ply:SetAvoidPlayers(false)
 	ply:SetNoTarget(false)
 end
@@ -1692,6 +1698,14 @@ function GM:PlayerSwitchFlashlight(ply, on)
 	return ply:IsSuitEquipped() && ply:CanUseFlashlight()
 end
 
+function GM:KeyPress(pl, key)
+	if !SINGLEPLAYER_FAILMAP_STYLE then return end
+
+	if self:IsGameState(GAMESTATE_FAILED) and self.LastFailed+3 < CurTime() then
+		self:RestartMap(0)
+	end
+end
+
 
 -- Called when a player uses something
 function GM:PlayerUse(ply, ent)
@@ -1718,10 +1732,10 @@ end
 
 -- Called automatically and by the console command
 function GM:RestartMap(overridetime, noplayerdatasave)
-	if changingLevel and overridetime ~= 0 then return end
+	if !self:GameStateIsRunning() and self:IsGameState(GAMESTATE_RESTARTING) and overridetime ~= 0 then return end
+	if SINGLEPLAYER_FAILMAP_STYLE and overridetime ~= 0 then return end
 
 	overridetime = overridetime or RESTART_MAP_TIME
-	changingLevel = true
 
 	net.Start("RestartMap")
 	net.WriteFloat(CurTime())
@@ -1758,9 +1772,8 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 			net.Broadcast()
 			self:Initialize() -- why run GAMEMODE:Initialize() again? so that difficulty will also reset if noplayerdatasave is true
 			self.GameStartedTime = CurTime()
-			changingLevel = true
+			self:SetGameState(GAMESTATE_RESTARTING)
 			game.CleanUpMap(false, {"env_fire", "entityflame", "_firesmoke"}, function()
-				changingLevel = nil
 				local plyrespawn = FORCE_PLAYER_RESPAWNING
 				FORCE_PLAYER_RESPAWNING = true
 				for k,v in ipairs(player.GetAll()) do
@@ -1782,7 +1795,7 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 						v.invulnerableTime = CurTime()
 					end)
 				end
-				changingLevel = false
+				self:SetGameState(GAMESTATE_RUNNING)
 				FORCE_PLAYER_RESPAWNING=plyrespawn
 			end)
 		end
@@ -1824,7 +1837,8 @@ function GM:OnMapFailed(ply)
 end
 
 function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, giving them a quite big penalty
-	if changingLevel then return end
+	if self:IsGameState(GAMESTATE_FAILED) then return end
+
 	net.Start("hl2ce_fail")
 	net.WriteString(hook.Run("GetFailReason", ply, reason) or OVERRIDE_FAIL_REASON or reason or "Map failed!")
 	net.Broadcast()
@@ -1845,6 +1859,16 @@ function GM:FailMap(ply, reason) -- ply is the one who caused the map to fail, g
 		MAP_FORCE_CHANGELEVEL_ON_MAPRESTART = true
 	end
 
+	self:SetGameState(GAMESTATE_FAILED)
+
+	if SINGLEPLAYER_FAILMAP_STYLE then
+		for _,pl in player.Iterator() do
+			pl:SetNoTarget(true)
+		end
+	end
+
+	self.FailCounts = self.FailCounts + 1
+	self.LastFailed = CurTime()
 	self:RestartMap()
 
 	if !game.SinglePlayer() and player.GetCount() > 1 and ply and ply:IsValid() and ply:IsPlayer() then
@@ -2037,7 +2061,7 @@ local delayedDMGTick = 0
 function GM:Think()
 	self.playersAlive = team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)
 
-	if !changingLevel and self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
+	if self:IsGameState(GAMESTATE_RUNNING) and self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
 		self:NextMap()
 	end
 
@@ -2139,7 +2163,7 @@ function GM:CheckAllPlayersDead()
 	end
 	if self:HardcoreEnabled() and (self.GameStartedTime+30 > CurTime()) then return false end
 
-	return !self:CanPlayerRespawn() and ((team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)) <= 0) and !changingLevel
+	return !self:CanPlayerRespawn() and ((team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)) <= 0) and self:IsGameState(GAMESTATE_RUNNING)
 end
 
 function GM:CheckAllPlayersDeadPass()
@@ -2250,7 +2274,7 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 				ply:ScreenFade(SCREENFADE.OUT, color_black, 2, RESTART_MAP_TIME)
 			end
 			timer.Simple(5, function()
-				if !changingLevel then return end
+				if !self:IsGameState(GAMESTATE_FAILED) then return end
 				for _,ply in ipairs(player.GetLiving()) do
 					ply:Kill()
 				end

@@ -693,7 +693,7 @@ local function HL2cHyperEX_NPCVariantTakeDamage(ent, dmginfo)
 	if !GAMEMODE.HyperEXMode then return end
 	if !IsValid(ent) then return end
 
-	local dmg, attacker = dmginfo:GetDamage(), dmginfo:GetAttacker()
+	local dmg, attacker, inflictor = dmginfo:GetDamage(), dmginfo:GetAttacker(), dmginfo:GetInflictor()
 	local class = ent:GetClass()
 	if class == "npc_combine_s" then
 		if attacker:GetClass() == "npc_antlion" and bit.band(dmginfo:GetDamageType(), DMG_SLASH) ~= 0 then
@@ -705,7 +705,7 @@ local function HL2cHyperEX_NPCVariantTakeDamage(ent, dmginfo)
 			end
 		end
 	elseif class == "npc_strider" then
-		if ent.VariantType == 1 then
+		if ent.VariantType == 1 and not (IsValid(inflictor) and inflictor:GetClass() == "weapon_striderbuster") then
 			dmginfo:ScaleDamage(0.7)
 		end
 	end

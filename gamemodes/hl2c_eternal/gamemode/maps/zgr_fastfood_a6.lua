@@ -32,7 +32,7 @@ hook.Add("EntityTakeDamage", "InfDifficulty", function(ent, dmginfo)
 					local e = ents.FindByName("pizzaspawner2")[1]
 					timer.Simple(math.Rand(3,5), function()
 						if !IsValid(e) then return end
-						if changingLevel then return end
+						if !self:GameStateIsRunning() then return end
 						gamemode.Call("FailMap", atk, "You lost because you got yourself in crippling debt of "..moneys.." moneys!"..(moneys < -200 and "\nSeems like someone can't even manage their pizzas properly!" or "").."\nYou have been fired for general incompetence!"..(moneys < -500 and "\nAnd you ended up getting sued for causing catastrophic economic damages to the restaurant!" or ""))
 					end)
 					losing = true

@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{7}inf" -- It'll be going on endlessly... so why bother?
-GM.DateVer = "05-07-2026"
+GM.Version = "0.inf{8}inf" -- It'll be going on endlessly... so why bother?
+GM.DateVer = "22-07-2026"
 
 -- even crazier things inbound... beware!
 
@@ -138,6 +138,16 @@ function GM:StartCommand(ply, ucmd)
 	-- 	ucmd:RemoveKey(IN_SPEED)
 	-- 	ply.m_InSpeedNoclip = true
 	-- end
+
+
+	if SINGLEPLAYER_FAILMAP_STYLE and self:IsGameState(GAMESTATE_FAILED) then
+		ucmd:ClearMovement()
+		if not self.LastFailed or self.LastFailed+3 >= CurTime() then
+			ucmd:ClearButtons()
+		end
+
+		return
+	end
 
 	if ucmd:KeyDown(IN_SPEED) and !ply:IsSuitEquipped() then
 		ucmd:RemoveKey(IN_SPEED)
@@ -574,6 +584,22 @@ end
 
 function GM:SetCurrentBoss(ent)
 	SetGlobalEntity("HL2CE.Boss", ent)
+end
+
+function GM:GetGameState()
+	return GetGlobalInt("GM.GameState", GAMESTATE_RUNNING)
+end
+
+function GM:IsGameState(int)
+	return self:GetGameState() == int
+end
+
+function GM:SetGameState(int)
+	SetGlobalInt("GM.GameState", int)
+end
+
+function GM:GameStateIsRunning()
+	return self:IsGameState(GAMESTATE_RUNNING) or self:IsGameState(GAMESTATE_COMPLETED)
 end
 
 /*

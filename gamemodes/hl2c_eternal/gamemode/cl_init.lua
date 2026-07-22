@@ -265,9 +265,11 @@ function GM:HUDPaint()
 	end
 
 	-- Are we restarting the map?
-	if restartMapCountdownStart then
+	if !SINGLEPLAYER_FAILMAP_STYLE and restartMapCountdownStart then
 		local restartMapCountdownLeft = math.ceil( restartMapCountdownStart + RESTART_MAP_TIME - CurTime() )
 		draw.SimpleTextOutlined(restartMapCountdownLeft > 0 and translate.Format("restarting_in_x", tostring(restartMapCountdownLeft)) or translate.Get("restarting_map"), "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
+	elseif SINGLEPLAYER_FAILMAP_STYLE and self:IsGameState(GAMESTATE_FAILED) and self.LastFailed+3 < CurTime() then
+		draw.SimpleTextOutlined("Press a key to restart...", "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
 	end
 
 	-- On top of it all
@@ -383,6 +385,7 @@ function GM:Initialize()
 	self.HyperEXMode = self.EnableHyperEXMode
 
 	self.MapRestarts = 0
+	self.LastFailed = 0
 	self.MapVars = {}
 	self.MapVarsPersisting = {}
 	if InitMapVars then
@@ -601,6 +604,13 @@ end
 function GM:PostOnMapRestart()
 end
 
+function GM:OnMapFailed()
+	self.LastFailed = CurTime()
+end
+
+function GM:PostOnMapFailed()
+end
+
 function GM:OnMapCompleted()
 end
 
@@ -613,6 +623,17 @@ end
 function GM:PostOnCampaignCompleted()
 end
 
+-- local ang
+-- function GM:CreateMove(cmd)
+-- 	if !game.SinglePlayer() then return end
+-- 	local ply = LocalPlayer()
+
+-- 	if ang and self:IsGameState(GAMESTATE_FAILED) then
+-- 		cmd:SetViewAngles(ang)
+-- 	else
+-- 		ang = cmd:GetViewAngles()
+-- 	end
+-- end
 
 if file.Exists(GM.VaultFolder.."/gamemode/maps/"..game.GetMap()..".lua", "LUA") then
 	include("maps/"..game.GetMap()..".lua")
