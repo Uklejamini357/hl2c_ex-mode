@@ -323,7 +323,7 @@ net.Receive("hl2ce_vote", function(len, ply)
     end
 end)
 
-net.Receive("hl2ce_revive", function(len, ply)
+function GM:SendPlayersToRevive(plys)
     local plrs = {}
 
     for _,pl in player.Iterator() do
@@ -336,5 +336,9 @@ net.Receive("hl2ce_revive", function(len, ply)
     net.Start("hl2ce_revive")
     net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
     net.WriteTable(plrs)
-    net.Send(ply)
+    net.Send(plys)
+end
+
+net.Receive("hl2ce_revive", function(len, ply)
+    GAMEMODE:SendPlayersToRevive(ply)
 end)

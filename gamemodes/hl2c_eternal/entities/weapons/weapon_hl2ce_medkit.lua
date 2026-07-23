@@ -98,6 +98,42 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+	local owner = self:GetOwner()
+
+	if !SERVER then return end
+
+	local tbl = {}
+	for _,pl in player.Iterator() do
+		if !pl:Alive() and pl.deathRevivePos then
+			local pos = pl.deathRevivePos + pl:OBBCenter()
+			local dist = pos:Distance(owner:GetPos() + owner:OBBCenter())
+
+			if dist > 64 then continue end
+
+			tbl[#tbl+1] = {pl, dist}
+		end
+	end
+
+	table.sort(tbl, function(a, b) return a[2] < b[2] end)
+	
+	for _,pl in ipairs(tbl) do
+		self:RevivePlayer(pl)
+		break
+	end
+end
+
+function SWEP:RevivePlayer(pl)
+	local pos = pl:GetPos()
+	GAMEMODE.DeadPlayers[pl:SteamID()] = nil
+	pl:Spawn()
+	pl.invulnerableTime = CurTime()
+	pl:AddFlags(FL_DUCKING)
+	pl:SetPos(pos)
+	pl:EmitSound("ambient/levels/labs/electric_explosion1.wav")
+	pl:EmitSound("items/suitchargeok1.wav")
+
+	GAMEMODE:SendPlayersToRevive(player.GetAll())
+
 end
 
 function SWEP:StartReviving(pl)
@@ -195,10 +231,21 @@ end
 
 function SWEP:GetHealingEntity()
 	local pl = self:GetOwner()
-	for _,ent in ipairs(ents.FindInCone(pl:GetShootPos(), pl:GetAimVector(), 64, math.cos(math.rad(60/2)))) do
+	local tbl = {}
+	local pos = pl:GetShootPos()
+	for _,ent in ipairs(ents.FindInCone(pos, pl:GetAimVector(), 64, math.cos(math.rad(60/2)))) do
 		if pl ~= ent and (ent:IsPlayer() and ent:Alive() or ent:IsFriendlyNPC() and ent:Health() > 0) then
-			return ent
+			tbl[#tbl+1] = ent
 		end
+	end
+
+	table.sort(tbl, function(a,b)
+		local apos,bpos = a:GetPos() + a:OBBCenter(), b:GetPos() + b:OBBCenter()
+		return apos:Distance(pos) < bpos:Distance(pos) and a:Health() < b:Health()
+	end)
+
+	if tbl[1] then
+		return tbl[1]
 	end
 
 	return NULL
@@ -242,7 +289,17 @@ function SWEP:DrawHUD()
 
 	local w,h = ScrW(), ScrH()
 	draw.SimpleText("LMB: Heal player or ally", "hl2ce_hudfont_small", w*0.98, h*0.85, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
-	-- draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+20, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+20, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+
+	for ply,pos in pairs(GAMEMODE.DeadPlayersToRevive) do
+		local scr = pos:ToScreen()
+
+		draw.SimpleText(ply:Nick(), "hl2ce_hudfont", scr.x, scr.y-70, Color(255,0,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+		draw.SimpleText(pos:Length() > 64 and "Too far to revive!", "hl2ce_hudfont_small", scr.x, scr.y+60, Color(255,0,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+		surface.SetDrawColor(255,0,0,155)
+		surface.DrawLine(scr.x, scr.y-40, scr.x, scr.y+40)
+		surface.DrawLine(scr.x-25, scr.y, scr.x+25, scr.y)
+	end
 
 	if not healthmat then return end
 

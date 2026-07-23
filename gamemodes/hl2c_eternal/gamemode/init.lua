@@ -1425,6 +1425,8 @@ function GM:PlayerInitialSpawn(ply)
 		ply.consideredDead = true
 	else
 		ply.deathPos = nil
+		ply.deathRevivePos = nil
+		ply.deathReviveCrouching = nil
 	end
 
 	if ply.PlayerReady then
