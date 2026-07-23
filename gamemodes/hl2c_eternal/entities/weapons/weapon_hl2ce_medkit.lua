@@ -35,8 +35,13 @@ local DenySound = Sound("WallHealth.Deny")
 
 function SWEP:Initialize()
 	self.nextReviveFetch = SysTime()
-
 	self:SetHoldType("slam")
+	
+	if CLIENT then
+		local x,y = self:GetHealIconExpectedPos()
+		self.IconPosX = x
+		self.IconPosY = y
+	end
 end
 
 function SWEP:PrimaryAttack()
@@ -46,17 +51,17 @@ function SWEP:PrimaryAttack()
 		owner:LagCompensation(true)
 	end
 
-	local tr = util.TraceLine({
-		start = owner:GetShootPos(),
-		endpos = owner:GetShootPos() + owner:GetAimVector() * 64,
-		filter = owner
-	})
+	-- local tr = util.TraceLine({
+	-- 	start = owner:GetShootPos(),
+	-- 	endpos = owner:GetShootPos() + owner:GetAimVector() * 64,
+	-- 	filter = owner
+	-- })
 
 	if SERVER and owner:IsPlayer() and !compensated then
 		owner:LagCompensation(false)
 	end
 
-	local ent = tr.Entity
+	local ent = self:GetHealingEntity()
 
 	local need = self.HealAmount + (self.HealAmount * ((GAMEMODE.EndlessMode and 0.05 or 0.02) * owner:GetSkillAmount("Medical")))
 	if IsValid(ent) then
@@ -87,8 +92,8 @@ function SWEP:PrimaryAttack()
 		timer.Create("weapon_idle"..self:EntIndex(), 1.5, 1, function() if IsValid(self) then self:SendWeaponAnim(ACT_VM_IDLE) end end)
 	else
 		owner:EmitSound(DenySound)
-		self:SetNextPrimaryFire(CurTime() + 0.15)
-		self:SetNextSecondaryFire(CurTime() + 0.15)
+		self:SetNextPrimaryFire(CurTime() + 0.25)
+		self:SetNextSecondaryFire(CurTime() + 0.25)
 	end
 end
 
@@ -107,9 +112,9 @@ function SWEP:Think()
 	if CLIENT and self.nextReviveFetch and self.nextReviveFetch <= SysTime() then
 		self.nextReviveFetch = SysTime()+2
 	
-		-- net.Start("hl2ce_revive")
-		-- net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
-		-- net.SendToServer()
+		net.Start("hl2ce_revive")
+		net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
+		net.SendToServer()
 	end
 end
 
@@ -151,9 +156,9 @@ function SWEP:Deploy()
 		GAMEMODE.DeadPlayersToRevive = {}
 		self.nextReviveFetch = SysTime()+2
 
-		-- net.Start("hl2ce_revive")
-		-- net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
-		-- net.SendToServer()
+		net.Start("hl2ce_revive")
+		net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
+		net.SendToServer()
 	end
 
 	return true
@@ -188,6 +193,24 @@ function SWEP:SetReviveEndTime()
 	return self:GetDTFloat(2) or 0
 end
 
+function SWEP:GetHealingEntity()
+	local pl = self:GetOwner()
+	for _,ent in ipairs(ents.FindInCone(pl:GetShootPos(), pl:GetAimVector(), 64, math.cos(math.rad(60/2)))) do
+		if pl ~= ent and (ent:IsPlayer() and ent:Alive() or ent:IsFriendlyNPC() and ent:Health() > 0) then
+			return ent
+		end
+	end
+
+	return NULL
+end
+
+function SWEP:CanHeal()
+	local ent = self:GetHealingEntity()
+	local need = self.HealAmount + (self.HealAmount * ((GAMEMODE.EndlessMode and 0.05 or 0.02) * self:GetOwner():GetSkillAmount("Medical")))
+	return IsValid(ent) and self:Clip1() >= need and (ent:IsPlayer() or ent:IsFriendlyNPC()) and ent:Health() < ent:GetMaxHealth()
+end
+
+if !CLIENT then return end
 
 function SWEP:CustomAmmoDisplay()
 	self.AmmoDisplay = self.AmmoDisplay or {}
@@ -197,10 +220,54 @@ function SWEP:CustomAmmoDisplay()
 	return self.AmmoDisplay
 end
 
+local healthmat = Material("hl2c_eternal/health", "smooth")
+
+function SWEP:GetHealIconPos()
+	return self.IconPosX, self.IconPosY
+end
+
+function SWEP:GetHealIconExpectedPos()
+	local ent = self:GetHealingEntity()
+
+	if IsValid(ent) then
+		local tbl = (ent:GetPos() + ent:OBBCenter()):ToScreen()
+		return tbl.x, tbl.y
+	else
+		return ScrW()/2, ScrH()/2
+	end
+end
+
 function SWEP:DrawHUD()
 	local pl = LocalPlayer()
 
 	local w,h = ScrW(), ScrH()
 	draw.SimpleText("LMB: Heal player or ally", "hl2ce_hudfont_small", w*0.98, h*0.85, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
 	-- draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+20, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+
+	if not healthmat then return end
+
+	local healing = self:GetHealingEntity()
+	local _x1,_y1 = self:GetHealIconPos()
+	local _x2,_y2 = self:GetHealIconExpectedPos()
+	self.IconPosX = _x1 + (_x2 - _x1) * math.min(1, FrameTime()*8)
+	self.IconPosY = _y1 + (_y2 - _y1) * math.min(1, FrameTime()*8)
+
+	local posx, posy = self:GetHealIconPos()
+	local wdth, hght = 96, 96
+
+	local col = IsValid(healing) and Color(255,0,0):Lerp(Color(0,255,0), healing:Health()/healing:GetMaxHealth()) or COLOR_WHITE
+	col.a = 120
+
+	surface.SetMaterial(healthmat)
+	if self:CanHeal() then
+		surface.SetDrawColor(col.r,col.g,col.b,150)
+	else
+		surface.SetDrawColor(255,5,5,150)
+	end
+	surface.DrawTexturedRect(posx - wdth/2, posy - hght/2, wdth, hght)
+
+	if IsValid(healing) then
+		draw.SimpleText(healing:IsPlayer() and healing:Nick() or healing:GetClass(), "hl2ce_hudfont_small", posx, posy - hght/1.5, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(healing:Health().." / ".. healing:GetMaxHealth().." ("..math.Round(100*healing:Health()/healing:GetMaxHealth()).."%)", "hl2ce_hudfont_small", posx, posy + hght/1.5, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	end
 end

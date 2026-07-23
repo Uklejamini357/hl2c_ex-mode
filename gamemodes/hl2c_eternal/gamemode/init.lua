@@ -2357,6 +2357,9 @@ function GM:AddResources()
 	resource.AddFile("sound/hl2c_eternal/music/zombie_survival.wav") -- Resident Evil (idk which one): Main menu theme
 	resource.AddFile("sound/hl2c_eternal/music/hl2_finale.wav") -- Deltarune: Black Knife
 	resource.AddFile("sound/hl2c_eternal/music/chaos_defense.wav") -- Terraria 1.4.5: Skeletron Prime
+
+	resource.AddFile("materials/hl2c_eternal/health.vtf")
+	resource.AddFile("materials/hl2c_eternal/health.vmt")
 end
 
 function GM:StartVote(caller, title, text, duration, minVotes, options, callback)
