@@ -11,6 +11,8 @@ example:
 LANG.test = "Test!" -- (T)
 in case of multiple tags:
 LANG.test = "Test!" -- (TDL,T,I)
+
+Maybe i should perhaps add separator function too, so that strings in here and in functions used for chat.AddText can be used seamlessly, without adding any separated strings.
 ]]
 
 translate.AddLanguage("en", "English")

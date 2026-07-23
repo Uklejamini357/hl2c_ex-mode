@@ -7,6 +7,7 @@ if CLIENT then
 	CreateClientConVar("hl2ce_cl_nokillfeed", 0, true, false, "Disables the Gmod's killfeed.", 0, 1)
 	CreateClientConVar("hl2ce_cl_nodmgnum", 0, true, false, "Disables damage numbers.", 0, 1)
 	CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)
+	CreateClientConVar("hl2ce_cl_noplrdeathmsg", 0, true, false, "Disable player death messages. (NOT RECOMMENDED)", 0, 1)
 	CreateClientConVar("hl2ce_cl_noplrdeathsound", 0, true, false, "Disable player death sounds.", 0, 1)
 	CreateClientConVar("hl2ce_cl_showmaptimer", 0, true, false, "Show how much time you spent on this map.", 0, 1)
 	local hl2ce_cl_noepilepsy = CreateClientConVar("hl2ce_cl_noepilepsy", 1, true, false, "Greatly weakens violently flashing lights, or disables them.", 0, 1)

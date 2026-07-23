@@ -52,7 +52,7 @@ end)
 
 -- Initialize entities
 function hl2cMapEdit()
-	-- ents.FindByName("startitems_template")[1]:Remove() -- bugs starting cutscene, again.
+	-- ents.FindByName("startitems_template")[1]:Remove() -- bugs out the starting cutscene, again.
 
 	if IsValid(GAMEMODE.MagBombManager) then GAMEMODE.MagBombManager:Remove() end
 	GAMEMODE.MagBombManager = ents.Create("lua_run")
@@ -63,6 +63,11 @@ function hl2cMapEdit()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
+hook.Add("OnNPCKilled", "hl2cOnNPCKilled", function(ent)
+	if ent:GetName() == "mirt" then
+		ent:SetKeyValue("GameEndAlly", "1") -- at least this still works
+	end
+end)
 
 -- hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
 -- 	local class = ent:GetClass()

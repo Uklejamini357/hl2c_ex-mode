@@ -34,6 +34,8 @@ local HealSound = Sound("HealthKit.Touch")
 local DenySound = Sound("WallHealth.Deny")
 
 function SWEP:Initialize()
+	self.nextReviveFetch = SysTime()
+
 	self:SetHoldType("slam")
 end
 
@@ -85,16 +87,30 @@ function SWEP:PrimaryAttack()
 		timer.Create("weapon_idle"..self:EntIndex(), 1.5, 1, function() if IsValid(self) then self:SendWeaponAnim(ACT_VM_IDLE) end end)
 	else
 		owner:EmitSound(DenySound)
-		self:SetNextPrimaryFire(CurTime() + 0.5)
-		self:SetNextSecondaryFire(CurTime() + 0.5)
+		self:SetNextPrimaryFire(CurTime() + 0.15)
+		self:SetNextSecondaryFire(CurTime() + 0.15)
 	end
 end
 
 function SWEP:SecondaryAttack()
 end
 
+function SWEP:StartReviving(pl)
+end
+
+function SWEP:StopReviving(pl)
+end
+
 function SWEP:Think()
 	self:Regen(true)
+
+	if CLIENT and self.nextReviveFetch and self.nextReviveFetch <= SysTime() then
+		self.nextReviveFetch = SysTime()+2
+	
+		-- net.Start("hl2ce_revive")
+		-- net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
+		-- net.SendToServer()
+	end
 end
 
 function SWEP:Regen(keepaligned)
@@ -130,10 +146,48 @@ function SWEP:OnRemove()
 	timer.Stop("weapon_idle"..self:EntIndex())
 end
 
+function SWEP:Deploy()
+	if CLIENT then
+		GAMEMODE.DeadPlayersToRevive = {}
+		self.nextReviveFetch = SysTime()+2
+
+		-- net.Start("hl2ce_revive")
+		-- net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
+		-- net.SendToServer()
+	end
+
+	return true
+end
+
 function SWEP:Holster()
 	timer.Stop("weapon_idle" .. self:EntIndex())
 	return true
 end
+
+function SWEP:SetRevivingPlayer(pl)
+	self:SetDTEntity(0, pl)
+end
+
+function SWEP:GetRevivingPlayer()
+	return self:GetDTEntity(0) or NULL
+end
+
+function SWEP:SetReviveStartTime(time)
+	self:SetDTFloat(1, time)
+end
+
+function SWEP:SetReviveStartTime()
+	return self:GetDTFloat(1) or 0
+end
+
+function SWEP:SetReviveEndTime(time)
+	self:SetDTFloat(2, time)
+end
+
+function SWEP:SetReviveEndTime()
+	return self:GetDTFloat(2) or 0
+end
+
 
 function SWEP:CustomAmmoDisplay()
 	self.AmmoDisplay = self.AmmoDisplay or {}
@@ -141,4 +195,12 @@ function SWEP:CustomAmmoDisplay()
 	self.AmmoDisplay.PrimaryClip = self:Clip1()
 
 	return self.AmmoDisplay
+end
+
+function SWEP:DrawHUD()
+	local pl = LocalPlayer()
+
+	local w,h = ScrW(), ScrH()
+	draw.SimpleText("LMB: Heal player or ally", "hl2ce_hudfont_small", w*0.98, h*0.85, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	-- draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+20, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
 end

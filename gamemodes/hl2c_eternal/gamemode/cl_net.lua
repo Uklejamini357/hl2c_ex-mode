@@ -153,35 +153,65 @@ end)
 
 
 net.Receive("hl2ce_playerkilled", function(len)
-    local sound = net.ReadBit()
+    local pl = net.ReadEntity()
+    local attacker = net.ReadEntity()
+    local me = LocalPlayer()
 
-    if sound == 1 then
-        local pl = net.ReadEntity()
-	
-        if !GetConVar("hl2ce_cl_noplrdeathsound"):GetBool() then
-            local model = string.lower(pl:GetModel())
-            local sndid = GAMEMODE.DeathVoicelineModels[model] or "Male"
-            if !sndid then return end
+    if !GetConVar("hl2ce_cl_noplrdeathsound"):GetBool() then
+        local model = string.lower(pl:GetModel())
+        local sndid = GAMEMODE.DeathVoicelineModels[model] or "Male"
+        if !sndid then return end
 
-            local mdlsnds = GAMEMODE.DeathVoicelines[sndid]
-            if !mdlsnds then return end
+        local mdlsnds = GAMEMODE.DeathVoicelines[sndid]
+        if !mdlsnds then return end
 
-            local snd
-            if isstring(mdlsnds) then
-                snd = mdlsnds
-            else
-                snd = table.Random(mdlsnds)
-            end
-
-            pl:EmitSound(snd)
+        local snd
+        if isstring(mdlsnds) then
+            snd = mdlsnds
+        else
+            snd = table.Random(mdlsnds)
         end
-    else
+
+        pl:EmitSound(snd)
+    end
+
+    
+    if !GetConVar("hl2ce_cl_noplrdeathmsg"):GetBool() then
         local cl = net.ReadString()
         if cl == "trigger_hurt" then
-            chat.AddText(color_white, "You died a ", Color(255,0,0), "stupid death", color_white, ".")
+            chat.AddText(
+                Color(99, 121, 247), "[Hl2cE] ",
+                pl == me and "" or pl,
+                color_white, pl == me and "You died a " or " died a ",
+                Color(255,0,0), "stupid death",
+                color_white, "."
+            )
+        elseif pl == attacker then
+            chat.AddText(
+                Color(99, 121, 247), "[Hl2cE] ",
+                pl == me and "" or pl,
+                color_white, pl == me and "You died to " or " has died to ",
+                Color(255,0,0), "suicide",
+                color_white, "."
+            )
         else
-            chat.AddText(color_white, "Killed by ", Color(255,0,0), language.GetPhrase(cl))
+            chat.AddText(
+                Color(99, 121, 247), "[Hl2cE] ",
+                pl == me and "" or pl,
+                color_white, pl == me and "You were killed by " or " was killed by ",
+                Color(255,0,0), language.GetPhrase(cl),
+                color_white, "."
+            )
         end
+    end
+end)
+
+net.Receive("hl2ce_revive", function(len)
+    local typ = net.ReadUInt(4)
+    if typ == REVIVE_SENDDEADPLAYERS then
+        local plrs = net.ReadTable()
+
+        GAMEMODE.DeadPlayersToRevive = plrs
     end
 end)
 

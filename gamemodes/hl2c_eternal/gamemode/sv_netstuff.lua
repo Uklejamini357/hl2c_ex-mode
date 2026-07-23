@@ -25,6 +25,7 @@ util.AddNetworkString("hl2ce_playerkilled")
 util.AddNetworkString("hl2ce_playertimer")
 util.AddNetworkString("hl2ce_dmgnum")
 util.AddNetworkString("hl2ce_vote")
+util.AddNetworkString("hl2ce_revive")
 
 util.AddNetworkString("hl2ce_admin_teleport")
 util.AddNetworkString("hl2ce_admin_changemap")
@@ -320,4 +321,20 @@ net.Receive("hl2ce_vote", function(len, ply)
 
         GAMEMODE:DoVote(ply, option)
     end
+end)
+
+net.Receive("hl2ce_revive", function(len, ply)
+    local plrs = {}
+
+    for _,pl in player.Iterator() do
+        if pl:Alive() then continue end
+        if !pl.deathRevivePos then continue end
+
+        plrs[pl] = pl.deathRevivePos + pl:OBBCenter()
+    end
+
+    net.Start("hl2ce_revive")
+    net.WriteUInt(REVIVE_SENDDEADPLAYERS, 4)
+    net.WriteTable(plrs)
+    net.Send(ply)
 end)

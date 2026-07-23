@@ -127,11 +127,13 @@ end
 
 -- Called when the player dies
 function GM:DoPlayerDeath(ply, attacker, dmgInfo)
-	ply.deathPos = ply:EyePos()
+	ply.deathPos = ply:GetPos() + ply:OBBCenter()
+	ply.deathRevivePos = ply:GetPos()
+	ply.deathReviveCrouching = ply:Crouching()
 
 	-- Add to deadPlayers table to prevent respawning on re-connect
-	if !self:CanPlayerRespawn() and !table.HasValue(deadPlayers, ply:SteamID()) and !ply:IsBot() then
-		table.insert(deadPlayers, ply:SteamID())
+	if !self:CanPlayerRespawn() and !self.DeadPlayers[ply:SteamID()] and !ply:IsBot() then
+		self.DeadPlayers[ply:SteamID()] = true
 		if self:HardcoreEnabled() then
 			table.RemoveByValue(self.HardcoreAlivePlayers, ply:SteamID64())
 		end
@@ -173,13 +175,14 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	end
 
 
-	local cl = attacker.GetClass and attacker:GetClass()
-	if attacker:IsNPC() or attacker:IsNextBot() or cl == "trigger_hurt" then
-		net.Start("hl2ce_playerkilled")
-		net.WriteBit(0)
-		net.WriteString(attacker:GetClass())
-		net.Send(ply)
-	end
+	-- local cl = attacker.GetClass and attacker:GetClass()
+	-- if attacker:IsNPC() or attacker:IsNextBot() or cl == "trigger_hurt" then
+	-- end
+	net.Start("hl2ce_playerkilled")
+	net.WriteEntity(ply)
+	net.WriteEntity(attacker)
+	net.WriteString(attacker:GetClass())
+	net.Broadcast()
 	
 	local diff = self:GetDifficulty(true, true)
 	local normal_diff = infmath.ConvertInfNumberToNormalNumber(diff)
@@ -188,12 +191,6 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 		normal_diff >= 10 and 0.968 or normal_diff >= 4 and 0.974 or
 		0.98
 	)))
-
-
-	net.Start("hl2ce_playerkilled")
-	net.WriteBit(1)
-	net.WriteEntity(ply)
-	net.SendPVS(ply:GetPos())
 end
 
 
@@ -444,6 +441,8 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 			ent:Inf_SetHealth(ent:Inf_Health() - damage)
 		end
 
+		ent.m_PrevHP = ent:Health()
+
 		if attacker:IsPlayer() and hp > 0 then
 			if attacker.DamagedEntsTick[ent] then -- if the player is already dealing dmg to the entity...
 				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + damage
@@ -679,7 +678,7 @@ end
 
 -- Called immediately after starting the gamemode  
 function GM:Initialize()
-	deadPlayers = {}
+	self.DeadPlayers = {}
 	checkpointPositions = {}
 	nextAreaOpenTime = 0
 	startingWeapons = {}
@@ -1033,8 +1032,8 @@ concommand.Add("hl2ce_next_map", function(ply)
 	end
 end)
 concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
-	if IsValid(ply) && ply:IsAdmin() && (!ply:Alive() || table.HasValue(deadPlayers, ply:SteamID()) or args[1] == "force") && self:GameStateIsRunning() then
-		table.RemoveByValue(deadPlayers, ply:SteamID())
+	if IsValid(ply) && ply:IsAdmin() && (!ply:Alive() || GAMEMODE.DeadPlayers[ply:SteamID()] or args[1] == "force") && GAMEMODE:GameStateIsRunning() then
+		GAMEMODE.DeadPlayers[ply:SteamID()] = nil
 		ply:SetTeam(TEAM_ALIVE)
 		timer.Simple(0, function()
 			ply:KillSilent()
@@ -1044,9 +1043,9 @@ concommand.Add("hl2ce_admin_respawn", function(ply, cmd, args)
 	else
 		if !ply:IsAdmin() then
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_admin")
-		elseif ply:Alive() || !table.HasValue(deadPlayers, ply:SteamID()) then
+		elseif ply:Alive() || !GAMEMODE.DeadPlayers[ply:SteamID()] then
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "not_dead")
-		elseif self:IsGameState(GAMESTATE_CHANGINGLEVEL) then
+		else
 			ply:PrintTranslatedMessage(HUD_PRINTTALK, "mapchange_cantrespawn")
 		end
 	end
@@ -1194,9 +1193,11 @@ end
 function GM:EntityRemoved(ent)
 	for _,pl in player.Iterator() do
 		if pl.DamagedEntsTick[ent] then
-			-- pcall(function()
-			self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
-			-- end)
+			if ent.m_PrevHP ~= ent:Health() then
+				-- pcall(function()
+				self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
+				-- end)
+			end
 
 			pl.DamagedEntsTick[ent] = nil
 		end
@@ -1410,9 +1411,9 @@ function GM:PlayerInitialSpawn(ply)
 	end
 	
 	-- If the player died before, kill them again
-	if table.HasValue(deadPlayers, ply:SteamID()) and !self:CanPlayerRespawn(ply) then
+	if self.DeadPlayers[ply:SteamID()] and !self:CanPlayerRespawn(ply) then
 		ply:PrintTranslatedMessage(HUD_PRINTTALK, "cant_respawn")
-		ply.deathPos = ply:EyePos()
+		ply.deathPos = ply:GetPos() + ply:OBBCenter()
 	
 		ply:RemoveVehicle()
 		ply:Flashlight(false)
@@ -1422,6 +1423,8 @@ function GM:PlayerInitialSpawn(ply)
 
 	if !ply:Alive() then
 		ply.consideredDead = true
+	else
+		ply.deathPos = nil
 	end
 
 	if ply.PlayerReady then
@@ -2148,9 +2151,11 @@ end
 function GM:Tick()
 	for _,pl in player.Iterator() do
 		for ent,dmg in pairs(pl.DamagedEntsTick or {}) do
-			pcall(function()
-				self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
-			end)
+			if ent.m_PrevHP ~= ent:Health() then
+				pcall(function()
+					self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
+				end)
+			end
 
 			pl.DamagedEntsTick[ent] = nil
 		end

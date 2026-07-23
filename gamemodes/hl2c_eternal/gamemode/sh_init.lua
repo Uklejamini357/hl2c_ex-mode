@@ -3,9 +3,9 @@ DeriveGamemode("sandbox")
 
 include("break_infinity.lua")
 
+include("sh_globals.lua")
 include("sh_config.lua")
 include("sh_cvars.lua")
-include("sh_globals.lua")
 include("sh_player.lua")
 include("sh_ents.lua")
 include("sh_pets.lua")
@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{8}inf" -- It'll be going on endlessly... so why bother?
-GM.DateVer = "22-07-2026"
+GM.Version = "0.inf{9}inf" -- It'll be going on endlessly... so why bother?
+GM.DateVer = "23-07-2026"
 
 -- even crazier things inbound... beware!
 

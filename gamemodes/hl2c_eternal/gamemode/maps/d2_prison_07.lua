@@ -12,8 +12,10 @@ if CLIENT then
 			chat.AddText(Color(255,0,0), "PREPARE FOR HELL.")
 			chat.AddText(Color(255,120,0), "COMBINE ARRIVES IN... 14")
 			
+			local maprestarts = GAMEMODE.MapRestarts
 			for i=1,13 do
 				timer.Simple(i, function()
+					if GAMEMODE.MapRestarts ~= maprestarts then return end
 					chat.AddText(Color(255,120,0), 14-i)
 				end)
 			end
@@ -302,4 +304,22 @@ hook.Add("OnMapFailed", "hl2c_MapFail", function()
 	net.Start("hl2ce_music")
 	net.WriteBool(false)
 	net.Broadcast()
+end)
+
+-- turrets aren't meant to damage a friendly player
+hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", function(ent, dmginfo)
+	local attacker = dmginfo:GetAttacker()
+	local inflictor = dmginfo:GetInflictor()
+	if ent:IsPlayer() and (IsValid(attacker) and attacker:GetClass() == "npc_turret_floor" and attacker:Disposition(ent) == D_LI) then
+		return true
+	elseif ent == GAMEMODE:GetCurrentBoss() and (IsValid(inflictor) and inflictor:GetClass() == "prop_combine_ball") then
+		dmginfo:ScaleDamage(0.1)
+	end
+end)
+
+-- turrets aren't meant to damage a friendly player
+hook.Add("DoPlayerDeath", "hl2cPlayerDeath", function(pl, attacker, dmginfo)
+	if attacker:GetClass() == "npc_antlionguard" then
+		pl:PrintMessage(3, "Sorry, you cannot cheese this part.")
+	end
 end)

@@ -67,7 +67,16 @@ function PANEL:Paint()
 	if !IsValid(self.ply) then return end
 
 	if LocalPlayer() == self.ply then
-		surface.SetDrawColor(Color(125, 125, 125, 75))
+		surface.SetDrawColor(125, 125, 125, 75)
+		surface.DrawRect(0, 0, self:GetWide(), self:GetTall())
+	end
+
+	local team = self.ply:Team()
+	if team == TEAM_DEAD then
+		surface.SetDrawColor(225, 25, 25, 35)
+		surface.DrawRect(0, 0, self:GetWide(), self:GetTall())
+	elseif team == TEAM_COMPLETED_MAP then
+		surface.SetDrawColor(225, 225, 25, 35)
 		surface.DrawRect(0, 0, self:GetWide(), self:GetTall())
 	end
 end
