@@ -1395,6 +1395,11 @@ function GM:PlayerInitialSpawn(ply)
 	ply:SetFrags(0)
 	ply:SetDeaths(0)
 
+	ply.lastWeapons = nil
+	ply.lastAmmo = nil
+	ply.lastSelectedWeapon = nil
+	ply.droppedWeapon = nil
+
 	-- Grab previous map info
 	local plyID = ply:SteamID64() or ply:UniqueID()
 	if file.Exists(self.VaultFolder.."/players/"..plyID..".txt", "DATA") then
