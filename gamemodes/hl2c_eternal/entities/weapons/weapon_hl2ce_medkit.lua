@@ -130,7 +130,7 @@ function SWEP:RevivePlayer(pl)
 	if !SERVER then return end
 	if pl:Alive() then return end
 
-	local pos = pl:GetPos()
+	local pos = pl.deathRevivePos
 	GAMEMODE.DeadPlayers[pl:SteamID()] = nil
 	pl:Spawn()
 	pl:SetHealth(pl:GetMaxHealth()*0.25)
