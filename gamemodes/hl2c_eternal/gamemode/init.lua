@@ -128,7 +128,14 @@ end
 -- Called when the player dies
 function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	ply.deathPos = ply:GetPos() + ply:OBBCenter()
-	ply.deathRevivePos = ply:GetPos()
+	local tr = util.TraceHull({
+		start = ply:GetPos(),
+		endpos = ply:GetPos() + Vector(0,0,-32768),
+		mins = ply:OBBMins(),
+		maxs = ply:OBBMaxs(),
+		filter = function(ent) return ply ~= ent end
+	})
+	ply.deathRevivePos = tr.HitPos
 	ply.deathReviveCrouching = ply:Crouching()
 
 	ply.lastWeapons = {}

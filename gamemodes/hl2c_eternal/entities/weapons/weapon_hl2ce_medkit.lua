@@ -74,6 +74,8 @@ function SWEP:PrimaryAttack()
 
 	if IsValid(ent) and self:Clip1() >= need and (ent:IsPlayer() or ent:IsFriendlyNPC()) and ent:Health() < ent:GetMaxHealth() then
 		self:TakePrimaryAmmo(need)
+		self:SetLastAmmoRegen(CurTime())
+
 		if SERVER then
 			ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + need))
 			if ent:IsPlayer() then
@@ -87,6 +89,7 @@ function SWEP:PrimaryAttack()
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
 		self:SetNextPrimaryFire(CurTime() + 0.15)
+		self:SetNextSecondaryFire(CurTime() + 0.5)
 		owner:SetAnimation(PLAYER_ATTACK1)
 
 		-- Even though the viewmodel has looping IDLE anim at all times, we need this to make fire animation work in multiplayer
@@ -112,8 +115,14 @@ function SWEP:SecondaryAttack()
 		if !pl:Alive() and pl.deathRevivePos then
 			local pos = pl.deathRevivePos + pl:OBBCenter()
 			local dist = pos:Distance(owner:GetPos() + owner:OBBCenter())
+			local tr = util.TraceLine({
+				start = owner:GetPos() + owner:OBBCenter(),
+				endpos = pos,
+				filter = function(ent) return ent ~= owner and !ent:IsPlayer() and !ent:IsNPC() end
+			})
 
 			if dist > 64 then continue end
+			if tr.Hit then continue end
 
 			tbl[#tbl+1] = {pl, dist}
 		end
@@ -150,7 +159,9 @@ function SWEP:RevivePlayer(pl)
 		end
 	end
 
-	self:SetClip1(self:Clip1() - self:GetMaxAmmo()*0.5)
+	self:TakePrimaryAmmo(self:GetMaxAmmo()*0.5)
+	self:SetLastAmmoRegen(CurTime())
+	self:SetNextPrimaryFire(CurTime() + 1)
 
 	net.Start("hl2ce_revive")
 	net.WriteUInt(REVIVE_PLAYERREVIVED, 4)
@@ -305,8 +316,19 @@ end
 
 function SWEP:GetHealingEntity()
 	local pl = self:GetOwner()
-	local tbl = {}
 	local pos = pl:GetShootPos()
+	local tr = util.TraceLine({
+		start = pos,
+		endpos = pos + pl:GetAimVector()*64,
+		filter = function(ent) return pl ~= ent and (ent:IsPlayer() or ent:IsFriendlyNPC()) end
+	})
+
+	if tr.Hit and tr.Entity then
+		return tr.Entity
+	end
+
+
+	local tbl = {}
 	for _,ent in ipairs(ents.FindInCone(pos, pl:GetAimVector(), 64, math.cos(math.rad(60/2)))) do
 		if pl ~= ent and (ent:IsPlayer() and ent:Alive() or ent:IsFriendlyNPC() and ent:Health() > 0) then
 			tbl[#tbl+1] = ent
@@ -353,7 +375,7 @@ end
 
 function SWEP:GetHealIconExpectedPos()
 	if IsValid(self:GetRevivingPlayer()) then
-		local tbl = (GAMEMODE.DeadPlayersToRevive[self:GetRevivingPlayer()]):ToScreen()
+		local tbl = (GAMEMODE.DeadPlayersToRevive[self:GetRevivingPlayer()] or self:GetRevivingPlayer():GetPos()):ToScreen()
 
 		return tbl.x, tbl.y
 	end
