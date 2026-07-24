@@ -103,6 +103,7 @@ cvars.AddChangeCallback("hl2ce_server_player_medkit", function(convar, old, new)
 	if SERVER then
 		if GAMEMODE.PlayerMedkitOnSpawn then
 			for _,pl in ipairs(player.GetLiving()) do
+				if !pl:IsSuitEquipped() then continue end
 				pl:Give("weapon_hl2ce_medkit")
 			end
 		else

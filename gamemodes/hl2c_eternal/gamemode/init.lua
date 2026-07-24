@@ -131,6 +131,18 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	ply.deathRevivePos = ply:GetPos()
 	ply.deathReviveCrouching = ply:Crouching()
 
+	ply.lastWeapons = {}
+	ply.lastAmmo = ply:GetAmmo()
+	ply.lastSelectedWeapon = IsValid(ply:GetActiveWeapon()) and ply:GetActiveWeapon():GetClass() or nil
+	ply.droppedWeapon = IsValid(ply:GetActiveWeapon()) and ply:GetActiveWeapon() or nil
+
+	for _,wep in ipairs(ply:GetWeapons()) do
+		ply.lastWeapons[wep:GetClass()] = {
+			wep:Clip1(),
+			wep:Clip2()
+		}
+	end
+
 	-- Add to deadPlayers table to prevent respawning on re-connect
 	if !self:CanPlayerRespawn() and !self.DeadPlayers[ply:SteamID()] and !ply:IsBot() then
 		self.DeadPlayers[ply:SteamID()] = true
@@ -1514,8 +1526,6 @@ function GM:PlayerSpawn(ply)
 		end
 	else
 		ply:SetHealth(maxhp)
-
-		hook.Run("PlayerSpawnLoadout", ply)
 	end
 	ply:SetMaxHealth(maxhp)
 	ply:SetMaxArmor(maxap)
@@ -1560,42 +1570,53 @@ end
 
 -- Called by GM:PlayerSpawn
 function GM:PlayerLoadout(ply)
+	if ply.lastWeapons then
+		for class, w in pairs(ply.lastWeapons) do
+			local wep = ply:Give(class, true)
+			wep:SetClip1(w[1] or wep:Clip1())
+			wep:SetClip2(w[2] or wep:Clip2())
+		end
+		ply.lastWeapons = nil
+	end
+	if ply.lastAmmo then
+		for id,count in pairs(ply.lastAmmo) do
+			ply:SetAmmo(count, id)
+		end
+		ply.lastAmmo = nil
+	end
+	if ply.lastSelectedWeapon then
+		ply:SelectWeapon(ply.lastSelectedWeapon)
+		ply.lastSelectedWeapon = nil
+	end
 
 	if (ply.info && ply.info.loadout) then
-	
 		for wep, ammo in pairs(ply.info.loadout) do
-		
 			ply:Give(wep)
-		
 		end
 	
 		if (ply.info.weapon) then
-		
 			ply:SelectWeapon(ply.info.weapon)
-		
 		end
 	
 		ply:RemoveAllAmmo()
 	
 		for _, wep in ipairs(ply:GetWeapons()) do
-		
 			local wepClass = wep:GetClass()
-		
 			if (ply.info.loadout[ wepClass ]) then
-			
 				wep:SetClip1(tonumber(ply.info.loadout[ wepClass ][1]))
 				wep:SetClip2(tonumber(ply.info.loadout[ wepClass ][ 2 ]))
 				ply:GiveAmmo(tonumber(ply.info.loadout[ wepClass ][ 3 ]), wep:GetPrimaryAmmoType())
 				ply:GiveAmmo(tonumber(ply.info.loadout[ wepClass ][ 4 ]), wep:GetSecondaryAmmoType())
-			
 			end
-		
 		end
-	
-	elseif (startingWeapons && (#startingWeapons > 0)) then
-		for _, wep in pairs(startingWeapons) do
-			if wep[WHITELISTED_WEAPONS] then
-				ply:Give(wep)
+	else
+		hook.Run("PlayerSpawnLoadout", ply)
+
+		if (startingWeapons && (#startingWeapons > 0)) then
+			for _, wep in pairs(startingWeapons) do
+				if wep[WHITELISTED_WEAPONS] then
+					ply:Give(wep)
+				end
 			end
 		end
 	end

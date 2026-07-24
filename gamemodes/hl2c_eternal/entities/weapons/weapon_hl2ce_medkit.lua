@@ -45,6 +45,8 @@ function SWEP:Initialize()
 end
 
 function SWEP:PrimaryAttack()
+	if IsValid(self:GetRevivingPlayer()) then return end
+
 	local owner = self:GetOwner()
 	local compensated = SERVER and owner:IsLagCompensated()
 	if SERVER and owner:IsPlayer() and !compensated then
@@ -101,6 +103,9 @@ function SWEP:SecondaryAttack()
 	local owner = self:GetOwner()
 
 	if !SERVER then return end
+	if GAMEMODE:HardcoreEnabled() then return end
+	if IsValid(self:GetRevivingPlayer()) then return end
+	if self:Clip1() < self:GetMaxAmmo()*0.5 then return end
 
 	local tbl = {}
 	for _,pl in player.Iterator() do
@@ -116,34 +121,91 @@ function SWEP:SecondaryAttack()
 
 	table.sort(tbl, function(a, b) return a[2] < b[2] end)
 	
-	for _,pl in ipairs(tbl) do
-		self:RevivePlayer(pl)
-		break
+	if tbl[1] then
+		self:StartReviving(tbl[1][1])
 	end
 end
 
 function SWEP:RevivePlayer(pl)
+	if !SERVER then return end
+	if pl:Alive() then return end
+
 	local pos = pl:GetPos()
 	GAMEMODE.DeadPlayers[pl:SteamID()] = nil
 	pl:Spawn()
+	pl:SetHealth(pl:GetMaxHealth()*0.25)
 	pl.invulnerableTime = CurTime()
 	pl:AddFlags(FL_DUCKING)
 	pl:SetPos(pos)
 	pl:EmitSound("ambient/levels/labs/electric_explosion1.wav")
 	pl:EmitSound("items/suitchargeok1.wav")
 
-	GAMEMODE:SendPlayersToRevive(player.GetAll())
+	self:SetClip1(self:Clip1() - self:GetMaxAmmo()*0.5)
 
+	net.Start("hl2ce_revive")
+	net.WriteUInt(REVIVE_PLAYERREVIVED, 4)
+	net.WriteEntity(self:GetOwner())
+	net.WriteEntity(pl)
+	net.Broadcast()
+
+	GAMEMODE:SendPlayersToRevive(player.GetAll())
 end
 
 function SWEP:StartReviving(pl)
+	self:SetRevivingPlayer(pl)
+	self:SetReviveStartTime(CurTime())
+	self:SetReviveEndTime(CurTime()+5)
+
+	if not self.ReviveSound then self.ReviveSound = CreateSound(self, "items/medcharge4.wav") end
+	self.ReviveSound:Play()
+
+	if SERVER then
+		net.Start("hl2ce_revive")
+		net.WriteUInt(REVIVE_PLAYERSTARTREVIVE, 4)
+		net.WriteEntity(self:GetOwner())
+		net.WriteFloat(self:GetReviveEndTime())
+		net.Send(pl)
+	end
 end
 
-function SWEP:StopReviving(pl)
+function SWEP:StopReviving()
+	local pl = self:GetRevivingPlayer()
+	self:SetRevivingPlayer(NULL)
+	self:SetReviveStartTime(0)
+	self:SetReviveEndTime(0)
+
+	if not self.ReviveSound then self.ReviveSound = CreateSound(self, "items/medcharge4.wav") end
+	self.ReviveSound:Stop()
+
+	if SERVER then
+		net.Start("hl2ce_revive")
+		net.WriteUInt(REVIVE_PLAYERSTOPREVIVE, 4)
+		net.WriteEntity(self:GetOwner())
+		net.Send(pl)
+	end
 end
 
 function SWEP:Think()
 	self:Regen(true)
+
+	local reviving = self:GetRevivingPlayer()
+	if IsValid(reviving) then
+		local owner = self:GetOwner()
+		if owner:KeyDown(IN_ATTACK2) then
+			if self:GetReviveEndTime() <= CurTime() then
+				self:RevivePlayer(reviving)
+				self:StopReviving()
+			end
+		else
+			self:StopReviving()
+		end
+
+		local pos = SERVER and reviving.deathRevivePos + reviving:OBBCenter() or CLIENT and GAMEMODE.DeadPlayersToRevive[reviving] or Vector(0,0,0)
+		local dist = pos:Distance(owner:GetPos() + owner:OBBCenter())
+		if dist > 64 then
+			self:StopReviving()
+		end
+	end
 
 	if CLIENT and self.nextReviveFetch and self.nextReviveFetch <= SysTime() then
 		self.nextReviveFetch = SysTime()+2
@@ -164,7 +226,7 @@ function SWEP:Regen(keepaligned)
 	if timepassed < regenrate then return false end
 
 	local ammo = self:Clip1()
-	local maxammo = self.MaxAmmo + (self.MaxAmmo * ((GAMEMODE.EndlessMode and 0.1 or 0.02) * owner:GetSkillAmount("Surgeon")))
+	local maxammo = self:GetMaxAmmo()
 
 	if ammo >= maxammo then return false end
 
@@ -183,6 +245,8 @@ end
 
 
 function SWEP:OnRemove()
+	self:StopReviving()
+
 	timer.Stop("hl2ce_medkit_ammo"..self:EntIndex())
 	timer.Stop("weapon_idle"..self:EntIndex())
 end
@@ -217,7 +281,7 @@ function SWEP:SetReviveStartTime(time)
 	self:SetDTFloat(1, time)
 end
 
-function SWEP:SetReviveStartTime()
+function SWEP:GetReviveStartTime()
 	return self:GetDTFloat(1) or 0
 end
 
@@ -225,7 +289,7 @@ function SWEP:SetReviveEndTime(time)
 	self:SetDTFloat(2, time)
 end
 
-function SWEP:SetReviveEndTime()
+function SWEP:GetReviveEndTime()
 	return self:GetDTFloat(2) or 0
 end
 
@@ -257,6 +321,10 @@ function SWEP:CanHeal()
 	return IsValid(ent) and self:Clip1() >= need and (ent:IsPlayer() or ent:IsFriendlyNPC()) and ent:Health() < ent:GetMaxHealth()
 end
 
+function SWEP:GetMaxAmmo()
+	return self.MaxAmmo + (self.MaxAmmo * ((GAMEMODE.EndlessMode and 0.1 or 0.02) * self:GetOwner():GetSkillAmount("Surgeon")))
+end
+
 if !CLIENT then return end
 
 function SWEP:CustomAmmoDisplay()
@@ -274,6 +342,12 @@ function SWEP:GetHealIconPos()
 end
 
 function SWEP:GetHealIconExpectedPos()
+	if IsValid(self:GetRevivingPlayer()) then
+		local tbl = (GAMEMODE.DeadPlayersToRevive[self:GetRevivingPlayer()]):ToScreen()
+
+		return tbl.x, tbl.y
+	end
+
 	local ent = self:GetHealingEntity()
 
 	if IsValid(ent) then
@@ -289,13 +363,20 @@ function SWEP:DrawHUD()
 
 	local w,h = ScrW(), ScrH()
 	draw.SimpleText("LMB: Heal player or ally", "hl2ce_hudfont_small", w*0.98, h*0.85, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
-	draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+20, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+18, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	draw.SimpleText("Need 50% charges to revive!", "hl2ce_hudfont_small", w*0.98, h*0.85+36, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
 
 	for ply,pos in pairs(GAMEMODE.DeadPlayersToRevive) do
 		local scr = pos:ToScreen()
 
+		local toofar = pos:Distance(pl:GetPos() + pl:OBBCenter()) > 64
+		local notenoughammo = self:Clip1() < self:GetMaxAmmo()*0.5
+		local reviving = self:GetRevivingPlayer() == ply
+		local reviveperc = 100 * (CurTime() - self:GetReviveStartTime()) / (self:GetReviveEndTime() - self:GetReviveStartTime())
+
 		draw.SimpleText(ply:Nick(), "hl2ce_hudfont", scr.x, scr.y-70, Color(255,0,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
-		draw.SimpleText(pos:Length() > 64 and "Too far to revive!", "hl2ce_hudfont_small", scr.x, scr.y+60, Color(255,0,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+		draw.SimpleText(toofar and "Too far to revive!" or notenoughammo and "Not enough charge!" or reviving and "Reviving "..ply:Nick().." ("..math.Round(reviveperc).."%)" or "Hold RMB to revive a player!",
+		"hl2ce_hudfont_small", scr.x, scr.y+60, (toofar or notenoughammo) and Color(255,0,0,155) or reviving and Color(255,0,0,155):Lerp(Color(0,255,0,155), reviveperc/100) or Color(0,255,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 		surface.SetDrawColor(255,0,0,155)
 		surface.DrawLine(scr.x, scr.y-40, scr.x, scr.y+40)
 		surface.DrawLine(scr.x-25, scr.y, scr.x+25, scr.y)

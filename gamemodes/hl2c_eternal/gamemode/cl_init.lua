@@ -272,6 +272,24 @@ function GM:HUDPaint()
 		draw.SimpleTextOutlined("Press a key to restart...", "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
 	end
 
+	if !game.SinglePlayer() and !pl:Alive() and self:GameStateIsRunning() then
+		draw.SimpleText("You are dead!", "hl2ce_hudfont_small", centerX, h * 0.075, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+
+		if self:HardcoreEnabled() then
+			draw.SimpleText("You cannot respawn in this run! Enjoy the chaos...", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 0, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+		elseif self.PlayerMedkitOnSpawn then
+			if self.BeingRevivedBy and IsValid(self.BeingRevivedBy) then
+				draw.SimpleText(Format("You are being revived by %s! (%ss)", self.BeingRevivedBy:Nick(), math.Round(self.ReviveEndTime - CurTime(), 1)), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(0, 255, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			else
+				draw.SimpleText("A friendly player can revive you using their medkit.", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			end
+		elseif self.CheckpointRespawn then
+			draw.SimpleText("You will respawn on the next checkpoint or on the next map.", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+		else
+			draw.SimpleText("You will respawn on the next map.", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+		end
+	end
+
 	-- On top of it all
 	hook.Run("DrawDeathNotice", 0.85, 0.04)
 end
@@ -378,7 +396,6 @@ end
 
 -- Called when we initialize
 function GM:Initialize()
-
 	-- Initial variables for client
 	self.ShowScoreboard = false
 	self.EXMode = self.EnableEXMode
@@ -388,6 +405,7 @@ function GM:Initialize()
 	self.LastFailed = 0
 	self.MapVars = {}
 	self.MapVarsPersisting = {}
+	self.DeadPlayersToRevive = {}
 	if InitMapVars then
 		InitMapVars(GAMEMODE.MapVars, GAMEMODE.MapVarsPersisting)
 	end

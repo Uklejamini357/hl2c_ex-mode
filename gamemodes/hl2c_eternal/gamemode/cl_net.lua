@@ -212,6 +212,31 @@ net.Receive("hl2ce_revive", function(len)
         local plrs = net.ReadTable()
 
         GAMEMODE.DeadPlayersToRevive = plrs
+    elseif typ == REVIVE_PLAYERSTARTREVIVE then
+        local reviver = net.ReadEntity()
+        local endtime = net.ReadFloat()
+
+        GAMEMODE.BeingRevivedBy = reviver
+        GAMEMODE.ReviveStartTime = CurTime()
+        GAMEMODE.ReviveEndTime = endtime
+    elseif typ == REVIVE_PLAYERSTOPREVIVE then
+        local reviver = net.ReadEntity()
+        
+        GAMEMODE.BeingRevivedBy = nil
+        GAMEMODE.ReviveStartTime = nil
+        GAMEMODE.ReviveEndTime = nil
+    elseif typ == REVIVE_PLAYERREVIVED then
+        local reviver = net.ReadEntity()
+        local pl = net.ReadEntity()
+        local me = LocalPlayer()
+
+        chat.AddText(
+            Color(99, 121, 247), "[Hl2cE] ",
+            pl == me and "" or pl,
+            color_white, pl == me and "You were revived by " or " was revived by ",
+            Color(0,255,0), reviver,
+            color_white, "."
+        )
     end
 end)
 
