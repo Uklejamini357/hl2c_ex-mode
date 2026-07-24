@@ -219,12 +219,19 @@ net.Receive("hl2ce_revive", function(len)
         GAMEMODE.BeingRevivedBy = reviver
         GAMEMODE.ReviveStartTime = CurTime()
         GAMEMODE.ReviveEndTime = endtime
+
+        GAMEMODE.ReviveSound = CreateSound(LocalPlayer(), "items/medcharge4.wav")
+        GAMEMODE.ReviveSound:PlayEx(0.2, 100)
     elseif typ == REVIVE_PLAYERSTOPREVIVE then
         local reviver = net.ReadEntity()
         
         GAMEMODE.BeingRevivedBy = nil
         GAMEMODE.ReviveStartTime = nil
         GAMEMODE.ReviveEndTime = nil
+
+        if GAMEMODE.ReviveSound then
+            GAMEMODE.ReviveSound:Stop()
+        end
     elseif typ == REVIVE_PLAYERREVIVED then
         local reviver = net.ReadEntity()
         local pl = net.ReadEntity()

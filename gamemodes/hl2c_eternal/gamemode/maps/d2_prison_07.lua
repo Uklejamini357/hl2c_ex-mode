@@ -33,7 +33,7 @@ if CLIENT then
 			GAMEMODE.MusicSound = CreateSound(ply, sound)
 			GAMEMODE.MusicSound:SetSoundLevel(0)
 			GAMEMODE.MusicSound:Play()
-		else
+		elseif GAMEMODE.MusicSound and GAMEMODE.MusicSound:IsPlaying() then
 			GAMEMODE.MusicSound:FadeOut(3)
 		end
 	end)
@@ -114,6 +114,10 @@ local function TriggerEventDelayed(ent, time, func)
 		if !IsValid(ent) then return end
 		if func then func() end
 	end)
+end
+
+local function enemiesCountScale()
+	return math.Clamp(0.6+player.GetCount()*0.4, 1, 3)
 end
 
 -- Accept input
@@ -219,8 +223,8 @@ function hl2cAcceptInput(ent, input, activator)
 			SpawnCombines(true, true)
 			SpawnCombines(true, true)
 
-			for i=1,8 do
-				TriggerEventDelayed(ent, i*5, function()
+			for i=1,5*enemiesCountScale() do
+				TriggerEventDelayed(ent, i*9/enemiesCountScale(), function()
 					SpawnCombines(true, false)
 				end)
 			end
@@ -241,24 +245,24 @@ function hl2cAcceptInput(ent, input, activator)
 			ag.dontDIE = true
 			ag:Spawn()
 
-			for i=0,9 do
-				TriggerEventDelayed(ent, 5+i*8, function()
+			for i=0,9*enemiesCountScale() do
+				TriggerEventDelayed(ent, 5+(i*8/enemiesCountScale()), function()
 					SpawnCombines(true, i%2==1)
 				end)
 			end
 		end
 
 		if ent:GetName() == "lcs_al_moresoldiers02" and input:lower() == "start" then
-			for i=0,10 do
-				TriggerEventDelayed(ent, i*4, function()
+			for i=0,10*enemiesCountScale() do
+				TriggerEventDelayed(ent, i*4/enemiesCountScale(), function()
 					SpawnCombines(true, true)
 				end)
 			end
 		end
 
 		if ent:GetName() == "lcs_al_moresoldiers04" and input:lower() == "start" then
-			for i=0,20 do
-				TriggerEventDelayed(ent, i*3, function()
+			for i=0,15*enemiesCountScale() do
+				TriggerEventDelayed(ent, i*3/enemiesCountScale(), function()
 					SpawnCombines(true, true)
 				end)
 			end
@@ -323,3 +327,4 @@ hook.Add("DoPlayerDeath", "hl2cPlayerDeath", function(pl, attacker, dmginfo)
 		pl:PrintMessage(3, "Sorry, you cannot cheese this part.")
 	end
 end)
+

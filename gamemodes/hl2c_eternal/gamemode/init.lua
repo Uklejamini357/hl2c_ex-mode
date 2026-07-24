@@ -1797,7 +1797,7 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 	end
 
 	function dorestart()
-		if MAP_FORCE_CHANGELEVEL_ON_MAPRESTART then
+		if MAP_FORCE_CHANGELEVEL_ON_MAPRESTART and self:SetGameState(GAMESTATE_RESTARTING) then
 			if noplayerdatasave then self.DisableDataSave = true end
 			if self:HardcoreEnabled() then
 				RunConsoleCommand("changelevel", "d1_trainstation_01") -- ain't got anything else for it for now
