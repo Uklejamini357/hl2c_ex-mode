@@ -1,4 +1,4 @@
--- tbh this was just edit of weapon_medkit weapon for it to fit with the hl2c EX gamemode
+-- tbh this was just edit of weapon_medkit weapon for it to fit with the hl2ce gamemode
 AddCSLuaFile()
 
 SWEP.Base = "weapon_medkit"
@@ -391,11 +391,12 @@ end
 
 function SWEP:DrawHUD()
 	local pl = LocalPlayer()
+	if pl:InVehicle() then return end
 
 	local w,h = ScrW(), ScrH()
-	draw.SimpleText("LMB: Heal player or ally", "hl2ce_hudfont_small", w*0.98, h*0.85, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
-	draw.SimpleText("RMB: Revive a dead player", "hl2ce_hudfont_small", w*0.98, h*0.85+18, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
-	draw.SimpleText("Need 50% charges to revive!", "hl2ce_hudfont_small", w*0.98, h*0.85+36, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	draw.SimpleText(translate.Get("medkit_lmb"), "hl2ce_hudfont_small", w*0.98, h*0.85, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	draw.SimpleText(translate.Get("medkit_rmb"), "hl2ce_hudfont_small", w*0.98, h*0.85+18, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
+	draw.SimpleText(translate.Get("medkit_revive_tip"), "hl2ce_hudfont_small", w*0.98, h*0.85+36, Color(255,255,255,120), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
 
 	for ply,pos in pairs(GAMEMODE.DeadPlayersToRevive) do
 		local scr = pos:ToScreen()
@@ -405,8 +406,21 @@ function SWEP:DrawHUD()
 		local reviving = self:GetRevivingPlayer() == ply
 		local reviveperc = 100 * (CurTime() - self:GetReviveStartTime()) / (self:GetReviveEndTime() - self:GetReviveStartTime())
 
+		if !toofar then
+			local tr = util.TraceLine({
+				start = pl:GetPos() + pl:OBBCenter(),
+				endpos = pos,
+				filter = function(ent) return ent ~= pl and !ent:IsPlayer() and !ent:IsNPC() end
+			})
+
+			if tr.Hit then
+				toofar = true
+			end
+		end
+
+
 		draw.SimpleText(ply:Nick(), "hl2ce_hudfont", scr.x, scr.y-70, Color(255,0,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
-		draw.SimpleText(toofar and "Too far to revive!" or notenoughammo and "Not enough charges!" or reviving and "Reviving "..ply:Nick().." ("..math.Round(reviveperc).."%)" or "Hold RMB to revive a player!",
+		draw.SimpleText(toofar and translate.Get("medkit_too_far_to_revive") or notenoughammo and translate.Get("medkit_not_enough_charge") or reviving and translate.Format("medkit_reviving_x", ply:Nick(), reviveperc) or translate.Get("medkit_hold_to_revive"),
 		"hl2ce_hudfont_small", scr.x, scr.y+60, (toofar or notenoughammo) and Color(255,0,0,155) or reviving and Color(255,0,0,155):Lerp(Color(0,255,0,155), reviveperc/100) or Color(0,255,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 		surface.SetDrawColor(255,0,0,155)
 		surface.DrawLine(scr.x, scr.y-40, scr.x, scr.y+40)

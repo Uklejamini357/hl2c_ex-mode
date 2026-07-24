@@ -17,10 +17,29 @@ Maybe i should perhaps add separator function too, so that strings in here and i
 
 translate.AddLanguage("en", "English")
 
--- HUD
+-- HUD/UI
 LANG.health = "Health:"
 LANG.armor = "Armor:"
 LANG.time_spent = "Time spent: %s"
+LANG.press_a_key_to_restart = "Press a key to restart..."
+LANG.you_cant_respawn_hardcore = "You cannot respawn in this run! Enjoy the chaos..."
+LANG.you_are_being_revived_by_x = "You are being revived by %s! (%ss)"
+LANG.ally_can_revive_with_medkit = "A friendly player can revive you using their medkit."
+LANG.you_can_respawn_on_next_cpt = "You will respawn on the next checkpoint or on the next map."
+LANG.you_can_respawn_on_next_map = "You will respawn on the next map."
+
+LANG.hardcore_enabled = "Hardcore enabled!"
+
+LANG.medkit_lmb = "LMB: Heal player or ally"
+LANG.medkit_rmb = "RMB: Revive a dead player"
+LANG.medkit_revive_tip = "Need 50% charges to revive!"
+LANG.medkit_too_far_to_revive = "Too far to revive!"
+LANG.medkit_not_enough_charge = "Not enough charges!"
+LANG.medkit_reviving_x = "Reviving %s (%d%%)"
+LANG.medkit_hold_to_revive = "Hold RMB to revive a player!"
+
+LANG.x_xp_gained = "%s XP gained"
+LANG.x_xp_gained_total = "(%s XP gained total)"
 
 LANG.team = "TEAM"
 LANG.dead = "Dead"

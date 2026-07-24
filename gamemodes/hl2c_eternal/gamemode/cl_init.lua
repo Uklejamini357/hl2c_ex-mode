@@ -269,24 +269,24 @@ function GM:HUDPaint()
 		local restartMapCountdownLeft = math.ceil( restartMapCountdownStart + RESTART_MAP_TIME - CurTime() )
 		draw.SimpleTextOutlined(restartMapCountdownLeft > 0 and translate.Format("restarting_in_x", tostring(restartMapCountdownLeft)) or translate.Get("restarting_map"), "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
 	elseif SINGLEPLAYER_FAILMAP_STYLE and self:IsGameState(GAMESTATE_FAILED) and self.LastFailed+3 < CurTime() then
-		draw.SimpleTextOutlined("Press a key to restart...", "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
+		draw.SimpleTextOutlined(translate.Get("press_a_key_to_restart"), "roboto32BlackItalic", centerX, h - h * 0.075, Color( 255, 255, 255, 200 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 2, Color( 0, 0, 0, 255 ) )
 	end
 
 	if !game.SinglePlayer() and !pl:Alive() and self:GameStateIsRunning() then
-		draw.SimpleText("You are dead!", "hl2ce_hudfont_small", centerX, h * 0.075, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+		draw.SimpleText(translate.Get("you_are_dead"), "hl2ce_hudfont_small", centerX, h * 0.075, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 
 		if self:HardcoreEnabled() then
-			draw.SimpleText("You cannot respawn in this run! Enjoy the chaos...", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 0, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			draw.SimpleText(translate.Get("you_cant_respawn_hardcore"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 0, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 		elseif self.PlayerMedkitOnSpawn then
 			if self.BeingRevivedBy and IsValid(self.BeingRevivedBy) then
-				draw.SimpleText(Format("You are being revived by %s! (%ss)", self.BeingRevivedBy:Nick(), math.Round(self.ReviveEndTime - CurTime(), 1)), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(0, 255, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+				draw.SimpleText(translate.Format("you_are_being_revived_by_x", self.BeingRevivedBy:Nick(), math.Round(self.ReviveEndTime - CurTime(), 1)), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(0, 255, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 			else
-				draw.SimpleText("A friendly player can revive you using their medkit.", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+				draw.SimpleText(translate.Get("ally_can_revive_with_medkit"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 			end
 		elseif self.CheckpointRespawn then
-			draw.SimpleText("You will respawn on the next checkpoint or on the next map.", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			draw.SimpleText(translate.Get("you_can_respawn_on_next_cpt"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 		else
-			draw.SimpleText("You will respawn on the next map.", "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			draw.SimpleText(translate.Get("you_can_respawn_on_next_map"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 		end
 	end
 
@@ -314,14 +314,14 @@ function GM:PostDrawHUD()
 	cam.Start2D()
 	-- draw.SimpleText(self.Name.." "..self.Version, "hl2ce_hudfont_small", 5, 5, Color(255,255,192,25))
 	if self:HardcoreEnabled() then
-		draw.SimpleText("Hardcore enabled!", "hl2ce_hudfont_small", 5, 5, Color(255,0,0,150))
+		draw.SimpleText(translate.Get("hardcore_enabled"), "hl2ce_hudfont_small", 5, 5, Color(255,0,0,150))
 	end
 	surface.SetDrawColor(0, 0, 0, 0)
 
 	if hl2ce_cl_drawxpgaintext:GetBool() and XPColor > 0 then
-		draw.SimpleText(tostring(infmath.Round(XPGained, 2)).." XP gained", "hl2ce_hudfont", ScrW() / 2 + 15, (ScrH() / 2) + 15, Color(255,255,255,XPColor), 0, 1 )
+		draw.SimpleText(translate.Format("x_xp_gained", infmath.Round(XPGained, 2)), "hl2ce_hudfont", ScrW() / 2 + 15, (ScrH() / 2) + 15, Color(255,255,255,XPColor), 0, 1 )
 		if XPGainedTotal ~= XPGained then
-			draw.SimpleText("("..tostring(infmath.Round(XPGainedTotal, 2)).." XP gained total)", "hl2ce_hudfont_small", ScrW() / 2 + 15, (ScrH() / 2) + 30, Color(255,255,205,XPColor), 0, 1 )
+			draw.SimpleText(translate.Format("x_xp_gained_total", infmath.Round(XPGainedTotal, 2)), "hl2ce_hudfont_small", ScrW() / 2 + 15, (ScrH() / 2) + 30, Color(255,255,205,XPColor), 0, 1 )
 		end
 	else
 		XPGained = InfNumber(0)
@@ -452,7 +452,7 @@ function GM:InitPostEntity()
 
 	if !file.Exists(self.VaultFolder.."/client/shown_help.txt", "DATA") then
 		ShowHelp()
-		file.Write(self.VaultFolder.."/client/shown_help.txt", "You've viewed the help menu in Half-Life 2 Campaign.")
+		file.Write(self.VaultFolder.."/client/shown_help.txt", "absolutely no")
 	end
 
 	net.Start("hl2c_playerready")
