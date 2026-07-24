@@ -4,8 +4,8 @@ AddCSLuaFile()
 SWEP.Base = "weapon_medkit"
 SWEP.PrintName = "HL2c Medkit"
 SWEP.Author = "Uklejamini"
-SWEP.Purpose = "Heal people with your primary attack, or yourself with the secondary."
-SWEP.Instructions = "Effectiveness is increased by 2% per Medical skill point, max efficiency 120%. Remember, healing other players will give you 1/4 of health you heal!"
+SWEP.Purpose = "Heal other allies with your primary, or revive downed allies with secondary.\nRevived players are put back with 25% of their max health."
+SWEP.Instructions = "Primary: Heal ally.\nSecondary: Revive a dead player.\n\nNeed to have at least 50% charges to revive!\nEffectiveness is increased as your Medical skill level goes."
 
 SWEP.Slot = 5
 SWEP.SlotPos = 4
@@ -38,6 +38,8 @@ function SWEP:Initialize()
 	self:SetHoldType("slam")
 	
 	if CLIENT then
+		GAMEMODE.DeadPlayersToRevive = {}
+
 		local x,y = self:GetHealIconExpectedPos()
 		self.IconPosX = x
 		self.IconPosY = y
@@ -75,10 +77,8 @@ function SWEP:PrimaryAttack()
 		if SERVER then
 			ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + need))
 			if ent:IsPlayer() then
-				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.25))
 				owner:GiveXP(need * 0.35)
 			elseif ent:IsFriendlyNPC() then
-				owner:SetHealth(math.min(owner:GetMaxHealth(), owner:Health() + need * 0.25/2))
 				owner:GiveXP(need * 0.35/2)
 			end
 		end
@@ -139,6 +139,7 @@ function SWEP:RevivePlayer(pl)
 	pl:SetPos(pos)
 	pl:EmitSound("ambient/levels/labs/electric_explosion1.wav")
 	pl:EmitSound("items/suitchargeok1.wav")
+	self:GetOwner():GiveXP(7)
 
 	self:SetClip1(self:Clip1() - self:GetMaxAmmo()*0.5)
 
@@ -375,7 +376,7 @@ function SWEP:DrawHUD()
 		local reviveperc = 100 * (CurTime() - self:GetReviveStartTime()) / (self:GetReviveEndTime() - self:GetReviveStartTime())
 
 		draw.SimpleText(ply:Nick(), "hl2ce_hudfont", scr.x, scr.y-70, Color(255,0,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
-		draw.SimpleText(toofar and "Too far to revive!" or notenoughammo and "Not enough charge!" or reviving and "Reviving "..ply:Nick().." ("..math.Round(reviveperc).."%)" or "Hold RMB to revive a player!",
+		draw.SimpleText(toofar and "Too far to revive!" or notenoughammo and "Not enough charges!" or reviving and "Reviving "..ply:Nick().." ("..math.Round(reviveperc).."%)" or "Hold RMB to revive a player!",
 		"hl2ce_hudfont_small", scr.x, scr.y+60, (toofar or notenoughammo) and Color(255,0,0,155) or reviving and Color(255,0,0,155):Lerp(Color(0,255,0,155), reviveperc/100) or Color(0,255,0,155), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 		surface.SetDrawColor(255,0,0,155)
 		surface.DrawLine(scr.x, scr.y-40, scr.x, scr.y+40)
