@@ -132,6 +132,7 @@ function SWEP:RevivePlayer(pl)
 
 	local pos = pl.deathRevivePos
 	GAMEMODE.DeadPlayers[pl:SteamID()] = nil
+	local droppedwep = pl.droppedWeapon
 	pl:Spawn()
 	pl:SetHealth(pl:GetMaxHealth()*0.25)
 	pl.invulnerableTime = CurTime()
@@ -140,6 +141,14 @@ function SWEP:RevivePlayer(pl)
 	pl:EmitSound("ambient/levels/labs/electric_explosion1.wav")
 	pl:EmitSound("items/suitchargeok1.wav")
 	self:GetOwner():GiveXP(7)
+
+	if IsValid(droppedwep) and droppedwep:GetOwner() == NULL then
+		if pl:HasWeapon(droppedwep:GetClass()) then
+			droppedwep:Remove()
+		else
+			droppedwep:SetPos(pl:GetPos())
+		end
+	end
 
 	self:SetClip1(self:Clip1() - self:GetMaxAmmo()*0.5)
 

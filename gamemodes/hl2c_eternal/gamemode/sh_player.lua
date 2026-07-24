@@ -63,8 +63,6 @@ function meta:GetSkillAmount(stat)
 end
 
 function meta:HasPerkUnlocked(perk)
-	if GAMEMODE.SkillsDisabled then return false end
-
 	return self.UnlockedPerks[perk]
 end
 

@@ -530,6 +530,14 @@ GM.PerksData = {
 		PrestigeLevel = 3
 	},
 
+	["3_the_eterlasting_moment"] = {
+		Name = "The Everlasting Moment (NYI)",
+		DescriptionEndless = "Keep eternity upgrades permanently across sessions.",
+		Cost = 3,
+		PrestigeReq = 15,
+		PrestigeLevel = 3
+	},
+
 	["3_exponentially_cursed"] = {
 		Name = "Exponentially Cursed",
 		DescriptionEndless = "Your health and damage taken becomes logarithmed (min 0.01 damage taken)\nx100 to your health after logarithm (NYI)",
