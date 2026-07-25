@@ -25,6 +25,8 @@ LANG.you_are_being_revived_by_x = "You are being revived by %s! (%ss)"
 LANG.ally_can_revive_with_medkit = "A friendly player can revive you using their medkit."
 LANG.you_can_respawn_on_next_cpt = "You will respawn on the next checkpoint or on the next map."
 LANG.you_can_respawn_on_next_map = "You will respawn on the next map."
+LANG.you_can_respawn_now = "You can now respawn!"
+LANG.you_can_respawn_in_x = "You can respawn in %ss"
 
 LANG.hardcore_enabled = "Hardcore enabled!"
 

@@ -263,7 +263,9 @@ net.Receive("hl2ce_admin_changemap", function(len, ply)
 
     for _,tbl in pairs(GAMEMODE.ChaptersList) do
         if tbl.ID == str then
+            
             if map ~= "" then
+                if !file.Exists("maps/"..map..".bsp", "GAME") then ply:PrintMessage(3, "Are you kidding me?! This map isn't even found in the files!") return end
                 if table.HasValue(tbl.Maps, map) then
                     game.ConsoleCommand(string.format("changelevel %s\n", map))
                     print(string.format("%s is changing the map to %s (%s)!", ply:Nick(), map, tbl.Name))
@@ -272,6 +274,7 @@ net.Receive("hl2ce_admin_changemap", function(len, ply)
 
                 return
             end
+            if !file.Exists("maps/"..tbl.Map..".bsp", "GAME") then ply:PrintMessage(3, "Are you kidding me?! This map isn't even found in the files!") return end
 
             game.ConsoleCommand(string.format("changelevel %s\n", tbl.Map))
             print(string.format("%s is changing the map to %s (%s)!", ply:Nick(), tbl.Map, tbl.Name))

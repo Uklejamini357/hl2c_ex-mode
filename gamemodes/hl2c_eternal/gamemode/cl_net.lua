@@ -118,7 +118,9 @@ net.Receive("hl2ce_fail", function(len)
     GAMEMODE.UITextFailed2 = failtext
     failtext:SetFont("hl2ce_font")
     failtext:SetTextColor(Color(220,100,100))
-    failtext:SetSize(x, y)
+    failtext:SetSize(math.min(ScrW(), x), y*math.ceil(x/ScrW()))
+    failtext:SetAutoStretchVertical(true)
+    failtext:SetWrap(true)
     failtext:Center()
     failtext:CenterVertical(0.65)
 
@@ -126,11 +128,15 @@ net.Receive("hl2ce_fail", function(len)
     -- local 
     failtext.Think = function(self)
         if self.NoMoreUpdate then return end
-        local str = sub(s2, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10)))))
+        local max = math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10))))
+        local str = sub(s2, 1, max)
         if str == self:GetText() then return end
         self:SetText(str)
         surface.PlaySound("buttons/lightswitch2.wav")
-        -- self.NoMoreUpdate = true
+
+        if len == max then
+            self.NoMoreUpdate = true
+        end
     end
 
     failtext:AlphaTo(0, 1, time, function(_, self)
@@ -156,6 +162,10 @@ net.Receive("hl2ce_playerkilled", function(len)
     local pl = net.ReadEntity()
     local attacker = net.ReadEntity()
     local me = LocalPlayer()
+
+    if pl == me then
+        GAMEMODE.LastDeath = CurTime()
+    end
 
     if !GetConVar("hl2ce_cl_noplrdeathsound"):GetBool() then
         local model = string.lower(pl:GetModel())

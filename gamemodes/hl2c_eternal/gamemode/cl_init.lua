@@ -277,6 +277,12 @@ function GM:HUDPaint()
 
 		if self:HardcoreEnabled() then
 			draw.SimpleText(translate.Get("you_cant_respawn_hardcore"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 0, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+		elseif self:CanPlayerRespawn() then
+			if self.LastDeath and self.LastDeath+self.RespawnTimer < CurTime() then
+				draw.SimpleText(translate.Get("you_can_respawn_now"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(155, 255, 155, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			else
+				draw.SimpleText(translate.Format("you_can_respawn_in_x", math.Round(self.LastDeath+self.RespawnTimer-CurTime(), 1)), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+			end
 		elseif self.PlayerMedkitOnSpawn then
 			if self.BeingRevivedBy and IsValid(self.BeingRevivedBy) then
 				draw.SimpleText(translate.Format("you_are_being_revived_by_x", self.BeingRevivedBy:Nick(), math.Round(self.ReviveEndTime - CurTime(), 1)), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(0, 255, 0, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )

@@ -47,6 +47,7 @@ function HL2cEX_NPCVariantSpawn(ent)
 	hook.Run("PreApplyNPCVariant", ent)
 	if FORCE_NPCVARIANT then
 		ent.VariantType = FORCE_NPCVARIANT
+		ent.VariantTypeForced = true
 		FORCE_NPCVARIANT = nil
 	elseif not ent.VariantType then
 		ent.VariantType = math.random(1,2)
@@ -311,6 +312,7 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 	hook.Run("PreApplyNPCVariant", ent, class)
 	if FORCE_NPCVARIANT then
 		ent.VariantType = FORCE_NPCVARIANT
+		ent.VariantTypeForced = true
 		FORCE_NPCVARIANT = nil
 	elseif not ent.VariantType then
 		ent.VariantType = math.random(3)
@@ -357,7 +359,7 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 			end
 		end)
 
-		if ent.VariantType == 2 and math.random(3) == 1 then -- i find the tanky variant very annoying to deal with
+		if !ent.VariantTypeForced and ent.VariantType == 2 and math.random(3) == 1 then -- i find the tanky variant very annoying to deal with
 			ent.VariantType = 1
 		end
 

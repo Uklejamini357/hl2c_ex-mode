@@ -117,7 +117,7 @@ local function TriggerEventDelayed(ent, time, func)
 end
 
 local function enemiesCountScale()
-	return math.Clamp(0.6+player.GetCount()*0.4, 1, 3)
+	return 5--math.Clamp(0.6+player.GetCount()*0.4, 1, 3)
 end
 
 -- Accept input

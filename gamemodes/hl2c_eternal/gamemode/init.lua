@@ -212,6 +212,54 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	)))
 end
 
+function GM:PlayerSilentDeath(pl)
+	pl.NextSpawnTime = CurTime() + self.RespawnTimer
+	pl.DeathTime = CurTime()
+end
+
+function GM:PlayerDeath(ply, inflictor, attacker)
+	ply.NextSpawnTime = CurTime() + self.RespawnTimer
+	ply.DeathTime = CurTime()
+
+	if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then attacker = ply end
+	if IsValid(attacker) && attacker:IsVehicle() and IsValid(attacker:GetDriver()) then
+		attacker = attacker:GetDriver()
+	end
+
+	if !IsValid(inflictor) and IsValid(attacker) then
+		inflictor = attacker
+	end
+
+	-- Convert the inflictor to the weapon that they're holding if we can.
+	-- This can be right or wrong with NPCs since combine can be holding a
+	-- pistol but kill you by hitting you with their arm.
+	if IsValid(inflictor) and inflictor == attacker and (inflictor:IsPlayer() or inflictor:IsNPC()) then
+		inflictor = inflictor:GetActiveWeapon()
+		if !IsValid(inflictor) then inflictor = attacker end
+	end
+
+	player_manager.RunClass(ply, "Death", inflictor, attacker)
+
+	if attacker == ply then
+		self:SendDeathNotice(nil, "suicide", ply, 0)
+		MsgAll(attacker:Nick().." suicided!\n")
+		return
+	end
+
+	if attacker:IsPlayer() then
+		self:SendDeathNotice(attacker, inflictor:GetClass(), ply, 0)
+		MsgAll(attacker:Nick().." killed "..ply:Nick().." using "..inflictor:GetClass().."\n")
+		return
+	end
+
+	if !IsValid(attacker) then attacker = game.GetWorld() end
+	if !IsValid(inflictor) then inflictor = attacker end
+
+	local flags = 0
+	if attacker:IsNPC() and attacker:Disposition(ply) == D_LI then flags = flags + DEATH_NOTICE_FRIENDLY_ATTACKER end
+	self:SendDeathNotice( self:GetDeathNoticeEntityName( attacker ), inflictor:GetClass(), ply, flags )
+	MsgAll(ply:Nick().." was killed by "..attacker:GetClass().."\n")
+end
 
 -- Called when the player is waiting to spawn
 function GM:PlayerDeathThink(ply)

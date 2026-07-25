@@ -27,41 +27,64 @@ end, "hl2c_admin_physgun")
 GM.AdminNoclip = CreateConVar("hl2c_admin_noclip", ADMIN_NOCLIP, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_admin_noclip", function(convar, old, new)
 	GAMEMODE.AdminNoclip = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.AdminNoclip = %s]], GAMEMODE.AdminNoclip))
 end, "hl2c_admin_noclip")
 
 GM.ForceGamerules = CreateConVar("hl2c_server_force_gamerules", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_force_gamerules", function(convar, old, new)
 	GAMEMODE.ForceGamerules = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.ForceGamerules = %s]], GAMEMODE.ForceGamerules))
 end, "hl2c_server_force_gamerules")
 
 GM.CustomPMs = CreateConVar("hl2c_server_custom_playermodels", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_custom_playermodels", function(convar, old, new)
 	GAMEMODE.CustomPMs = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.CustomPMs = %s]], GAMEMODE.CustomPMs))
 end, "hl2c_server_custom_playermodels")
 
 GM.CheckpointRespawn = CreateConVar("hl2c_server_checkpoint_respawn", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_checkpoint_respawn", function(convar, old, new)
 	GAMEMODE.CheckpointRespawn = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.CheckpointRespawn = %s]], GAMEMODE.CheckpointRespawn))
 end, "hl2c_server_checkpoint_respawn")
 
 GM.DynamicSkillLevel = CreateConVar("hl2c_server_dynamic_skill_level", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_dynamic_skill_level", function(convar, old, new)
 	GAMEMODE.DynamicSkillLevel = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.DynamicSkillLevel = %s]], GAMEMODE.DynamicSkillLevel))
 end, "hl2c_server_dynamic_skill_level")
 
 GM.LagCompensation = CreateConVar("hl2c_server_lag_compensation", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_lag_compensation", function(convar, old, new)
 	GAMEMODE.LagCompensation = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.LagCompensation = %s]], GAMEMODE.LagCompensation))
 end, "hl2c_server_lag_compensation")
 
 GM.PlayerRespawning = CreateConVar("hl2c_server_player_respawning", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_player_respawning", function(convar, old, new)
 	GAMEMODE.PlayerRespawning = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.PlayerRespawning = %s]], GAMEMODE.PlayerRespawning))
 end, "hl2c_server_player_respawning")
+
+GM.RespawnTimer = CreateConVar("hl2c_server_player_respawntimer", 3, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetFloat()
+cvars.AddChangeCallback("hl2c_server_player_respawntimer", function(convar, old, new)
+	GAMEMODE.RespawnTimer = tonumber(new)
+
+	BroadcastLua(string.format([[GAMEMODE.RespawnTimer = %s]], GAMEMODE.RespawnTimer))
+end, "hl2c_server_player_respawntimer")
 
 GM.JeepPassengerSeat = CreateConVar("hl2c_server_jeep_passenger_seat", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2c_server_jeep_passenger_seat", function(convar, old, new)
 	GAMEMODE.JeepPassengerSeat = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.JeepPassengerSeat = %s]], GAMEMODE.JeepPassengerSeat))
 end, "hl2c_server_jeep_passenger_seat")
 
 
@@ -89,16 +112,22 @@ end, "hl2ce_server_hardcore_mode_enabled")
 GM.ForceDifficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE):GetString()
 cvars.AddChangeCallback("hl2ce_server_force_difficulty", function(convar, old, new)
 	GAMEMODE.ForceDifficulty = new
+
+	BroadcastLua(string.format([[GAMEMODE.ForceDifficulty = %s]], GAMEMODE.ForceDifficulty))
 end, "hl2ce_server_force_difficulty")
 
 GM.SkillsDisabled = CreateConVar("hl2ce_server_skills_disabled", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetBool()
 cvars.AddChangeCallback("hl2ce_server_skills_disabled", function(convar, old, new)
 	GAMEMODE.SkillsDisabled = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.SkillsDisabled = %s]], GAMEMODE.SkillsDisabled))
 end, "hl2ce_server_skills_disabled")
 
 GM.PlayerMedkitOnSpawn = CreateConVar("hl2ce_server_player_medkit", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE, "Give medkits for players on spawn"):GetBool()
 cvars.AddChangeCallback("hl2ce_server_player_medkit", function(convar, old, new)
 	GAMEMODE.PlayerMedkitOnSpawn = tobool(new)
+
+	BroadcastLua(string.format([[GAMEMODE.PlayerMedkitOnSpawn = %s]], GAMEMODE.PlayerMedkitOnSpawn))
 
 	if SERVER then
 		if GAMEMODE.PlayerMedkitOnSpawn then
@@ -151,6 +180,8 @@ GM.BHopEnabled = CreateConVar("hl2ce_server_bhop_enable", 0, FCVAR_REPLICATED + 
 cvars.AddChangeCallback("hl2ce_server_bhop_enable", function(convar, old, new)
 	GAMEMODE.BHopEnabled = tobool(new)
 
+	BroadcastLua(string.format([[GAMEMODE.BHopEnabled = %s]], GAMEMODE.BHopEnabled))
+
 	callback()
 end, "hl2ce_server_bhop_enable")
 
@@ -161,4 +192,6 @@ end
 GM.EnemyNPCHealthMul = CreateConVar("hl2ce_server_npchpmul", 1, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE):GetFloat()
 cvars.AddChangeCallback("hl2ce_server_npchpmul", function(convar, old, new)
 	GAMEMODE.EnemyNPCHealthMul = tonumber(new)
+
+	BroadcastLua(string.format([[GAMEMODE.EnemyNPCHealthMul = %s]], GAMEMODE.EnemyNPCHealthMul))
 end, "hl2ce_server_npchpmul")
