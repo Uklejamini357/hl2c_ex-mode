@@ -24,3 +24,13 @@ function hl2cMapEdit()
 	ents.FindByName("player_spawn_template")[1]:Remove()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
+
+-- Initialize entities
+function hl2cAcceptInput(ent, input)
+	if !game.SinglePlayer() then
+		if ent:GetName() == "nogoingback_clipbrush" and input:lower() == "enable" then
+			return true
+		end
+	end
+end
+hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

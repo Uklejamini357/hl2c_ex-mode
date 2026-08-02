@@ -1091,9 +1091,9 @@ concommand.Add("hl2ce_next_map", function(ply)
 		return
 	end
 
-	if self:IsGameState(GAMESTATE_COMPLETED) then
+	if GAMEMODE:IsGameState(GAMESTATE_COMPLETED) then
 		timer.Remove("hl2c_next_map")
-		self:GrabAndSwitch(true)
+		GAMEMODE:GrabAndSwitch(true)
 	else
 		hook.Run("NextMap", true)
 	end
@@ -1630,23 +1630,25 @@ end
 
 -- Called by GM:PlayerSpawn
 function GM:PlayerLoadout(ply)
-	if ply.lastWeapons then
-		for class, w in pairs(ply.lastWeapons) do
-			local wep = ply:Give(class, true)
-			wep:SetClip1(w[1] or wep:Clip1())
-			wep:SetClip2(w[2] or wep:Clip2())
+	if ply.justRevived then
+		if ply.lastWeapons then
+			for class, w in pairs(ply.lastWeapons) do
+				local wep = ply:Give(class, true)
+				wep:SetClip1(w[1] or wep:Clip1())
+				wep:SetClip2(w[2] or wep:Clip2())
+			end
+			ply.lastWeapons = nil
 		end
-		ply.lastWeapons = nil
-	end
-	if ply.lastAmmo then
-		for id,count in pairs(ply.lastAmmo) do
-			ply:SetAmmo(count, id)
+		if ply.lastAmmo then
+			for id,count in pairs(ply.lastAmmo) do
+				ply:SetAmmo(count, id)
+			end
+			ply.lastAmmo = nil
 		end
-		ply.lastAmmo = nil
-	end
-	if ply.lastSelectedWeapon then
-		ply:SelectWeapon(ply.lastSelectedWeapon)
-		ply.lastSelectedWeapon = nil
+		if ply.lastSelectedWeapon then
+			ply:SelectWeapon(ply.lastSelectedWeapon)
+			ply.lastSelectedWeapon = nil
+		end
 	end
 
 	if (ply.info && ply.info.loadout) then
@@ -2234,7 +2236,7 @@ end
 function GM:Tick()
 	for _,pl in player.Iterator() do
 		for ent,dmg in pairs(pl.DamagedEntsTick or {}) do
-			if ent.m_PrevHP ~= ent:Health() then
+			if IsValid(ent) and ent.m_PrevHP ~= ent:Health() then
 				pcall(function()
 					self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
 				end)

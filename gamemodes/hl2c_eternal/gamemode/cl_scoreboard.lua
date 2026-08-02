@@ -61,12 +61,7 @@ function PANEL:UpdateScoreboard( force )
 	if !force and !self:IsVisible() then return end
 	self.hostnameLabel:SetText(GetHostName().." ("..GAMEMODE.Name.." ["..GAMEMODE.Version.."])")
 
-	local numPlayers = player.GetCount()
-	if numPlayers == 1 then
-		self.numPlayersLabel:SetText("1 Player")
-	else
-		self.numPlayersLabel:SetText(numPlayers.." Players")
-	end
+	self.numPlayersLabel:SetText(Format("%d/%d Players", player.GetCount(), game.MaxPlayers()))
 
 	self:InvalidateLayout()
 	self.playerList:UpdatePlayerList()

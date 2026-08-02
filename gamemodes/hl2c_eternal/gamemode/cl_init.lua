@@ -280,7 +280,7 @@ function GM:HUDPaint()
 		elseif self:CanPlayerRespawn() then
 			if self.LastDeath and self.LastDeath+self.RespawnTimer < CurTime() then
 				draw.SimpleText(translate.Get("you_can_respawn_now"), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(155, 255, 155, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
-			else
+			elseif self.LastDeath then
 				draw.SimpleText(translate.Format("you_can_respawn_in_x", math.Round(self.LastDeath+self.RespawnTimer-CurTime(), 1)), "hl2ce_hudfont_small", centerX, h * 0.075 + 20, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
 			end
 		elseif self.PlayerMedkitOnSpawn then

@@ -108,7 +108,11 @@ function SWEP:SecondaryAttack()
 	if !SERVER then return end
 	if GAMEMODE:HardcoreEnabled() then return end
 	if IsValid(self:GetRevivingPlayer()) then return end
-	if self:Clip1() < self:GetMaxAmmo()*0.5 then return end
+	if self:Clip1() < self:GetMaxAmmo()*0.5 then
+		owner:EmitSound(DenySound)
+		self:SetNextSecondaryFire(CurTime() + 0.5)
+		return true
+	end
 
 	local tbl = {}
 	for _,pl in player.Iterator() do
@@ -142,8 +146,10 @@ function SWEP:RevivePlayer(pl)
 	local pos = pl.deathRevivePos
 	GAMEMODE.DeadPlayers[pl:SteamID()] = nil
 	local droppedwep = pl.droppedWeapon
+	pl.justRevived = true
 	pl:Spawn()
 	pl:SetHealth(pl:GetMaxHealth()*0.25)
+	pl.justRevived = nil
 	pl.invulnerableTime = CurTime()
 	pl:SetPos(pos)
 	pl:EmitSound("ambient/levels/labs/electric_explosion1.wav")
