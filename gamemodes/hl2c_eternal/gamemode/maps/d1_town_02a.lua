@@ -98,6 +98,10 @@ function hl2cAcceptInput(ent, input)
 		-- end
 
 		if entname == "graveyard_monk_scene_b4" and inputlower == "start" then
+			local monk = ents.FindByName("monk")[1]
+			monk.allowDIE = nil
+
+
 			for i=1,10 do
 				SpawnNPC("npc_poisonzombie", Vector(-7960+(i-1)*40, 1024, -3400), Angle(0, -90, 0), function(ent)
 					ent:SetHealth(2^128)

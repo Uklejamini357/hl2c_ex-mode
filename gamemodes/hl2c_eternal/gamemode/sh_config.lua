@@ -285,7 +285,7 @@ GM.PerksData = {
 	["1_difficult_decision"] = {
 		Name = "Difficult Decision",
 		Description = "+25% personal difficulty (Functions same as difficulty, but only affects you, ignores the difficulty cap.)\nDoesn't work yet",
-		DescriptionEndless = "+75% difficulty gain on NPC kill, increases xp gain by 10%",
+		DescriptionEndless = "+95% difficulty gain on NPC kill, increases xp gain by 10%",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 1
@@ -458,7 +458,7 @@ GM.PerksData = {
 	-- Celestial Perks
 	["3_celestial"] = {
 		Name = "Celestial.",
-		DescriptionEndless = "OP Perks: +320 health, +80 armor, x1.6 damage dealt, 1.7x damage resistance, 1.4x xp gain",
+		DescriptionEndless = "+320 health, +80 armor, x1.6 damage dealt, 1.7x damage resistance, 1.4x xp gain\nBoosts Difficulty gain mult. based on your unlocked perks.",
 		Cost = 1,
 		PrestigeReq = 1,
 		PrestigeLevel = 3
@@ -466,7 +466,7 @@ GM.PerksData = {
 
 	["3_prestige_improver"] = {
 		Name = "Prestige Improver III",
-		DescriptionEndless = " (NYI)",
+		DescriptionEndless = "On prestige reset, start with 50 levels on each skill and keep 40% of your xp.\nMax prestige is no longer capped, however prestige gain from a single prestige is greatly nerfed if you are above 200+ prestige. Perks no longer cost Prestige points.\nGain more eternity based on current prestige amount. Eternity perks are automatically unlocked once you reach enough Eternity/Eternity Points.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,
@@ -474,7 +474,7 @@ GM.PerksData = {
 
 	["3_extremility"] = {
 		Name = "Extremility",
-		DescriptionEndless = "^0.9 to the effective difficulty.\nEffective difficulty affects only damage dealt to, and taken by NPC's.",
+		DescriptionEndless = "^0.9 to the effective difficulty.\nEffective difficulty affects only damage dealt to, and taken by NPC's.\n\n+3 eternity points on Celestiality reset.\n",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,
@@ -482,7 +482,7 @@ GM.PerksData = {
 
 	["3_medkit_enhancer"] = {
 		Name = "Medkit Enhancer",
-		DescriptionEndless = "Medkits you pick up refill additional +100hp and 20% of your health",
+		DescriptionEndless = "Medkits you pick up refill additional +100hp and 20% of your health.\nYou can overheal other players by up to 30% of their max health with your medkit.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,
@@ -491,7 +491,7 @@ GM.PerksData = {
 
 	["3_uno_reverse"] = {
 		Name = "Uno Reverse",
-		DescriptionEndless = "10% chance to deflect all the damage taken to the attacker and quadruples it\n(<75% health needed for this to work, the lower hp the better chance).\nAlso recovers 25% health upon activation. Chance divides by 1.1 each time this ability is activated. This perk becomes weaker on 1M% difficulty and higher.",
+		DescriptionEndless = "10% chance to deflect all the damage taken to the attacker and quadruples it\n(<75% health needed for this to work, the lower hp the better chance).\nAlso recovers 25% health upon activation. Chance divides by 1.1 each time this ability is activated.\nThis perk becomes weaker on 100K% difficulty and higher.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,
@@ -500,7 +500,7 @@ GM.PerksData = {
 
 	["3_difficult_decision"] = {
 		Name = "Mega Difficult Decision",
-		DescriptionEndless = "Increases difficulty gain from NPC kills by x log10(difficulty)*2.5\n1.25x xp gain",
+		DescriptionEndless = "Increases difficulty gain from NPC kills by x log10(difficulty)*2.5\nPrestige and Eternity count grant a significant boost to difficulty gain mult.\n1.25x xp gain",
 		Cost = 1,
 		PrestigeReq = 3,
 		PrestigeLevel = 3
@@ -516,7 +516,7 @@ GM.PerksData = {
 
 	["3_ultra_tough"] = {
 		Name = "Ultra Tough",
-		DescriptionEndless = "+6125 health",
+		DescriptionEndless = "+3120 health. +10 health for each prestige.\nDamage mult. is based on log75 of your health.",
 		Cost = 2,
 		PrestigeReq = 4,
 		PrestigeLevel = 3
@@ -524,7 +524,7 @@ GM.PerksData = {
 
 	["3_vampiric_killer"] = {
 		Name = "Vampiric Killer III",
-		DescriptionEndless = "Upgrades health gained from enemies. Damaging enemies will restore your health equal to the amount of damage inflict.",
+		DescriptionEndless = "Upgrades lifesteal perk. Damaging enemies will restore your health equal to the amount of damage inflict.\nKilling enemies will restore 5% of your max health. Restored health can also go past max health, at maximum 150% of your max health.",
 		Cost = 1,
 		PrestigeReq = 5,
 		PrestigeLevel = 3
@@ -532,7 +532,7 @@ GM.PerksData = {
 
 	["3_eternal_will"] = {
 		Name = "Eternal Will",
-		DescriptionEndless = "Unlocks a new eternity upgrade. Moneys gain are boosted by ^1.5\nDifficulty gain mult. is multiplied by 10x under 500K% difficulty, slowly goes off as you approach the difficulty.",
+		DescriptionEndless = "Unlocks a new eternity upgrade. Moneys gain are boosted by ^1.5\nDifficulty gain mult. is multiplied by 10x under 500K% difficulty.",
 		Cost = 2,
 		PrestigeReq = 7,
 		PrestigeLevel = 3
@@ -548,41 +548,41 @@ GM.PerksData = {
 
 	["3_exploding_bullets"] = {
 		Name = "Exploding Bullets",
-		DescriptionEndless = "Has 5% chance for the shot bullet to be explosive.\nExplosive bullets have 100 blast radius and 20 base explosion damage.\nExplosion damage gets better the more damage the bullet does.",
+		DescriptionEndless = "Has 10% chance for the shot bullet to be explosive.\nExplosive bullets have 100 blast radius and 20 base explosion damage.\nExplosion damage gets better the more damage the bullet does.",
 		Cost = 3,
 		PrestigeReq = 10,
 		PrestigeLevel = 3
 	},
 
 	["3_the_eterlasting_moment"] = {
-		Name = "The Everlasting Moment (NYI)",
+		Name = "The Everlasting Moment",
 		DescriptionEndless = "Keep eternity upgrades permanently across sessions. ^1.05 to difficulty gain mult.",
 		Cost = 3,
-		PrestigeReq = 15,
+		PrestigeReq = 12,
 		PrestigeLevel = 3
 	},
 
 	["3_armor_steal"] = {
 		Name = "Armor Steal",
 		DescriptionEndless = "Kills restore 15% of your armor. Picking up batteries will restore 500 + 35% of your armor",
-		Cost = 8,
-		PrestigeReq = 22,
+		Cost = 5,
+		PrestigeReq = 17,
 		PrestigeLevel = 3
 	},
 
 	["3_eternal_enhancer"] = {
 		Name = "Eternal Enhnacer",
-		DescriptionEndless = "All Prestige and Eternity perks have max damage and damage resistance bonus.",
-		Cost = 15,
-		PrestigeReq = 35,
+		DescriptionEndless = "All Prestige and Eternity perks have max damage and damage resistance bonus.\nCelestiality reset no longer resets pre-celestiality perks.",
+		Cost = 7,
+		PrestigeReq = 20,
 		PrestigeLevel = 3
 	},
 
 	["3_highly_enhanced_organism"] = {
 		Name = "Highly-Enhanced Organism",
-		DescriptionEndless = "+10K health. Your health is multiplied based on the amount of perks you have unlocked.",
-		Cost = 2,
-		PrestigeReq = 4,
+		DescriptionEndless = "+10K health. Your health is multiplied based on the amount of perks you have unlocked.\n",
+		Cost = 15,
+		PrestigeReq = 35,
 		PrestigeLevel = 3
 	},
 

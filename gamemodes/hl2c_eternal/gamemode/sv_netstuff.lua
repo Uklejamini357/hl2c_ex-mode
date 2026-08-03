@@ -129,7 +129,7 @@ net.Receive("hl2ce_unlockperk", function(len, ply)
     local plyprestige = infmath.ConvertInfNumberToNormalNumber(ply[prestigetypepoints])
 
     if infmath.ConvertInfNumberToNormalNumber(ply[prestigetype]) < prestigereq then
-        ply:PrintTranslatedMessage(3, "perk_noprestige")
+        ply:PrintTranslatedMessage(3, "perk_noprestige", prestigetype)
         return
     end
 
@@ -290,9 +290,11 @@ net.Receive("hl2ce_admin_completemaptest", function(len, ply)
 
     local GM = GAMEMODE
     GM.MapCompleteTest = true
-    gamemode.Call("RestartMap", 0.01)
     gamemode.Call("CompleteMap", ply)
+    ply:SetTeam(TEAM_ALIVE)
     timer.Remove("hl2c_next_map")
+    BroadcastLua([[nextMapCountdownStart = nil]])
+    gamemode.Call("RestartMap", 0)
 end)
 
 net.Receive("hl2ce_admin_forcefailmap", function(len, ply)

@@ -15,10 +15,10 @@ include("sh_pets.lua")
 local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficulty", 0, FCVAR_REPLICATED + FCVAR_ARCHIVE, "Forced difficulty.")
 
 -- General gamemode information
-GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
+GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition (or is it... hl2c: infinity simulator?)
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{10^100}inf" -- STOP!!!! (no)
+GM.Version = "0.inf{G64}inf" -- STOP!!!! (no)
 GM.DateVer = "03-08-2026"
 
 -- even crazier things inbound... beware!

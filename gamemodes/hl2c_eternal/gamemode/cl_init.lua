@@ -688,12 +688,11 @@ function ShowHelp()
 		end
 	end)
 
-	local list = vgui.Create("DPanelList", helpMenu) -- i ain't using other panels, despite this one being deprecated.
+	local list = vgui.Create("DScrollPanel", helpMenu) -- i ain't using other panels, despite this one being deprecated.
 	list:SetSize(1000, 700)
-	list:SetSpacing(12)
+	-- list:SetSpacing(12)
 	list:Center()
 	list.Paint = function() end
-	list:EnableVerticalScrollbar()
 
 
 	local text = vgui.Create("DLabel", list)
@@ -703,9 +702,10 @@ This gamemode is based on Half-Life 2 Campaign made by Jai 'Choccy' Fox!
 Expanded by Uklejamini]])
 	text:SetTextColor(Color(255,255,255))
 	text:SetContentAlignment(5)
-	text:SizeToContents()
+	text:Dock(TOP)
+	text:DockMargin(0,10,0,5)
 	text:SetWrap(true)
-	list:AddItem(text)
+	text:SetAutoStretchVertical(true)
 
 	local text = vgui.Create("DLabel", list)
 	text:SetText([[-= KEYBOARD SHORTCUTS =-
@@ -715,29 +715,33 @@ Expanded by Uklejamini]])
 [F4] (Spare 2) - Removes a vehicle if you have one.]])
 	text:SetTextColor(Color(255,255,155))
 	text:SetContentAlignment(5)
-	text:SizeToContents()
+	text:Dock(TOP)
+	text:DockMargin(0,10,0,5)
 	text:SetWrap(true)
-	list:AddItem(text)
+	text:SetAutoStretchVertical(true)
 
 	local text = vgui.Create("DLabel", list)
 	text:SetText([[-= OTHER NOTES =-
 Once you're dead you cannot respawn until the next map.]])
 	text:SetTextColor(Color(155,155,255))
 	text:SetContentAlignment(5)
-	text:SizeToContents()
+	text:Dock(TOP)
+	text:DockMargin(0,10,0,5)
 	text:SetWrap(true)
-	list:AddItem(text)
+	text:SetAutoStretchVertical(true)
 
 	local text = vgui.Create("DLabel", list)
-	text:SetText([[While this gamemode is still unfinished, I had a lot of fun in the process of coding and playing it.
+	text:SetText([[While this gamemode is still unfinished, I had a lot of fun in the process of playingtesting it. Although I can't always get to fix bugs if i don't know them :/
 If there are lua errors or bugs, please do report them on the addon page.
+Be aware this gamemode could be heavily unbalanced!
 
-Anyway, enjoy the craziness if you are playing on EX mode :)]])
+Anyway, enjoy the craziness if you are playing on EX mode]])
 	text:SetTextColor(Color(145,196,208))
 	text:SetContentAlignment(5)
-	text:SizeToContents()
+	text:Dock(TOP)
+	text:DockMargin(0,10,0,5)
 	text:SetWrap(true)
-	list:AddItem(text)
+	text:SetAutoStretchVertical(true)
 
 	if pl:IsAdmin() then
 		local text = vgui.Create("DLabel", list)
@@ -747,9 +751,10 @@ Holding ALT then pressing the spawnmenu (Q) key will open up the spawnmenu, othe
 Also, holding ALT then pressing the context menu (C) key will open up the contextmenu.]])
 		text:SetTextColor(Color(155,255,255))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
 		text:SetWrap(true)
-		list:AddItem(text)
+		text:SetAutoStretchVertical(true)
 	end
 
 	if GAMEMODE.EnableHardcoreMode then
@@ -757,18 +762,20 @@ Also, holding ALT then pressing the context menu (C) key will open up the contex
 		text:SetText([[Hardcore Mode has been enabled. You only have one life per run! Play carefully...]])
 		text:SetColor(Color(255,0,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
 		text:SetWrap(true)
-		list:AddItem(text)
+		text:SetAutoStretchVertical(true)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[Hardcore Mode adds a new way of playing Half-Life 2 by restricting you to only having one life per run.
 This is similar to Roguelite/Roguelike games and Hardcore minecraft!]])
 		text:SetColor(Color(255,110,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[---- Rules of the run ----
@@ -779,17 +786,19 @@ Dead players can still spectate.
 Connecting players are given 30 seconds to load in order to catch up before the run is failable by the lack of alive players.]])
 		text:SetColor(Color(255,170,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[As usual, this is in beta stage. Some things may not work correctly.]])
 		text:SetColor(Color(255,140,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 	end
 
 	if GAMEMODE.EXMode then
@@ -797,17 +806,19 @@ Connecting players are given 30 seconds to load in order to catch up before the 
 		text:SetText([[EX Mode has been enabled. Good luck.]])
 		text:SetColor(Color(255,0,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText("What is EX Mode?")
 		text:SetColor(Color(255,160,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[EX mode is a (not so) new mode added in Hl2c Eternal.
@@ -815,9 +826,10 @@ In this new mode, you should expect new map gimnicks, various npc variants, and 
 Experience Half-Life 2 in a new, and twisted way!]])
 		text:SetColor(Color(255,110,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 	end
 
 	if GAMEMODE.HyperEXMode then
@@ -825,26 +837,29 @@ Experience Half-Life 2 in a new, and twisted way!]])
 		text:SetText([[HyperEXMode engaged. WTF IS WRONG WITH YOU?!]])
 		text:SetColor(Color(255,0,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[HyperEX mode is one of the sequels to the EX mode.
 It's much more insane than the regular EX mode.]])
 		text:SetColor(Color(255,110,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 
 		local text = vgui.Create("DLabel", list)
 		text:SetText([[OH MY GOD WE'RE DOOMED!!!!!!]])
 		text:SetColor(Color(190,0,0))
 		text:SetContentAlignment(5)
-		text:SizeToContents()
+		text:Dock(TOP)
+		text:DockMargin(0,10,0,5)
+		text:SetAutoStretchVertical(true)
 		text:SetWrap(true)
-		list:AddItem(text)
 	end
 
 end
@@ -1130,3 +1145,21 @@ function GM:OnContextMenuClose()
 end
 
 
+-- maybe another time
+-- timer.Create("updateSteamRPC", 20, 0, function()
+-- 	local pl = LocalPlayer()
+-- 	local str = "HL2cE ("..game.GetMap()..") | "..FormatNumber(pl.XP).." XP | "
+
+-- 	str = str.." Level "..tostring(pl.Level).." | "
+-- 	if pl:HasCelestialityUnlocked() then
+-- 		str = str.."Celestiality "..tostring(pl.Celestiality).." (Prestige Tier 3)"
+-- 	elseif pl:HasEternityUnlocked() then
+-- 		str = str.."Eternity "..tostring(pl.Eternity).." (Prestige Tier 2)"
+-- 	elseif pl:HasPrestigeUnlocked() then
+-- 		str = str.."Prestige "..tostring(pl.Prestige).." (Prestige Tier 1)"
+-- 	end
+
+-- 	str = str.." | Difficulty "..FormatNumber(100*GAMEMODE:GetDifficulty()).."%"
+
+-- 	pl:ConCommand("steamrpc_update "..str)
+-- end)

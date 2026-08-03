@@ -57,7 +57,11 @@ net.Receive("hl2ce_finishedmap", function(length)
 
     local color_yellow = Color(255,255,190)
     chat.AddText(color_white, "Map summary:")
-    chat.AddText(color_white, "XP Gained: ", color_yellow, tostring(xpgained), color_white, " (+", color_yellow, tostring(bonusxp), color_white, " bonus xp)")
+    chat.AddText(color_white, "XP Gained: ",
+        color_yellow, string.Comma(tostring(infmath.Round(xpgained, math.max(0, math.floor(2-xpgained:log10()))))),
+        color_white, " (+",
+        color_yellow, string.Comma(tostring(infmath.Round(bonusxp, math.max(0, math.floor(2-bonusxp:log10()))))),
+        color_white, " bonus xp)")
     chat.AddText(color_white, "Moneys Gained: ", color_yellow, tostring(moneysgained))
     -- for k,v in pairs(tbl) do
     --     chat.AddText(k, " ", v)
@@ -259,7 +263,8 @@ end)
 
 local hl2ce_cl_nodmgnum = GetConVar("hl2ce_cl_nodmgnum")
 net.Receive("hl2ce_dmgnum", function(len)
-	local dmg = net.ReadDouble()
+	local infdmg = net.ReadInfNumber()
+    local dmg = infmath.ConvertInfNumberToNormalNumber(infdmg)
 	local dmgtype = net.ReadUInt(32)
 	local pos = net.ReadVector()
 	local pl = net.ReadBool()
@@ -269,7 +274,7 @@ net.Receive("hl2ce_dmgnum", function(len)
 	effectdata:SetOrigin(pos)
 	effectdata:SetMagnitude(dmg)
 	effectdata:SetScale(0)
-    GAMEMODE.LastDamageDealt = dmg
+    GAMEMODE.LastDamageDealt = infdmg
     GAMEMODE.LastDamageTypeDealt = dmgtype
 	util.Effect("hl2ce_dmg", effectdata)
 end)

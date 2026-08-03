@@ -188,9 +188,11 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	ply.info = nil
 
 	-- RIP Eternity Upgrades
-	ply.EternityUpgradeValues = {}
-	for upgrade,_ in pairs(self.UpgradesEternity) do
-		ply.EternityUpgradeValues[upgrade] = 0
+    if !ply:HasPerkUnlocked("3_the_eterlasting_moment") then
+		ply.EternityUpgradeValues = {}
+		for upgrade,_ in pairs(self.UpgradesEternity) do
+			ply.EternityUpgradeValues[upgrade] = 0
+		end
 	end
 
 
@@ -378,8 +380,6 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	local attacker = dmgInfo:GetAttacker()
 	local damage = InfNumber(math.min(dmgInfo:GetDamage(), 2^128)) -- fuck the infinite damage's float limits
 	local dmgdirect = bit.band(DMG_DIRECT, dmgInfo:GetDamageType()) ~= 0
-	local difficulty = self:GetDifficulty()
-	local eff_difficulty = ent:IsPlayer() and self:GetEffectiveDifficulty(ent) or attacker:IsPlayer() and self:GetEffectiveDifficulty(attacker) or difficulty
 
 
 	-- Vehicle driver isn't accounted for any damage, so fix it
@@ -389,48 +389,56 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		attacker = attacker:GetDriver()
 	end
 
-	if attacker.NextDamageMul and (ent:IsNPC() or ent:IsNextBot() or ent:IsPlayer()) then
+	local difficulty = self:GetDifficulty()
+	local eff_difficulty = ent:IsPlayer() and self:GetEffectiveDifficulty(ent) or attacker:IsPlayer() and self:GetEffectiveDifficulty(attacker) or difficulty
+
+	local entisnpc, entisplayer = ent:IsNPC(), ent:IsPlayer()
+	local atkisnpc, atkisplayer = attacker:IsNPC(), attacker:IsPlayer()
+	local entclass, atkclass = ent:GetClass(), attacker:GetClass()
+
+	if attacker.NextDamageMul and (entisnpc or ent:IsNextBot() or entisplayer) then
 		damage = damage * attacker.NextDamageMul
 		attacker.NextDamageMul = nil
 	end
 
-	local attackerisworld = attacker:GetClass() == "trigger_hurt" or attacker:GetClass() == "trigger_waterydeath"
-	local ispoisonheadcrab = attacker:GetClass() == "npc_headcrab_poison" or attacker:GetClass() == "npc_headcrab_black"
+	local attackerisworld = atkclass == "trigger_hurt" or atkclass == "trigger_waterydeath"
+	local ispoisonheadcrab = atkclass == "npc_headcrab_poison" or atkclass == "npc_headcrab_black"
 
-	if attacker:IsPlayer() then
+	if atkisplayer then
 		damage = damage * attacker:GetDamageMul(dmgInfo, ent)
 	end
 
-	if ent:IsPlayer() and not attackerisworld and not ispoisonheadcrab then
+	if entisplayer and not attackerisworld and not ispoisonheadcrab then
 		damage = ent:ApplyDamageResistance(dmgInfo, damage, ent:GetDamageResistanceMul(dmgInfo))
 	end
 
-
-	if ent:IsPlayer() and attacker:IsValid() and attackerisworld then
+	if entisplayer and attacker:IsValid() and attackerisworld then
 		damage = damage * math.max(1, ent:GetMaxHealth()*0.01)
-	elseif ent:IsPlayer() and attacker == game.GetWorld() and dmgInfo:GetDamageType() == DMG_FALL then
+	elseif entisplayer and attacker == game.GetWorld() and dmgInfo:GetDamageType() == DMG_FALL then
 		damage = damage * math.max(1, ent:GetMaxHealth()*0.01) * eff_difficulty^0.2
 	end
 
-	if (ent:IsPlayer() or ent:IsNPC() or ent:IsNextBot() and ent:IsFriendlyNPC()) and (attacker:IsNPC() or attacker:IsNextBot()) and not attacker:IsFriendlyNPC() then
+	if (entisplayer or entisnpc or ent:IsNextBot() and ent:IsFriendlyNPC()) and (atkisnpc or attacker:IsNextBot()) and not attacker:IsFriendlyNPC() then
 		if not ispoisonheadcrab then
 			damage = damage * eff_difficulty^0.7
-		elseif ent:IsPlayer() and ent:HasPerkActive("1_antipoison") then
+		elseif entisplayer and ent:HasPerkActive("1_antipoison") then
 			damage = damage - math.min(self.EndlessMode and 100 or 25, ent:Health()/2)
 		end
 	end
 
-	if (ent:IsNPC() or ent:IsNextBot()) and not ent:IsFriendlyNPC() and (attacker:IsFriendlyNPC() or attacker:IsPlayer()) then
-		if ent:GetClass() ~= "npc_combinegunship" then
+	if (entisnpc or ent:IsNextBot()) and not ent:IsFriendlyNPC() and (attacker:IsFriendlyNPC() or atkisplayer) then
+		if entclass ~= "npc_combinegunship" then
 			damage = damage / eff_difficulty^0.55
 		end
 	end
 
-	if ent:IsPlayer() and (attacker:IsNPC() or attacker:IsNextBot()) and not dmgdirect then
+	if entisplayer and (atkisnpc or attacker:IsNextBot()) and not dmgdirect then
 		local chance = (10 + math.max(0, (ent:GetMaxHealth()*0.75 - ent:Health())/ent:GetMaxHealth()*10)) / math.Clamp(1.1^math.max(0, ent.UnoReverseTimesActivated), 0, 100)
 		if ent:HasPerkActive("3_uno_reverse") and ent:Health() <= ent:GetMaxHealth()*0.75 and math.Rand(1,100) <= chance then
+			local efficiency = 1/math.max(1, (self:GetDifficulty():log10())-3)
+
 			local d = DamageInfo()
-			d:SetDamage(damage)
+			d:SetDamage(damage*efficiency)
 			d:SetDamageType(DMG_DIRECT)
 			d:SetDamagePosition(dmgInfo:GetDamagePosition())
 			d:SetDamageForce(dmgInfo:GetDamageForce())
@@ -439,13 +447,13 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 			attacker:TakeDamageInfo(d)
 
 			ent.UnoReverseTimesActivated = ent.UnoReverseTimesActivated + 1
-			ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + ent:GetMaxHealth()*0.25))
+			ent:SetHealth(math.min(ent:GetMaxHealth(), ent:Health() + ent:GetMaxHealth()*0.25*efficiency))
 			return true
 		end
 
 	end
 
-	if ent:IsNPC() and attacker:IsPlayer() and not dmgdirect then
+	if entisnpc and atkisplayer and not dmgdirect then
 		if attacker:HasPerkActive("2_damage_of_eternity") then
 			if math.random(100) <= 15 then
 				local delayed = infmath.ConvertInfNumberToNormalNumber(damage)*2
@@ -457,42 +465,46 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 				ent.DelayedDamageAttacker = attacker
 			end
 		end
-
-		if attacker:HasPerkActive("2_vampiric_killer") then
-			local heal = math.ceil(infmath.ConvertInfNumberToNormalNumber(infmath.min(ent:Health(), damage)*0.2))
-			attacker:SetHealth(math.min(attacker:Health() + heal, attacker:GetMaxHealth()))
-		end
 	end
 
 	-- print(damage)
 
-	if ent ~= attacker and (ent:IsNPC() or ent:IsNextBot()) and (attacker:IsNPC() or attacker:IsNextBot()) and (not attacker:IsFriendlyNPC() and not ent:IsFriendlyNPC()) then
+	if ent ~= attacker and (entisnpc or ent:IsNextBot()) and (atkisnpc or attacker:IsNextBot()) and (not attacker:IsFriendlyNPC() and not ent:IsFriendlyNPC()) then
 		local diff = difficulty^0.1
 		local diff2 = infmath.min(1e200, infmath.max(1, diff/1e10)^0.1)
 
 		damage = damage * infmath.min(diff, 1e5) * diff2
 	end
 
+	if entisnpc and atkisplayer and not dmgdirect then
+		if attacker:HasPerkActive("2_vampiric_killer") and attacker:Health() < attacker:GetMaxHealth()then
+			local heal = math.ceil(infmath.ConvertInfNumberToNormalNumber(infmath.min(ent:Health(), damage)*(attacker:HasPerkActive("3_vampiric_killer") and 1 or 0.2)))
+			attacker:SetHealth(math.min(attacker:Health() + heal, attacker:GetMaxHealth()))
+		end
+	end
+
+
+	local infdamage = damage
 	damage = infmath.ConvertInfNumberToNormalNumber(damage)
 	dmgInfo:SetDamage(damage)
 
-	if self.EXMode and attacker:GetClass() == "npc_sniper" and attacker.VariantType == 1 then
-		PrintMessage(3, tostring(attacker).." "..(ent:IsPlayer() and ent:Nick() or ent:GetClass()).." "..tostring(damage))
+	if self.EXMode and atkclass == "npc_sniper" and attacker.VariantType == 1 then
+		PrintMessage(3, tostring(attacker).." "..(entisplayer and ent:Nick() or entclass).." "..tostring(damage))
 	end
 
-	if (ent:IsNPC() or ent:IsNextBot()) and NPC_NONPCKILL_HOOK[ent:GetClass()] then
+	if (entisnpc or ent:IsNextBot()) and NPC_NONPCKILL_HOOK[entclass] then
 		ent.m_LastAttacker = attacker
 		ent.m_LastInflictor = inflictor
 		ent.m_LastAttackTime = CurTime()
 	end
 
-	local cantakedamage = ent:IsValid() and ent:IsPlayer() and not (ent:HasGodMode() or not gamemode.Call("PlayerShouldTakeDamage", ent, attacker)) or ent:IsValid() and !ent:IsPlayer()
+	local cantakedamage = ent:IsValid() and entisplayer and not (ent:HasGodMode() or not gamemode.Call("PlayerShouldTakeDamage", ent, attacker)) or ent:IsValid() and !entisplayer
 	if cantakedamage then
-		if ent.PlyAttackers and attacker:IsPlayer() then
+		if ent.PlyAttackers and atkisplayer then
 			ent.PlyAttackers[attacker] = (ent.PlyAttackers[attacker] or 0) + damage 
 		end
 
-		if ent:IsPlayer() then
+		if entisplayer then
 			if !ent.SessionStats.DamageTaken then
 				ent.SessionStats.DamageTaken = 0
 			end
@@ -510,13 +522,13 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 
 		ent.m_PrevHP = ent:Health()
 
-		if attacker:IsPlayer() and hp > 0 then
+		if atkisplayer and hp > 0 then
 			if attacker.DamagedEntsTick[ent] then -- if the player is already dealing dmg to the entity...
-				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + damage
+				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + infdamage
 				attacker.DamagedEntsTick[ent][2] = dmgInfo:GetDamageType()
 				attacker.DamagedEntsTick[ent][3] = (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2
 			else
-				attacker.DamagedEntsTick[ent] = {damage, dmgInfo:GetDamageType(), (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2}
+				attacker.DamagedEntsTick[ent] = {infdamage, dmgInfo:GetDamageType(), (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2}
 			end
 		end
 	else return true
@@ -539,7 +551,7 @@ function GM:DamageFloater(attacker, victim, dmgpos, dmg, dmgtype)
 	if dmgpos == vector_origin then dmgpos = victim:NearestPoint(attacker:EyePos()) end
 
 	net.Start("hl2ce_dmgnum")
-	net.WriteDouble(dmg)
+	net.WriteInfNumber(dmg)
 	net.WriteUInt(dmgtype, 32)
 	net.WriteVector(dmgpos)
 	net.WriteBool(victim:IsPlayer())
@@ -618,7 +630,9 @@ function GM:WriteCampaignSaveData(ply, save)
 			}
 		end
 	end
-	plyInfo.EternityUpgradeValues = ply.EternityUpgradeValues
+    if !ply:HasPerkUnlocked("3_the_eterlasting_moment") then
+		plyInfo.EternityUpgradeValues = ply.EternityUpgradeValues
+	end
 
 	ply.hl2cSavedData = plyInfo
 
@@ -1161,7 +1175,7 @@ function GM:OnNPCKilled(npc, killer, weapon)
 					end
 
 					if attacker:HasPerkActive("1_difficult_decision") then
-						diffmul = diffmul * 1.75
+						diffmul = diffmul * 1.95
 					end
 
 					if attacker:HasPerkActive("1_aggressive_gameplay") then
@@ -1173,13 +1187,25 @@ function GM:OnNPCKilled(npc, killer, weapon)
 						diffmul = diffmul * 3.35
 					end
 
+					if attacker:HasPerkActive("3_celestial") then
+						local mult = 1
+						for perk in pairs(attacker.UnlockedPerks) do
+							local p = self.PerksData[perk]
+							if !p then continue end
+							mult = mult * 1.04^(p.PrestigeLevel or 1)
+						end
+						diffmul = diffmul * mult
+					end
+
 					if attacker:HasPerkActive("3_difficult_decision") then
 						xpmul = xpmul * 1.25
 						diffmul = diffmul * difficulty:log10()*2.5
+
+						diffmul = diffmul * (1 + (attacker.Prestige^0.5)*0.01 + (attacker.Eternities^0.8)*0.1)
 					end
 
 					if attacker:HasPerkActive("3_eternal_will") and difficulty:log10() < math.log10(5e3) then
-						diffmul = diffmul * math.max(1, 10/difficulty:log10())
+						diffmul = diffmul * 10
 					end
 
 					if attacker:HasPerkActive("2_difficult_decision") and difficulty:log10() < math.log10(30) then
@@ -1187,6 +1213,10 @@ function GM:OnNPCKilled(npc, killer, weapon)
 					end
 
 					diffmul = diffmul * attacker:GetEternityUpgradeEffectValue("difficultygain_upgrader")
+					
+					if attacker:HasPerkActive("3_the_eterlasting_moment") then
+						diffmul = diffmul ^ 1.05
+					end
 				else
 					if attacker:HasPerkActive("1_better_knowledge") then
 						xpmul = xpmul * 1.25
@@ -1219,11 +1249,15 @@ function GM:OnNPCKilled(npc, killer, weapon)
 			end
 		end
 
-		if killer:IsPlayer() and killer:HasPerkActive("2_vampiric_killer") then
-			if self.EndlessMode then
-				killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + math.min(50, killer:GetMaxHealth()*0.04)))
-			else
-				killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + 2))
+		if killer:IsPlayer() then
+			if killer:HasPerkActive("3_vampiric_killer") and killer:Health() < killer:GetMaxHealth()*1.5 then
+				killer:SetHealth(math.min(killer:GetMaxHealth()*1.5, killer:Health() + killer:GetMaxHealth()*0.05))
+			elseif killer:HasPerkActive("1_vampiric_killer") and killer:Health() < killer:GetMaxHealth() then
+				if self.EndlessMode then
+					killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + math.min(50, killer:GetMaxHealth()*0.04)))
+				else
+					killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + 2))
+				end
 			end
 		end
 	end
@@ -1561,25 +1595,7 @@ function GM:PlayerSpawn(ply)
 	-- Set stuff from last level
 
 	local maxhp = ply:GetOriginalMaxHealth()
-	local maxap = 100 -- calculate their max armor
-	if ply:HasPerkActive("1_super_armor") then
-		maxap = maxap + (self.EndlessMode and 30 or 5)
-	end
-	if self.EndlessMode then
-		if ply:HasPerkActive("2_hyper_armor") then
-			maxap = maxap + 100
-		end
-		if ply:HasPerkActive("3_celestial") then
-			maxap = maxap + 80
-		end
-		if ply:HasPerkActive("3_ultra_armor") then
-			maxap = maxap + 500
-		end
-		if ply:HasPerkActive("3_turbocharged_armor") then
-			maxap = maxap + 1000
-		end
-	end
-	maxap = math.min(1e9, maxap)
+	local maxap = ply:GetOriginalMaxArmor()
 
 
 	if ply.info then
@@ -2192,7 +2208,7 @@ function GM:Think()
 		SecondTick = CurTime() + 1
 
 		for _,ply in player.Iterator() do
-			if ply:HasPerkActive("2_hyper_armor") then
+			if ply:HasPerkActive("2_hyper_armor") and ply:IsSuitEquipped() then
 				if ply:WaterLevel() < 3 and ply:GetSuitPower() < 100 then
 					ply:SetSuitPower(math.min(100, ply:GetSuitPower() + 1))
 					ply.HyperArmorCharge = 0
@@ -2237,6 +2253,7 @@ function GM:Think()
 				local dmg = DamageInfo()
 				dmg:SetDamage(math.ceil(ent.DelayedDamage*mult))
 				dmg:SetDamageType(DMG_DIRECT)
+				dmg:SetDamagePosition(ent:GetPos() + ent:OBBCenter())
 				dmg:SetAttacker(ent.DelayedDamageAttacker or game.GetWorld())
 				dmg:SetInflictor(game.GetWorld())
 				ent:TakeDamageInfo(dmg)

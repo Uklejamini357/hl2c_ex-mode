@@ -65,7 +65,9 @@ hook.Add("PostDrawTranslucentRenderables", "hl2ce_DrawDMG", function()
 
 			local pos = particle:GetPos()
 			cam.Start3D2D(pos, ang, math.Clamp(pos:Distance(pl:GetPos())/2000, 0.1, 1))
+			cam.IgnoreZ(true)
             draw.SimpleText(FormatNumber(particle.Amount), "hl2ce_dmgfont", 0, 0, particle.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+			cam.IgnoreZ(false)
 			cam.End3D2D()
 		end
 	end
@@ -137,7 +139,7 @@ function EFFECT:Init(data)
 	end
 
 	particle.Amount = GAMEMODE.LastDamageDealt or amount
-	particle.DamageType = GAMEMODE.LastDamageDealt or 0
+	particle.DamageType = GAMEMODE.LastDamageTypeDealt or 0
 	particle.DieTime = CurTime() + 2
 	particle.Type = Type
 

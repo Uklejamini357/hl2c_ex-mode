@@ -70,6 +70,7 @@ function meta:HasPerkActive(perk)
 	if GAMEMODE.SkillsDisabled then return false end
 
 	local perkdata = GAMEMODE.PerksData[perk]
+	if GAMEMODE.ShouldDebug and !perkdata then print("Warning! Perk "..perk.." not found!") return end
 	return self:HasPerkUnlocked(perk) and not table.HasValue(self.DisabledPerks, perk) and (GAMEMODE.EndlessMode or perkdata.PrestigeLevel < 2)
 end
 
@@ -112,9 +113,14 @@ function meta:HasCelestialityUnlocked()
 end
 
 function meta:GetPrestigeGainMul()
-	return infmath.ConvertInfNumberToNormalNumber(
-		infmath.floor(infmath.max(self.XPUsedThisPrestige / GAMEMODE:CalculateXPNeededForLevels(MAX_LEVEL) * 0.6, 1))
-	)
+	local count = infmath.max(self.XPUsedThisPrestige / GAMEMODE:CalculateXPNeededForLevels(MAX_LEVEL) * 0.6, self:HasPerkActive("3_prestige_improver") and 0 or 1)
+
+	if self:HasPerkActive("3_prestige_improver") and infmath.ConvertInfNumberToNormalNumber(count+self.Prestige) >= 200 then
+		count = count / (1 + 0.005*infmath.max(0, (self.Prestige*2+count)/2))
+	end
+	count = infmath.floor(count)
+
+	return infmath.ConvertInfNumberToNormalNumber(count)
 --[[
 	return infmath.floor(infmath.Clamp(
 		self.XPUsedThisPrestige / GAMEMODE:CalculateXPNeededForLevels(MAX_LEVEL) * 0.6,
@@ -123,6 +129,10 @@ function meta:GetPrestigeGainMul()
 end
 
 function meta:GetEternityGainMul()
+	if self:HasPerkActive("3_prestige_improver") then
+		return math.floor(math.Clamp(self.Prestige / MAX_ETERNITIES, 1, self:GetMaxEternity() - self.Eternities))
+	end
+
 	return 1
 --[[
 	return infmath.floor(math.Clamp(self.Prestige / MAX_ETERNITIES,
@@ -135,7 +145,7 @@ function meta:GetMaxLevel()
 end
 
 function meta:GetMaxPrestige()
-	return self:HasCelestialityUnlocked() and 200 or self:HasEternityUnlocked() and 30 or MAX_PRESTIGE
+	return self:HasPerkActive("3_prestige_improver") and math.huge or self:HasCelestialityUnlocked() and 200 or self:HasEternityUnlocked() and 30 or MAX_PRESTIGE
 end
 
 function meta:GetMaxEternity()
@@ -279,6 +289,10 @@ function meta:GetMinDamageMul(dmgInfo, ent)
 		damagemul = damagemul * 1.6
 	end
 
+	if attacker:HasPerkActive("3_ultra_tough") then
+		damagemul = damagemul * math.log(attacker:GetMaxHealth(), 75)
+	end
+
 	if attacker:HasPerkActive("3_ultra_armor") then
 		damagemul = damagemul * (1 + attacker:Armor()/1e3) -- 0.1% per 1ap
 	end
@@ -374,17 +388,49 @@ function meta:GetOriginalMaxHealth()
 	if self:HasPerkActive("1_healthboost") then
 		maxhp = maxhp + (GAMEMODE.EndlessMode and 85 or 15)
 	end
-	if GAMEMODE.EndlessMode then
-		if self:HasPerkActive("2_healthboost") then
-			maxhp = maxhp + 450
-		end
-		if self:HasPerkActive("3_celestial") then
-			maxhp = maxhp + 320
-		end
-		if self:HasPerkActive("3_ultra_tough") then
-			maxhp = maxhp + 6125
-		end
+	if self:HasPerkActive("2_healthboost") then
+		maxhp = maxhp + 450
+	end
+	if self:HasPerkActive("3_celestial") then
+		maxhp = maxhp + 320
+	end
+	if self:HasPerkActive("3_ultra_tough") then
+		maxhp = maxhp + 3120 + 10*self.Prestige
+	end
+	if self:HasPerkActive("3_highly_enhanced_organism") then
+		maxhp = maxhp + 10000
+	end
+
+
+	-- mult's
+	if self:HasPerkActive("3_highly_enhanced_organism") then
+		maxhp = maxhp * (1 + table.Count(self.UnlockedPerks)*0.1)
 	end
 
 	return maxhp
+end
+
+function meta:GetOriginalMaxArmor()
+	local maxap = 100
+
+	if self:HasPerkActive("1_super_armor") then
+		maxap = maxap + (self.EndlessMode and 30 or 5)
+	end
+	if GAMEMODE.EndlessMode then
+		if self:HasPerkActive("2_hyper_armor") then
+			maxap = maxap + 100
+		end
+		if self:HasPerkActive("3_celestial") then
+			maxap = maxap + 80
+		end
+		if self:HasPerkActive("3_ultra_armor") then
+			maxap = maxap + 500
+		end
+		if self:HasPerkActive("3_turbocharged_armor") then
+			maxap = maxap + 1000
+		end
+	end
+	maxap = math.min(1e9, maxap)
+
+	return maxap
 end

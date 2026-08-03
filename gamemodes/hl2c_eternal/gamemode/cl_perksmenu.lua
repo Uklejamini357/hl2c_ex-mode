@@ -1,3 +1,6 @@
+-- Caching functions here to make code run faster
+local draw_DrawText = draw.DrawText
+
 
 local nnumber = infmath.ConvertInfNumberToNormalNumber
 local dynprogress = 0
@@ -17,51 +20,59 @@ function GM:CMenu()
 		local alpha = 125
 		local x,y,y_add = 220,140,18
 		local xp,reqxp = pl.XP, self:GetReqXP(pl)
-		draw.DrawText(Format("Moneys: %s", FormatNumber(infmath.Round(pl.Moneys, -2))), "hl2ce_hudfont_small", x, y, Color(205,255,205,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText(Format("Moneys: %s", FormatNumber(infmath.Round(pl.Moneys, -2))), "hl2ce_hudfont_small", x, y, Color(205,255,205,alpha), TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText(Format("XP: %s / %s%s", FormatNumber(xp), FormatNumber(reqxp), xp < InfNumber(MAX_NUMBER) and " ("..FormatNumber(infmath.Round(xp/reqxp* 100,2)).."%)" or ""), "hl2ce_hudfont_small", x, y, xp>=reqxp and Color(105,255,105,alpha) or Color(255,255,255,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText(Format("XP: %s / %s%s", FormatNumber(xp), FormatNumber(reqxp), xp < InfNumber(MAX_NUMBER) and " ("..FormatNumber(infmath.Round(xp/reqxp* 100,2)).."%)" or ""), "hl2ce_hudfont_small", x, y, xp>=reqxp and Color(105,255,105,alpha) or Color(255,255,255,alpha), TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText(Format("Level: %s", infmath.Round(pl.Level)), "hl2ce_hudfont_small", x, y, Color(255,255,255,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText(Format("Level: %s", infmath.Round(pl.Level)), "hl2ce_hudfont_small", x, y, Color(255,255,255,alpha), TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText("Skill Points: "..FormatNumber(infmath.Round(pl.StatPoints)), "hl2ce_hudfont_small", x, y, Color(255,255,255,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText("Skill Points: "..FormatNumber(infmath.Round(pl.StatPoints)), "hl2ce_hudfont_small", x, y, Color(255,255,255,alpha), TEXT_ALIGN_LEFT)
 		y = y + y_add
 
 		if pl:HasPrestigeUnlocked() then
-			draw.DrawText(Format("Prestige: %s", FormatNumber(infmath.Round(pl.Prestige))), "hl2ce_hudfont_small", x, y, Color(255,255,155,alpha), TEXT_ALIGN_LEFT)
+			draw_DrawText(Format("Prestige: %s", FormatNumber(infmath.Round(pl.Prestige))), "hl2ce_hudfont_small", x, y, Color(255,255,155,alpha), TEXT_ALIGN_LEFT)
 			y = y + y_add
-			draw.DrawText(Format("Prestige Points: %s", FormatNumber(infmath.Round(pl.PrestigePoints))), "hl2ce_hudfont_small", x, y, Color(255,255,155,alpha), TEXT_ALIGN_LEFT)
+			draw_DrawText(Format("Prestige Points: %s", FormatNumber(infmath.Round(pl.PrestigePoints))), "hl2ce_hudfont_small", x, y, Color(255,255,155,alpha), TEXT_ALIGN_LEFT)
 			y = y + y_add
 		end
 
 		if pl:HasEternityUnlocked() then
-			draw.DrawText(Format("Eternities: %s", FormatNumber(infmath.Round(pl.Eternities))), "hl2ce_hudfont_small", x, y, Color(155,155,255,alpha), TEXT_ALIGN_LEFT)
+			draw_DrawText(Format("Eternities: %s", FormatNumber(infmath.Round(pl.Eternities))), "hl2ce_hudfont_small", x, y, Color(155,155,255,alpha), TEXT_ALIGN_LEFT)
 			y = y + y_add
-			draw.DrawText(Format("Eternity Points: %s", FormatNumber(infmath.Round(pl.EternityPoints))), "hl2ce_hudfont_small", x, y, Color(155,155,255,alpha), TEXT_ALIGN_LEFT)
+			draw_DrawText(Format("Eternity Points: %s", FormatNumber(infmath.Round(pl.EternityPoints))), "hl2ce_hudfont_small", x, y, Color(155,155,255,alpha), TEXT_ALIGN_LEFT)
 			y = y + y_add
 		end
 
 		if pl:HasCelestialityUnlocked() then
 			local c = Color(125+math.sin(SysTime())*125,125+math.sin(SysTime())*125,125+math.sin(SysTime())*-125,alpha)
-			draw.DrawText(Format("Celestialities: %s", FormatNumber(infmath.Round(pl.Celestiality))), "hl2ce_hudfont_small", x, y, c, TEXT_ALIGN_LEFT)
+			draw_DrawText(Format("Celestialities: %s", FormatNumber(infmath.Round(pl.Celestiality))), "hl2ce_hudfont_small", x, y, c, TEXT_ALIGN_LEFT)
 			y = y + y_add
-			draw.DrawText(Format("Celestiality Points: %s", FormatNumber(infmath.Round(pl.CelestialityPoints))), "hl2ce_hudfont_small", x, y, c, TEXT_ALIGN_LEFT)
+			draw_DrawText(Format("Celestiality Points: %s", FormatNumber(infmath.Round(pl.CelestialityPoints))), "hl2ce_hudfont_small", x, y, c, TEXT_ALIGN_LEFT)
 			y = y + y_add
 		end
 
 		y = y + y_add*2
 
-		draw.DrawText("Min Damage Mul: "..FormatNumber(pl:GetMinDamageMul()).."x", "hl2ce_hudfont_small", x, y, Color(205,155,155,alpha), TEXT_ALIGN_LEFT)
+		local red = Color(205,155,155,alpha)
+		local green = Color(155,205,155,alpha)
+		local blue = Color(155,155,205,alpha)
+		draw_DrawText("Min Damage Mul: "..FormatNumber(pl:GetMinDamageMul()).."x", "hl2ce_hudfont_small", x, y, red, TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText("Max Damage Mul: "..FormatNumber(pl:GetMaxDamageMul()).."x", "hl2ce_hudfont_small", x, y, Color(155,205,155,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText("Max Damage Mul: "..FormatNumber(pl:GetMaxDamageMul()).."x", "hl2ce_hudfont_small", x, y, green, TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText("Min Damage Resistance Mul: "..FormatNumber(pl:GetMinDamageResistanceMul()).."x", "hl2ce_hudfont_small", x, y, Color(205,155,155,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText("Min Damage Resistance Mul: "..FormatNumber(pl:GetMinDamageResistanceMul()).."x", "hl2ce_hudfont_small", x, y, red, TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText("Max Damage Resistance Mul: "..FormatNumber(pl:GetMaxDamageResistanceMul()).."x", "hl2ce_hudfont_small", x, y, Color(155,205,155,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText("Max Damage Resistance Mul: "..FormatNumber(pl:GetMaxDamageResistanceMul()).."x", "hl2ce_hudfont_small", x, y, green, TEXT_ALIGN_LEFT)
 		y = y + y_add
 
-		draw.DrawText("Max XP gain from difficulty: "..FormatNumber(pl:GetMaxDifficultyXPGainMul()).."x", "hl2ce_hudfont_small", x, y, Color(205,155,155,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText("Max XP gain from difficulty: "..FormatNumber(pl:GetMaxDifficultyXPGainMul()).."x", "hl2ce_hudfont_small", x, y, red, TEXT_ALIGN_LEFT)
 		y = y + y_add
-		draw.DrawText("Max Money gain from difficulty: "..FormatNumber(pl:GetMaxDifficultyMoneyGainMul()).."x", "hl2ce_hudfont_small", x, y, Color(155,205,155,alpha), TEXT_ALIGN_LEFT)
+		draw_DrawText("Max Money gain from difficulty: "..FormatNumber(pl:GetMaxDifficultyMoneyGainMul()).."x", "hl2ce_hudfont_small", x, y, green, TEXT_ALIGN_LEFT)
+		y = y + y_add
+
+		draw_DrawText("Max Health: "..FormatNumber(pl:GetOriginalMaxHealth()), "hl2ce_hudfont_small", x, y, blue, TEXT_ALIGN_LEFT)
+		y = y + y_add
+		draw_DrawText("Max Armor: "..FormatNumber(pl:GetOriginalMaxArmor()), "hl2ce_hudfont_small", x, y, blue, TEXT_ALIGN_LEFT)
 		y = y + y_add
 	end
 	ContextMenu.Think = function()
@@ -175,15 +186,43 @@ function GM:CMenu()
 	x,y = prestige:GetPos()
 	prestige:SetPos(x + (prestigeunlocked and 0 or 110), y + 220)
 	prestige:SetText(translate.Get("prestige"))
+	prestige:SetToolTip("Ascend beyond just normal levels.\n\nRight-click will auto prestige for highest whenever possible.")
 	prestige:SetTextColor(Color(255,255,255))
-	prestige.Paint = function(panel)
+	prestige.Paint = function(panel,w,h)
 		surface.SetDrawColor(250, 150, 0, 255)
-		surface.DrawOutlinedRect(0, 0, panel:GetWide(), panel:GetTall())
-		draw.RoundedBox(2, 0, 0, panel:GetWide(), panel:GetTall(), Color(0, 0, 0, 130))
+		surface.DrawOutlinedRect(0, 0, w, h)
+
+		local sin = math.abs(math.sin(SysTime()*1.2))
+		if pl:CanCelestiality() then
+			surface.SetDrawColor(200-sin*200,200-sin*200,sin*200,130)
+		elseif pl:CanEternity() then
+			surface.SetDrawColor(0,0,sin*200,130)
+		elseif pl:CanPrestige() then
+			surface.SetDrawColor(sin*200,sin*200,sin*200,130)
+		else
+			surface.SetDrawColor(0,0,0,130)
+		end
+
+		surface.DrawRect(0,0,w,h)
 	end
 	prestige.DoClick = function()
 		gamemode.Call("MakePrestigePanel")
 		ContextMenu:Close()
+	end
+	prestige.DoRightClick = function()
+		if pl:CanCelestiality() then
+			net.Start("hl2ce_prestige")
+			net.WriteString("celestiality")
+			net.SendToServer()
+		elseif pl:CanEternity() then
+			net.Start("hl2ce_prestige")
+			net.WriteString("eternity")
+			net.SendToServer()
+		elseif pl:CanPrestige() then
+			net.Start("hl2ce_prestige")
+			net.WriteString("prestige")
+			net.SendToServer()
+		end
 	end
 
 	if prestigeunlocked then
@@ -528,21 +567,20 @@ function GM:MakePrestigePanel()
 	end)
 
 
-	local list = vgui.Create("DPanelList", self.PrestigePanel)
-	list:EnableVerticalScrollbar()
-	list:EnableHorizontal(false)
-	list:SetSize(wide - 20, tall - 40)
-	list:SetPos(12, 32)
+	local list = vgui.Create("DScrollPanel", self.PrestigePanel)
+	list:Dock(FILL)
 	list:SetPadding(8)
-	list:SetSpacing(4)
 
 	local function MakeText(panel, text, font, color)
 		local txt = EasyLabel(panel, text, font, color or Color(205,205,205))
+		txt:SetAutoStretchVertical(true)
+		txt:SetWrap(true)
+		txt:Dock(TOP)
 		return txt
 	end
 
 	local function MakeButton(text, xpadding, ypadding, func, color)
-		local button = EasyButton(nil, text, xpadding, ypadding)
+		local button = EasyButton(self.PrestigePanel, text, xpadding, ypadding)
 		button:SetFont("hl2ce_hudfont")
 		button:SetTextColor(Color(205,205,205))
 		button:SetSize(0,30)
@@ -551,10 +589,13 @@ function GM:MakePrestigePanel()
 			surface.DrawRect(0, 0, w, h)
 		end
 		button.DoClick = func
+
+		button:Dock(TOP)
+		button:DockMargin(0,20,0,10)
 		return button
 	end
 
-	list:AddItem(MakeButton("Prestige", 0, 0, function()
+	MakeButton("Prestige", 0, 0, function()
 		if !pl:HasPrestigeUnlocked() then
 			self.PrestigePanel:Remove()
 		end
@@ -562,16 +603,16 @@ function GM:MakePrestigePanel()
 		net.Start("hl2ce_prestige")
 		net.WriteString("prestige")
 		net.SendToServer()
-	end, Color(150, 50, 0, 200)))
-	list:AddItem(MakeText(self.PrestigePanel, "Prestige will reset all your levels, XP and skills, but you will gain +20% boost to xp gain (every prestige) and a perk point.\nPrestigin will also unlock new perks after time.", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "You must reach Level "..MAX_LEVEL.." and reach max XP for the next level in order to prestige.", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "Upon first prestige:", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Gain 2 skill points per level", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Increase skills max level to 35", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Unlocks perks", "hl2ce_hudfont_small"))
+	end, Color(150, 50, 0, 200))
+	MakeText(self.PrestigePanel, "Prestige will reset all your levels, XP and skills, but you will gain +20% boost to xp gain (every prestige) and a perk point.\nPrestigin will also unlock new perks after time.", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "You must reach Level "..MAX_LEVEL.." and reach max XP for the next level in order to prestige.", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "Upon first prestige:", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Gain 2 skill points per level", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Increase skills max level to 35", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Unlocks perks", "hl2ce_hudfont_small")
 
 	if !pl:HasPrestigeUnlocked() then return end
-	list:AddItem(MakeButton("Eternize", 0, 0, function()
+	MakeButton("Eternize", 0, 0, function()
 		if !pl:HasEternityUnlocked() then
 			self.PrestigePanel:Remove()
 		end
@@ -579,16 +620,16 @@ function GM:MakePrestigePanel()
 		net.Start("hl2ce_prestige")
 		net.WriteString("eternity")
 		net.SendToServer()
-	end, Color(50, 150, 200, 200)))
-	list:AddItem(MakeText(self.PrestigePanel, "Eternizing will reset your levels, XP, skills, prestiges and prestige perks, but you gain a +120% boost to xp gain (every eternity) and\nEternity point. Eternity perks are more powerful than regular perks.", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "Must be able prestige with the exception of prestige limit or be above "..MAX_PRESTIGE.." prestiges in order to Eternity", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "Upon first eternity:", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Your skill max level is raised to 50", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Your max level is raised to 250", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Unlocks Eternity Upgrades", "hl2ce_hudfont_small"))
+	end, Color(50, 150, 200, 200))
+	MakeText(self.PrestigePanel, "Eternizing will reset your levels, XP, skills, prestiges and prestige perks, but you gain a +120% boost to xp gain (every eternity) and an Eternity point. Eternity perks are more powerful than regular perks.", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "Must be able prestige with the exception of prestige limit or be above "..MAX_PRESTIGE.." prestiges in order to Eternity", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "Upon first eternity:", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Your skill max level is raised to 50", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Your max level is raised to 250", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Unlocks Eternity Upgrades", "hl2ce_hudfont_small")
 
 	if !pl:HasEternityUnlocked() then return end
-	list:AddItem(MakeButton("Celestialize", 0, 0, function()
+	MakeButton("Celestialize", 0, 0, function()
 		if !pl:HasCelestialityUnlocked() then
 			self.PrestigePanel:Remove()
 		end
@@ -596,13 +637,13 @@ function GM:MakePrestigePanel()
 		net.Start("hl2ce_prestige")
 		net.WriteString("celestiality")
 		net.SendToServer()
-	end, Color(50, 150, 200, 200)))
-	list:AddItem(MakeText(self.PrestigePanel, "Celestiality will reset pre-Celestiality progress.", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "XP gain multiplier from prestiges are increased by x+0.5 for each celestiality!", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "The above Effect softcaps after reaching x10 mult.", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "Must be able to prestige and reach "..MAX_ETERNITIES.." Eternities", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "First celestiality:", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Raises max level to 1000", "hl2ce_hudfont_small"))
-	list:AddItem(MakeText(self.PrestigePanel, "- Max skills level are raised to 350", "hl2ce_hudfont_small"))
+	end, Color(50, 150, 200, 200))
+	MakeText(self.PrestigePanel, "Celestiality will reset pre-Celestiality progress.", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "XP gain multiplier from prestiges are increased by x+0.5 for each celestiality!", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "The above Effect softcaps after reaching x10 mult.", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "Must be able to prestige and reach "..MAX_ETERNITIES.." Eternities", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "First celestiality:", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Raises max level to 1000", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Max skills level are raised to 350", "hl2ce_hudfont_small")
 
 end

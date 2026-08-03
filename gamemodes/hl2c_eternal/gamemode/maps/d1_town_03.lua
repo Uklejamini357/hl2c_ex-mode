@@ -4,10 +4,6 @@ TRIGGER_DELAYMAPLOAD = {Vector(-3801, -65, -3457), Vector(-3719, -7, -3335)}
 
 if CLIENT then return end
 
-if !file.Exists("hl2c_eternal/d1_town_03.txt", "DATA") then
-	file.Write("hl2c_eternal/d1_town_03.txt", "We have been to d1_town_03.")
-end
-
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
@@ -27,3 +23,7 @@ function hl2cMapEdit()
 	ents.FindByName("startobjects_template")[1]:Remove()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
+
+hook.Add("CompleteMap", "hl2cCompleteMap", function(pl)
+	GAMEMODE.CampaignMapVars.D1Town03Passed = true
+end)

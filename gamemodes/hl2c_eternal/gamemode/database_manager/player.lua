@@ -73,6 +73,9 @@ function GM:SavePlayer(ply)
     
 	insertdata("UnlockedPerks", ply.UnlockedPerks)
 	insertdata("Skills", ply.Skills)
+    if ply:HasPerkUnlocked("3_the_eterlasting_moment") then
+	    insertdata("EternityUpgradeValues", ply.EternityUpgradeValues)
+    end
 
     insertdata("HardcoreModeAttempts", ply.HardcoreModeAttempts)
 

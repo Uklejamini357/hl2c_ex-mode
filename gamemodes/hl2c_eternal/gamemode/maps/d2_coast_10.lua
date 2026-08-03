@@ -39,6 +39,10 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 -- Accept input
 function hl2cAcceptInput(ent, input, activator)
+	if !game.SinglePlayer() and ent:GetName() == "fade_fall" and string.lower(input) == "fade" then
+		return true
+	end
+
 	if !game.SinglePlayer() and ent:GetName() == "greeter_briefing_conditions" and string.lower(input) == "enable" then
 		if IsValid(ents.FindByName("briefing_relay")[1]) then
 			ents.FindByName("briefing_relay")[1]:Fire("Trigger")
@@ -69,8 +73,17 @@ hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
 
 if !game.SinglePlayer() then
 	-- Entity takes damage
-	function hl2cEntityTakeDamage(ent, dmgInfo)
+	function hl2cEntityTakeDamage(ent, dmginfo)
 		if IsValid(ent) and ent:GetClass() == "npc_citizen" then
+			return true
+		end
+
+		local atk = dmginfo:GetAttacker()
+
+		if ent:GetClass() == "prop_dropship_container" then
+			if atk:IsPlayer() then
+				atk:PrintMessage(3, "NO")
+			end
 			return true
 		end
 	end

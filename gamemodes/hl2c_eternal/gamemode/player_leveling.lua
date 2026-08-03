@@ -112,8 +112,9 @@ function meta:GainPrestige()
     if self:CanPrestige() and infmath.ConvertInfNumberToNormalNumber(self.Prestige) < self:GetMaxPrestige() then
         local prevlvl = self.Prestige
         local prevprestigeunlocked = self:HasPrestigeUnlocked()
-        local gainmul = self:GetPrestigeGainMul()
-        self.XP = self.XP * (self:HasPerkActive("2_prestige_improver") and 0.25 or self:HasPerkActive("1_prestige_improver") and 0.15 or 0)
+        local gainmul = math.min(self:GetMaxPrestige()-self.Prestige, self:GetPrestigeGainMul())
+        if gainmul < 1 then return end
+        self.XP = self.XP * (self:HasPerkActive("3_prestige_improver") and 0.4 or self:HasPerkActive("2_prestige_improver") and 0.25 or self:HasPerkActive("1_prestige_improver") and 0.15 or 0)
         self.XPUsedThisPrestige = IN(0)
         self.Level = 1
         self.StatPoints = 0
@@ -122,7 +123,7 @@ function meta:GainPrestige()
         self:PrintMessage(HUD_PRINTTALK, Format("Prestige increased! (%s --> %s)", FormatNumber(prevlvl), FormatNumber(self.Prestige)))
 
         for id,_ in pairs(GAMEMODE.SkillsInfo) do
-            self.Skills[id] = 0
+            self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
         end
 
         if not prevprestigeunlocked then
@@ -145,29 +146,36 @@ function meta:GainEternity()
     if self:CanEternity() then
         local prevlvl = self.Eternities
         local preveternityunlocked = self:HasEternityUnlocked()
+        local gainmul = math.min(self:GetMaxEternity()-self.Eternities, self:GetEternityGainMul())
+        if gainmul < 1 then return end
+
         self.XP = IN(0)
         self.XPUsedThisPrestige = IN(0)
         self.Level = 1
         self.StatPoints = 0
         self.Prestige = 0
         self.PrestigePoints = self:HasPerkActive("2_perk_points") and 12 or 0
-        self.Eternities = self.Eternities + 1
-        self.EternityPoints = self.EternityPoints + 1
+        self.Eternities = self.Eternities + gainmul
+        self.EternityPoints = self.EternityPoints + gainmul
 
-        for id,_ in pairs(self.UnlockedPerks) do
-            local perk = GAMEMODE.PerksData[id]
-            if not perk then continue end
-            if perk.PrestigeLevel <= 1 then
+        for id,perk in pairs(GAMEMODE.PerksData) do
+            if perk.PrestigeLevel == 1 then
+                if self:HasPerkActive("3_prestige_improver") then continue end
                 if self:HasPerkActive("2_prestige_improver") then
                     self.PrestigePoints = self.PrestigePoints - perk.Cost
                 else
                     self.UnlockedPerks[id] = nil
                 end
+            elseif perk.PrestigeLevel == 2 then
+                if self:HasPerkActive("3_prestige_improver") and self.EternityPoints >= perk.Cost and self.Eternities >= perk.PrestigeReq then
+                    self.EternityPoints = self.EternityPoints - perk.Cost
+                    self.UnlockedPerks[id] = true
+                end
             end
         end
 
         for id,_ in pairs(GAMEMODE.SkillsInfo) do
-            self.Skills[id] = 0
+            self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
         end
 
         -- if self:HasEternityUnlocked() then
@@ -213,24 +221,27 @@ function meta:GainCelestiality()
         self.Prestige = 0
         self.PrestigePoints = self:HasPerkActive("2_perk_points") and 12 or 0
         self.Eternities = 0
-        self.EternityPoints = self:HasPerkActive("2_perk_points") and 12 or 0
+        self.EternityPoints = self:HasPerkActive("3_extremility") and 3 or 0
         self.Celestiality = self.Celestiality + 1
         self.CelestialityPoints = self.CelestialityPoints + 1
 
         for id,_ in pairs(self.UnlockedPerks) do
             local perk = GAMEMODE.PerksData[id]
             if not perk then continue end
-            if perk.PrestigeLevel <= 1 then
+            if perk.PrestigeLevel == 1 then
+                if self:HasPerkActive("3_prestige_improver") then continue end
                 if self:HasPerkActive("2_prestige_improver") then
                     self.PrestigePoints = self.PrestigePoints - perk.Cost
                 else
                     self.UnlockedPerks[id] = nil
                 end
+            elseif perk.PrestigeLevel == 2 then
+                self.UnlockedPerks[id] = nil
             end
         end
 
         for id,_ in pairs(GAMEMODE.SkillsInfo) do
-            self.Skills[id] = 0
+            self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
         end
 
         -- if self:HasEternityUnlocked() then

@@ -276,12 +276,17 @@ function hl2cAcceptInput(ent, input, activator)
 				timer.Create("checkCombines", 1, 0, function()
 					if !IsValid(ent) then timer.Remove("checkCombines") return end
 
-					for _,e in ipairs(ents.FindInBox(Vector(3160,-5264,-553), Vector(4880,-3010,-32))) do
+					print("TRIGGER?")
+
+					for _,e in ipairs(ents.FindInBox(Vector(3160,-5264,-553), Vector(4992,-3010,-32))) do
 						local class = e:GetClass()
-						if class == "npc_combine_s" or class == "npc_metropolice" or class == "npc_manhack" then return end
+						if class == "npc_combine_s" or class == "npc_metropolice" or class == "npc_manhack" then
+					print("NO")
+							return end
 					end
 
 					SECOND_DEFENSEROOM_COMPLETE = true
+					print("YES")
 
 					timer.Remove("checkCombines")
 					ent:Fire("Trigger")
