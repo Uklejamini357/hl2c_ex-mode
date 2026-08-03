@@ -311,33 +311,21 @@ function GM:PerksMenu()
 		end
 	end
 
-	local perklist = vgui.Create("DPanelList")
-	perklist:SetSize(850, perksvgui:GetTall() - 25)
-	perklist:SetPos(5, 25)
-	perklist:SetSpacing(10)
-	perklist:EnableVerticalScrollbar(true)
-	perklist:EnableHorizontal(true)
+	local perklist = vgui.Create("DScrollPanel", sheet)
+	perklist:Dock(FILL)
 	perklist.Tier = 1
 
 	local perklist2
 	if ply:HasEternityUnlocked() then
-		perklist2 = vgui.Create("DPanelList")
-		perklist2:SetSize(850, perksvgui:GetTall() - 25)
-		perklist2:SetPos(5, 25)
-		perklist2:SetSpacing(10)
-		perklist2:EnableVerticalScrollbar(true)
-		perklist2:EnableHorizontal(true)
+		perklist2 = vgui.Create("DScrollPanel", sheet)
+		perklist2:Dock(FILL)
 		perklist2.Tier = 2
 	end
 
 	local perklist3
 	if ply:HasCelestialityUnlocked() then
-		perklist3 = vgui.Create("DPanelList")
-		perklist3:SetSize(850, perksvgui:GetTall() - 25)
-		perklist3:SetPos(5, 25)
-		perklist3:SetSpacing(10)
-		perklist3:EnableVerticalScrollbar(true)
-		perklist3:EnableHorizontal(true)
+		perklist3 = vgui.Create("DScrollPanel", sheet)
+		perklist3:Dock(FILL)
 		perklist3.Tier = 3
 	end
 
@@ -378,8 +366,7 @@ function GM:PerksMenu()
 			if prestige ~= v.PrestigeLevel then continue end
 			local prestigereq = v.PrestigeReq --isinfnumber(v.PrestigeReq) and v.PrestigeReq or InfNumber(v.PrestigeReq)
 
-			local perkpanel = vgui.Create("DPanel", perksvgui)
-			perkpanel:SetPos(5, 5)
+			local perkpanel = vgui.Create("DPanel", panel)
 	        local size_x,size_y = 810,180
 			perkpanel:SetSize(size_x, size_y)
 			perkpanel.Paint = function(panel) -- Paint function
@@ -392,7 +379,7 @@ function GM:PerksMenu()
 
 			local perkname = vgui.Create("DLabel", perkpanel)
 			perkname:SetFont("hl2ce_hudfont")
-			perkname:SetPos(0, 5)
+			perkname:SetContentAlignment(2)
 			perkname:SetText(v.Name)
 			perkname:SetTextColor(color_white)
 			if v.GetTextColor then
@@ -403,14 +390,9 @@ function GM:PerksMenu()
 					panel:SetTextColor(v.GetTextColor())
 				end
 			end
-			perkname:SizeToContents()
-	        local x,y = perkname:GetSize()
-			perkname:SetSize(math.min(size_x - 20, x), y+5)
-			perkname:CenterHorizontal()
 
 			local perkdesc = vgui.Create("DLabel", perkpanel)
 			perkdesc:SetFont("hl2ce_hudfont_small")
-			perkdesc:SetPos(0, 35)
 			perkdesc:SetText(self.EndlessMode and v.DescriptionEndless or v.Description or "Doesn't do anything.")
 			perkdesc:SetToolTip(v.Name.."\n\nIn Non-Endless Mode:\n"..(v.Description or "Doesn't do anything.")..(v.DescriptionEndless and "\n\nIn Endless Mode:\n"..v.DescriptionEndless or ""))
 			perkdesc:SetMouseInputEnabled(true)
@@ -420,32 +402,12 @@ function GM:PerksMenu()
 			else
 				perkdesc:SetTextColor(Color(155,155,155))
 			end
-			perkdesc:SizeToContents()
 	        local x,y = perkdesc:GetSize()
-			perkdesc:SetSize(math.min(size_x - 20, x), 50)
 			perkdesc:SetWrap(true)
-			perkdesc:CenterHorizontal()
-
-			local perkcost = vgui.Create("DLabel", perkpanel)
-			perkcost:SetFont("hl2ce_hudfont_small")
-			perkcost:SetText("Points cost: "..v.Cost)
-	        perkcost:SetPos(10, 102)
-			perkcost:SetSize(size_x - 20, 15)
-			perkcost:SetWrap(true)
-			perkcost:SetColor(Color(155,155,255,255))
-
-			local perkprestige = vgui.Create("DLabel", perkpanel)
-			perkprestige:SetFont("hl2ce_hudfont_small")
-			perkprestige:SetPos(10, 119)
-			perkprestige:SetSize(size_x - 20, 15)
-			perkprestige:SetText(perks_names[prestige][1].." needed: "..tostring(prestigereq))
-			perkprestige:SetWrap(true)
-			perkprestige:SetColor(Color(255,155,155,255))
+			perkdesc:SetContentAlignment(5)
 
 
 			local perkapply = vgui.Create("DButton", perkpanel)
-			perkapply:SetSize(size_x - 20, 30)
-			perkapply:SetPos(10, size_y - 35)
 			perkapply:SetText(ply:HasPerkUnlocked(k) and "Unlocked" or prestigereq > perks_names[prestige][3](ply) and "Not enough "..perks_names[prestige][2] or "Unlock")
 			perkapply.Think = function(panel)
 				local txt = ply:HasPerkUnlocked(k) and "Unlocked" or prestigereq > perks_names[prestige][3](ply) and "Not enough "..perks_names[prestige][2] or "Unlock"
@@ -463,7 +425,50 @@ function GM:PerksMenu()
 				net.WriteString(k)
 				net.SendToServer()
 			end
-			panel:AddItem(perkpanel)
+
+			local perkcostpnl = vgui.Create("Panel", perkpanel)
+			perkcostpnl.Paint = function(panel)
+			end
+
+			local perkcost = vgui.Create("DLabel", perkcostpnl)
+			perkcost:SetFont("hl2ce_hudfont_small")
+			perkcost:SetText("Points cost: "..v.Cost)
+			perkcost:SetColor(Color(155,155,255,255))
+			perkcost:SizeToContents()
+
+			local perkprestige = vgui.Create("DLabel", perkcostpnl)
+			perkprestige:SetFont("hl2ce_hudfont_small")
+			perkprestige:SetText(perks_names[prestige][1].." needed: "..tostring(prestigereq))
+			perkprestige:SetColor(Color(255,155,155,255))
+			perkprestige:SizeToContents()
+
+
+			-- docks
+			perkname:Dock(TOP)
+			perkname:DockMargin(5,5,5,5)
+			perkdesc:Dock(FILL)
+			perkdesc:CenterHorizontal()
+
+			perkapply:Dock(BOTTOM)
+			perkapply:SetTall(perkapply:GetTall()+6)
+			perkapply:DockMargin(5,0,5,0)
+
+			perkcostpnl:Dock(BOTTOM)
+			perkcostpnl:SetTall(perkcostpnl:GetTall()+6)
+			perkcostpnl:DockMargin(0,6,0,0)
+
+			perkcost:Dock(LEFT)
+			perkcost:DockMargin(5,0,5,0)
+			perkcost:SetContentAlignment(4)
+
+			perkprestige:Dock(RIGHT)
+			perkprestige:DockMargin(5,0,5,0)
+			perkprestige:SetContentAlignment(6)
+
+
+
+			perkpanel:Dock(TOP)
+			perkpanel:DockMargin(5,5,5,5)
 		end
 	end
 

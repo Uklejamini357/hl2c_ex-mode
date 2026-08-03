@@ -113,7 +113,7 @@ function meta:GainPrestige()
         local prevlvl = self.Prestige
         local prevprestigeunlocked = self:HasPrestigeUnlocked()
         local gainmul = self:GetPrestigeGainMul()
-        self.XP = self.XP * (self:HasPerkActive("2_prestige_improvement_2") and 0.25 or self:HasPerkActive("prestige_improvement_1") and 0.15 or 0)
+        self.XP = self.XP * (self:HasPerkActive("2_prestige_improver") and 0.25 or self:HasPerkActive("1_prestige_improver") and 0.15 or 0)
         self.XPUsedThisPrestige = IN(0)
         self.Level = 1
         self.StatPoints = 0
@@ -158,7 +158,7 @@ function meta:GainEternity()
             local perk = GAMEMODE.PerksData[id]
             if not perk then continue end
             if perk.PrestigeLevel <= 1 then
-                if self:HasPerkActive("2_prestige_improvement_2") then
+                if self:HasPerkActive("2_prestige_improver") then
                     self.PrestigePoints = self.PrestigePoints - perk.Cost
                 else
                     self.UnlockedPerks[id] = nil
@@ -221,7 +221,7 @@ function meta:GainCelestiality()
             local perk = GAMEMODE.PerksData[id]
             if not perk then continue end
             if perk.PrestigeLevel <= 1 then
-                if self:HasPerkActive("2_prestige_improvement_2") then
+                if self:HasPerkActive("2_prestige_improver") then
                     self.PrestigePoints = self.PrestigePoints - perk.Cost
                 else
                     self.UnlockedPerks[id] = nil

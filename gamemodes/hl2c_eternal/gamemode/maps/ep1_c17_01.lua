@@ -19,6 +19,12 @@ hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
 -- Initialize entities
 function hl2cMapEdit()
+	-- local ent = ents.Create("info_target")
+	-- ent:SetName("target_zero")
+	-- ent:Spawn()
+
+	-- local ent = ents.FindByName("train_gate00")[1]
+	-- ent:SetKeyValue("movedir", "-10 150 0")
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
@@ -26,12 +32,14 @@ local hastriggered
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
-	if ent:GetName() == "physbox_crank_a" and input:lower() == "use" and !GAMEMODE.MapVars.CrankBroken then
-		GAMEMODE.MapVars.CrankBroken = true
-		if GAMEMODE.EXMode then
-			PrintMessage(3, "what the frick.") -- broken door
-		end
-	end
+	-- i would have loved to keep it.. but it was fixed and i cant think of anything to recreate this :/
+	-- if ent:GetName() == "physbox_crank_a" and input:lower() == "use" and !GAMEMODE.MapVars.CrankBroken then
+	-- 	GAMEMODE.MapVars.CrankBroken = true
+	-- 	if GAMEMODE.EXMode then
+
+	-- 		PrintMessage(3, "what the frick.") -- broken door
+	-- 	end
+	-- end
 
 	if GAMEMODE.EXMode then
 		if ent:GetName() == "lcs_freshair" and input:lower() == "start" then

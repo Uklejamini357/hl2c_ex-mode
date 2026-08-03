@@ -279,6 +279,11 @@ function meta:GetMinDamageMul(dmgInfo, ent)
 		damagemul = damagemul * 1.6
 	end
 
+	if attacker:HasPerkActive("3_ultra_armor") then
+		damagemul = damagemul * (1 + attacker:Armor()/1e3) -- 0.1% per 1ap
+	end
+
+
 	if attacker:HasEternityUnlocked() then
 		damagemul = damagemul * attacker:GetEternityUpgradeEffectValue("damage_upgrader")
 	end
@@ -326,15 +331,41 @@ function meta:GetMinDamageResistanceMul(dmgInfo)
 		damageresistancemul = damageresistancemul * 1.7
 	end
 
-	if infmath.ConvertInfNumberToNormalNumber(ent.PrestigePoints) < 0 then
-		damageresistancemul = damageresistancemul / (1 - ent.PrestigePoints*0.2)
+	if ent:HasPerkActive("3_ultra_armor") then
+		damageresistancemul = damageresistancemul * 1.25
+	end
+
+	if ent:HasPerkActive("3_turbocharged_armor") then
+		damageresistancemul = damageresistancemul * 1.45
 	end
 
 	if ent:HasEternityUnlocked() then
 		damageresistancemul = damageresistancemul * ent:GetEternityUpgradeEffectValue("damageresistance_upgrader")
 	end
 
+	if infmath.ConvertInfNumberToNormalNumber(ent.PrestigePoints) < 0 then
+		damageresistancemul = damageresistancemul / (1 - ent.PrestigePoints*0.2)
+	end
+
 	return damageresistancemul
+end
+
+function meta:ApplyDamageResistance(dmginfo, damage, damageresistancemul)
+	local ent = self
+
+	if ent == dmginfo:GetAttacker() then
+		if ent:HasPerkActive("3_ultra_armor") then
+			damage = infmath.max(damage/10, damage ^ 0.8)
+		end
+
+		if ent:HasPerkActive("3_turbocharged_armor") then
+			damage = infmath.max(damage/10, damage ^ 0.9)/5
+		end
+	end
+
+	damage = damage / damageresistancemul
+
+	return damage
 end
 
 

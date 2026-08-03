@@ -185,6 +185,7 @@ hook.Add("OnNPCKilled", "hl2cHyperEXOnNPCKilled", hl2cHyperEXOnNPCKilled)
 
 
 local function SpawnZombie(class, pos, ang)
+	do return end
 	local ent = ents.Create(class)
 	ent:SetPos(pos)
 	ent:SetAngles(ang)

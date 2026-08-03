@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{1,000,000}inf" -- STOP!!!! (no)
-GM.DateVer = "02-08-2026"
+GM.Version = "0.inf{10^100}inf" -- STOP!!!! (no)
+GM.DateVer = "03-08-2026"
 
 -- even crazier things inbound... beware!
 
@@ -254,6 +254,27 @@ end
 function GM:HardcoreEnabled()
 	return GetGlobalBool("hl2ce_hardcore", false)
 end
+
+function GM:EntityFireBullet(ent, bullet)
+	return true
+end
+
+function GM:PostEntityFireBullets(ent, data)
+	local atk = data.Attacker or ent
+
+	if atk:IsPlayer() and (ent:GetClass() == "prop_vehicle_airboat" and atk:HasPerkActive("4_antimatter_bullets") or atk == ent and atk:HasPerkActive("3_exploding_bullets")) and IsFirstTimePredicted() and util.SharedRandom("HL2CE_ExplosiveBullets", 0, 1) < 0.1 then
+		local e = EffectData()
+		e:SetOrigin(data.Trace.HitPos)
+		util.Effect("Explosion", e)
+
+		if SERVER then
+			util.BlastDamage(ent, data.Attacker, data.Trace.HitPos, 100, 20 + data.Damage)
+		end
+	end
+
+	return true
+end
+
 
 
 function GM:IsSpecialPerson(ply, image)

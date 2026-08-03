@@ -1,5 +1,3 @@
-ALLOWED_VEHICLE = "Airboat"
-
 NEXT_MAP = "d1_canals_12"
 
 if CLIENT then return end

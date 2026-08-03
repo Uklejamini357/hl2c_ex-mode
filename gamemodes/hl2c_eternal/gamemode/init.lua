@@ -402,7 +402,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 	end
 
 	if ent:IsPlayer() and not attackerisworld and not ispoisonheadcrab then
-		damage = damage / ent:GetDamageResistanceMul(dmgInfo)
+		damage = ent:ApplyDamageResistance(dmgInfo, damage, ent:GetDamageResistanceMul(dmgInfo))
 	end
 
 
@@ -1178,6 +1178,14 @@ function GM:OnNPCKilled(npc, killer, weapon)
 						diffmul = diffmul * difficulty:log10()*2.5
 					end
 
+					if attacker:HasPerkActive("3_eternal_will") and difficulty:log10() < math.log10(5e3) then
+						diffmul = diffmul * math.max(1, 10/difficulty:log10())
+					end
+
+					if attacker:HasPerkActive("2_difficult_decision") and difficulty:log10() < math.log10(30) then
+						diffmul = diffmul * 5
+					end
+
 					diffmul = diffmul * attacker:GetEternityUpgradeEffectValue("difficultygain_upgrader")
 				else
 					if attacker:HasPerkActive("1_better_knowledge") then
@@ -1563,6 +1571,12 @@ function GM:PlayerSpawn(ply)
 		end
 		if ply:HasPerkActive("3_celestial") then
 			maxap = maxap + 80
+		end
+		if ply:HasPerkActive("3_ultra_armor") then
+			maxap = maxap + 500
+		end
+		if ply:HasPerkActive("3_turbocharged_armor") then
+			maxap = maxap + 1000
 		end
 	end
 	maxap = math.min(1e9, maxap)
@@ -2113,7 +2127,7 @@ function GM:ShowSpare1(ply)
 		ply.vehicleLastSpawned = CurTime()
 	
 		-- Set pos/angle and spawn
-		ply.vehicle:SetPos(ply:GetPos())
+		ply.vehicle:SetPos(ply:GetPos() + (vehicle.Offset or Vector(0,0,0)))
 		-- ply.vehicle:SetPos(spawnpos)
 		ply.vehicle:SetAngles(Angle(0, plyAngle.y - 90, 0))
 		ply.vehicle:Spawn()
@@ -2183,7 +2197,7 @@ function GM:Think()
 					ply:SetSuitPower(math.min(100, ply:GetSuitPower() + 1))
 					ply.HyperArmorCharge = 0
 				elseif ply:GetSuitPower() >= 100 and ply:Armor() < ply:GetMaxArmor() then
-					ply.HyperArmorCharge = ply.HyperArmorCharge + 0.2
+					ply.HyperArmorCharge = ply.HyperArmorCharge + 0.2*(ply:HasPerkActive("3_ultra_armor") and 2 or 1)*(ply:HasPerkActive("3_turbocharged_armor") and 3 or 1) 
 					ply:SetArmor(ply:Armor() + math.floor(ply.HyperArmorCharge))
 					ply.HyperArmorCharge = ply.HyperArmorCharge - math.floor(ply.HyperArmorCharge)
 				end
@@ -2537,7 +2551,8 @@ local airboat = {
 		TargetName = "airboat",
 		vehiclescript = "scripts/vehicles/airboat.txt",
 		EnableGun = 0
-	}
+	},
+	Offset = Vector(0,0,8)
 }
 list.Set("Vehicles", "Airboat", airboat)
 
@@ -2551,7 +2566,8 @@ local airboatGun = {
 		TargetName = "airboat",
 		vehiclescript = "scripts/vehicles/airboat.txt",
 		EnableGun = 1
-	}
+	},
+	Offset = Vector(0,0,8)
 }
 list.Set("Vehicles", "Airboat Gun", airboatGun)
 

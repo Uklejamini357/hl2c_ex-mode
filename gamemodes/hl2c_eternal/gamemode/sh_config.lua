@@ -392,7 +392,7 @@ GM.PerksData = {
 
 	["2_difficult_decision"] = {
 		Name = "A very difficult decision",
-		DescriptionEndless = "3.35x difficulty gain per NPC kill, and a +45% XP Gain. +85% boost to moneys gain.",
+		DescriptionEndless = "3.35x difficulty gain per NPC kill, and a +45% XP Gain. +85% boost to moneys gain.\n5x difficulty gain below 3K% difficulty.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 2
@@ -406,7 +406,7 @@ GM.PerksData = {
 		PrestigeLevel = 2
 	},
 
-	["2_prestige_improver_2"] = {
+	["2_prestige_improver"] = {
 		Name = "Prestige Improver II",
 		DescriptionEndless = "On prestige you keep 25% of your XP. You will keep your Prestige perks after Eternity. (Affects your Prestige Points)\nHas a increased damage taken penalty when having negative prestige points.",
 		Cost = 1,
@@ -464,7 +464,7 @@ GM.PerksData = {
 		PrestigeLevel = 3
 	},
 
-	["3_prestige_improver_3"] = {
+	["3_prestige_improver"] = {
 		Name = "Prestige Improver III",
 		DescriptionEndless = " (NYI)",
 		Cost = 1,
@@ -491,7 +491,7 @@ GM.PerksData = {
 
 	["3_uno_reverse"] = {
 		Name = "Uno Reverse",
-		DescriptionEndless = "10% chance to deflect all the damage taken to the attacker and quadruples it\n(<75% health needed for this to work, the lower hp the better chance).\nAlso recovers 25% health upon activation. Chance divides by 1.1 each time this ability is activated",
+		DescriptionEndless = "10% chance to deflect all the damage taken to the attacker and quadruples it\n(<75% health needed for this to work, the lower hp the better chance).\nAlso recovers 25% health upon activation. Chance divides by 1.1 each time this ability is activated. This perk becomes weaker on 1M% difficulty and higher.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,
@@ -508,7 +508,7 @@ GM.PerksData = {
 
 	["3_ultra_armor"] = {
 		Name = "Ultra Armor",
-		DescriptionEndless = "+500 armor, +25% damage resistance mul, damage vs yourself is powered to ^0.5,\ndamage increases with armor (+1% dmg/10ap) (NYI)",
+		DescriptionEndless = "+500 armor, +25% damage resistance mul, damage vs yourself is powered to ^0.8,\nArmor regen rate is doubled. Damage increases with armor (+1% dmg/10ap)",
 		Cost = 2,
 		PrestigeReq = 4,
 		PrestigeLevel = 3
@@ -522,20 +522,86 @@ GM.PerksData = {
 		PrestigeLevel = 3
 	},
 
+	["3_vampiric_killer"] = {
+		Name = "Vampiric Killer III",
+		DescriptionEndless = "Upgrades health gained from enemies. Damaging enemies will restore your health equal to the amount of damage inflict.",
+		Cost = 1,
+		PrestigeReq = 5,
+		PrestigeLevel = 3
+	},
+
 	["3_eternal_will"] = {
 		Name = "Eternal Will",
-		DescriptionEndless = "Unlocks a new eternity upgrade. Moneys gain are boosted by ^1.5",
+		DescriptionEndless = "Unlocks a new eternity upgrade. Moneys gain are boosted by ^1.5\nDifficulty gain mult. is multiplied by 10x under 500K% difficulty, slowly goes off as you approach the difficulty.",
 		Cost = 2,
 		PrestigeReq = 7,
 		PrestigeLevel = 3
 	},
 
+	["3_turbocharged_armor"] = {
+		Name = "Turbocharged Armor",
+		DescriptionEndless = "+1000 armor, +45% damage resistance mul, damage vs yourself is powered to ^0.9, then divived by 5.\nArmor regen rate is tripled.",
+		Cost = 2,
+		PrestigeReq = 9,
+		PrestigeLevel = 3
+	},
+
+	["3_exploding_bullets"] = {
+		Name = "Exploding Bullets",
+		DescriptionEndless = "Has 5% chance for the shot bullet to be explosive.\nExplosive bullets have 100 blast radius and 20 base explosion damage.\nExplosion damage gets better the more damage the bullet does.",
+		Cost = 3,
+		PrestigeReq = 10,
+		PrestigeLevel = 3
+	},
+
 	["3_the_eterlasting_moment"] = {
 		Name = "The Everlasting Moment (NYI)",
-		DescriptionEndless = "Keep eternity upgrades permanently across sessions.",
+		DescriptionEndless = "Keep eternity upgrades permanently across sessions. ^1.05 to difficulty gain mult.",
 		Cost = 3,
 		PrestigeReq = 15,
 		PrestigeLevel = 3
+	},
+
+	["3_armor_steal"] = {
+		Name = "Armor Steal",
+		DescriptionEndless = "Kills restore 15% of your armor. Picking up batteries will restore 500 + 35% of your armor",
+		Cost = 8,
+		PrestigeReq = 22,
+		PrestigeLevel = 3
+	},
+
+	["3_eternal_enhancer"] = {
+		Name = "Eternal Enhnacer",
+		DescriptionEndless = "All Prestige and Eternity perks have max damage and damage resistance bonus.",
+		Cost = 15,
+		PrestigeReq = 35,
+		PrestigeLevel = 3
+	},
+
+	["3_highly_enhanced_organism"] = {
+		Name = "Highly-Enhanced Organism",
+		DescriptionEndless = "+10K health. Your health is multiplied based on the amount of perks you have unlocked.",
+		Cost = 2,
+		PrestigeReq = 4,
+		PrestigeLevel = 3
+	},
+
+
+	-- ??????
+	["4_antimatter_bullets"] = {
+		Name = "Antimatter Bullets",
+		DescriptionEndless = "Upgrades explosive bullets to 180 blast radius and 45 base explosion damage.",
+		Cost = 1,
+		PrestigeReq = 3,
+		PrestigeLevel = 4
+	},
+
+	["4_darkmatter_bullets"] = {
+		Name = "Dark Matter Bullets",
+		DescriptionEndless = "Dark Matter Bullets inflict plasma damage and add +1 stack to Suped-bleed effect for 10s. Affected enemies will take 150*stack% more damage as delayed damage.",
+		Cost = 15000,
+		PrestigeReq = 25000,
+		PrestigeLevel = 4
 	},
 
 	["3_exponentially_cursed"] = {
