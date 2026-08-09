@@ -72,6 +72,7 @@ local function InitializePanel(pnl, list)
 
 				if tbl.Maps then
 					b:SetTextColor(Color(255,255,0))
+					b:SetTooltip(Format("This chapter has %i maps to choose from.", #tbl.Maps))
 					b.DoRightClick = function()
 						pnl:MakeNewList(function(pnl, list)
 							for id,map in ipairs(tbl.Maps) do

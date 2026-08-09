@@ -4,6 +4,7 @@ if CLIENT then
 	CreateClientConVar("hl2ce_cl_nodifficultytext", 0, true, false, "Displays only the % on difficulty", 0, 1)
 	CreateClientConVar("hl2ce_cl_noshowdifficultychange", 0, true, false, "Displays when difficulty changed", 0, 1)
 	CreateClientConVar("hl2ce_cl_nocustomhud", 0, true, false, "Disables the HL2 Health and Armor Bars", 0, 1)
+	CreateClientConVar("hl2ce_cl_nohud", 0, true, false, "Disables the HUD display entirely.", 0, 1)
 	CreateClientConVar("hl2ce_cl_nokillfeed", 0, true, false, "Disables the Gmod's killfeed.", 0, 1)
 	CreateClientConVar("hl2ce_cl_nodmgnum", 0, true, false, "Disables damage numbers.", 0, 1)
 	CreateClientConVar("hl2ce_cl_drawxpgaintext", 1, true, false, "Draw XP gain text", 0, 1)

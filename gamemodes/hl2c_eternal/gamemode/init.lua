@@ -41,9 +41,23 @@ include("player_leveling.lua")
 
 
 -- Include the configuration for this map
-if file.Exists(GM.VaultFolder.."/gamemode/maps/"..game.GetMap()..".lua", "LUA") then
+if file.Exists(GM.FolderName.."/gamemode/maps/"..game.GetMap()..".lua", "LUA") then
 	AddCSLuaFile("maps/"..game.GetMap()..".lua")
 	include("maps/"..game.GetMap()..".lua")
+end
+if file.IsDir(GM.FolderName.."/gamemode/mods", "LUA") then
+	local _files,_dirs = file.Find(GM.FolderName.."/gamemode/mods/*", "LUA")
+	for _,name in ipairs(_dirs) do
+		if file.Exists(GM.FolderName.."/gamemode/mods/"..name.."/"..game.GetMap()..".lua", "LUA") then
+			if file.Exists(GM.FolderName.."/gamemode/mods/"..name.."/base.lua", "LUA") then
+				AddCSLuaFile("mods/"..name.."/base.lua")
+				include("mods/"..name.."/base.lua")
+			end
+
+			AddCSLuaFile("mods/"..name.."/"..game.GetMap()..".lua")
+			include("mods/"..name.."/"..game.GetMap()..".lua")
+		end
+	end
 end
 
 -- Create data folders
@@ -265,6 +279,7 @@ end
 
 -- Called when the player is waiting to spawn
 function GM:PlayerDeathThink(ply)
+	if game.SinglePlayer() then return end
 	if ply.NextSpawnTime and (ply.NextSpawnTime > CurTime()) then
 		return
 	end
@@ -523,12 +538,17 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		ent.m_PrevHP = ent:Health()
 
 		if atkisplayer and hp > 0 then
+			local dmgpos = dmgInfo:GetDamagePosition()
+			if dmgpos.x == 0 and dmgpos.y == 0 and dmgpos.z == 0 then -- sometimes does that
+				dmgpos = ent:GetPos() + ent:OBBCenter()
+			end
+
 			if attacker.DamagedEntsTick[ent] then -- if the player is already dealing dmg to the entity...
 				attacker.DamagedEntsTick[ent][1] = attacker.DamagedEntsTick[ent][1] + infdamage
 				attacker.DamagedEntsTick[ent][2] = dmgInfo:GetDamageType()
 				attacker.DamagedEntsTick[ent][3] = (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2
 			else
-				attacker.DamagedEntsTick[ent] = {infdamage, dmgInfo:GetDamageType(), (ent:GetPos() + ent:OBBCenter() + dmgInfo:GetDamagePosition()) / 2}
+				attacker.DamagedEntsTick[ent] = {infdamage, dmgInfo:GetDamageType(), (ent:GetPos() + ent:OBBCenter() + dmgpos) / 2}
 			end
 		end
 	else return true
@@ -652,6 +672,7 @@ function GM:GrabAndSwitch(instant)
 	self:SetGameState(GAMESTATE_CHANGINGLEVEL)
 	timer.Remove("hl2c_next_map")
 
+	hook.Run("OnMapSwitch")
 	gamemode.Call("ClearPlayerDataFolder")
 	self:HardcoreSaveAlivePlayers()
 
@@ -767,7 +788,8 @@ function GM:Initialize()
 
 	self.FailCounts = self.FailCounts or 0
 	self.LastFailed = self.LastFailed or 0
-
+	self.MapRestarts = self.MapRestarts or 0
+	
 	self.MapCompleteTest = nil
 
 	self.MapVars = {}
@@ -816,7 +838,8 @@ function GM:Initialize()
 	-- Force game rules such as aux power and max ammo
 	if self.ForceGamerules then
 		game.ConsoleCommand("gmod_suit 1\n")
-		game.ConsoleCommand("gmod_maxammo 0\n")	
+		game.ConsoleCommand("gmod_maxammo 0\n")
+		game.ConsoleCommand("physcannon_instant 0\n")
 	end
 
 	-- Kill global states
@@ -848,14 +871,22 @@ function GM:CompleteMap(ply)
 	ply:SetTeam(TEAM_COMPLETED_MAP)
 	self:WriteCampaignSaveData(ply)
 
+	if game.SinglePlayer() then
+		local veh = ply:GetVehicle()
+		if IsValid(veh) then
+			local phys = veh:GetPhysicsObject()
+			if phys then
+				phys:EnableMotion(false)
+			end
+		end
+	else
 	-- Remove their vehicle
-	if IsValid(ply:GetVehicle()) then
-		ply:ExitVehicle()
-		ply:RemoveVehicle()
-	end
+		if IsValid(ply:GetVehicle()) then
+			ply:ExitVehicle()
+			ply:RemoveVehicle()
+		end
 
 	-- Freeze them and make sure they don't push people away (and also so they don't get targeted by NPC's)
-	if !game.SinglePlayer() then
 		ply:Spectate(OBS_MODE_ROAMING)
 		ply:StripWeapons()
 	end
@@ -876,13 +907,11 @@ function GM:CompleteMap(ply)
 	end
 
 	-- Let everyone know that someone entered the loading section
-	PrintTranslatedMessage(HUD_PRINTTALK, "x_completed_map", ply:Name(), string.ToMinutesSeconds(CurTime() - ply.startTime), team.NumPlayers(TEAM_COMPLETED_MAP), self.playersAlive)
-
-	gamemode.Call("PlayerCompletedMap", ply)
+	gamemode.Call("PlayerCompletedMap", ply, CurTime() - ply.startTime)
 end
 
 
-function GM:PlayerCompletedMap(ply)
+function GM:PlayerCompletedMap(ply, time)
 	-- XP
 	local txp = 0
 	local xp = math.Round(math.Rand(4,7)) * infmath.min(self:GetDifficulty(), ply:GetMaxDifficultyXPGainMul())
@@ -911,10 +940,19 @@ function GM:PlayerCompletedMap(ply)
 	local stats = ply.MapStats
 	if stats then -- Map stats display after completing the map (Not yet.)
 		net.Start("hl2ce_finishedmap")
+		net.WriteBit(1)
+		net.WriteUInt(time, 16)
+		net.WriteEntity(ply)
+		net.WriteUInt(#team.GetPlayers(TEAM_COMPLETED_MAP), 7)
+		net.Broadcast()
+
+		net.Start("hl2ce_finishedmap")
+		net.WriteBit(0)
 		net.WriteInfNumber(stats.GainedXP or InfNumber(0))
 		net.WriteInfNumber(txp)
 		net.WriteInfNumber(gain)
 		net.Send(ply)
+
 	end
 
 	self:NetworkString_UpdateStats(ply)
@@ -1053,7 +1091,7 @@ function GM:MapEntitiesSpawned()
 	table.insert(checkpointPositions, tdmlPos)
 
 	-- Remove all triggers that cause the game to "end"
-	for _, trig in pairs(ents.FindByClass("trigger_*")) do
+	for _, trig in ipairs(ents.FindByClass("trigger_*")) do
 		if trig:GetName() == "fall_trigger" then
 			trig:Remove()
 		end
@@ -1301,7 +1339,7 @@ end
 
 function GM:EntityRemoved(ent)
 	for _,pl in player.Iterator() do
-		if pl.DamagedEntsTick[ent] then
+		if IsValid(pl) and pl.DamagedEntsTick[ent] then
 			if ent.m_PrevHP ~= ent:Health() then
 				-- pcall(function()
 				self:DamageFloater(pl, ent, pl.DamagedEntsTick[ent][3], pl.DamagedEntsTick[ent][1], pl.DamagedEntsTick[ent][2])
@@ -1395,7 +1433,7 @@ end
 
 
 -- Called just before the player's first spawn 
-function GM:PlayerInitialSpawn(ply)
+function GM:PlayerInitialSpawn(ply, transition)
 	ply.startTime = CurTime()
 
 	ply.HardcoreModeAttempts = 0
@@ -1563,8 +1601,9 @@ function GM:PlayerInitialSpawn(ply)
 end 
 
 -- Called when a player spawns 
-function GM:PlayerSpawn(ply)
+function GM:PlayerSpawn(ply, transition)
 	player_manager.SetPlayerClass(ply, "player_default")
+	if transition then return end
 
 	local alive = true
 	if ply.consideredDead then
@@ -1820,7 +1859,11 @@ function GM:KeyPress(pl, key)
 	if !SINGLEPLAYER_FAILMAP_STYLE then return end
 
 	if self:IsGameState(GAMESTATE_FAILED) and self.LastFailed+3 < CurTime() then
-		self:RestartMap(0)
+		-- if game.SinglePlayer() then
+		-- 	RunConsoleCommand("reload") -- barely works, or just simply does not fucking work
+		-- else
+			self:RestartMap(0)
+		-- end
 	end
 end
 
@@ -1889,6 +1932,7 @@ function GM:RestartMap(overridetime, noplayerdatasave)
 			net.WriteFloat(-1)
 			net.Broadcast()
 			self:Initialize() -- why run GAMEMODE:Initialize() again? so that difficulty will also reset if noplayerdatasave is true
+			self.MapRestarts = self.MapRestarts + 1
 			self.GameStartedTime = CurTime()
 			self:SetGameState(GAMESTATE_RESTARTING)
 			game.CleanUpMap(false, {"env_fire", "entityflame", "_firesmoke"}, function()
@@ -2180,7 +2224,7 @@ function GM:Think()
 	self.playersAlive = team.NumPlayers(TEAM_ALIVE) + team.NumPlayers(TEAM_COMPLETED_MAP)
 
 	if self:IsGameState(GAMESTATE_RUNNING) and self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_PERCENT / 100) then
-		self:NextMap()
+		self:NextMap(game.SinglePlayer())
 	end
 
 	if self.playersAlive > 0 and team.NumPlayers(TEAM_COMPLETED_MAP) >= (self.playersAlive * NEXT_MAP_INSTANT_PERCENT / 100) then
@@ -2381,6 +2425,11 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 		return true
 	end
 
+	-- useless
+	if ent:GetClass() == "logic_autosave" and (input:lower() == "save" or input:lower() == "savedangerous") then
+		return true
+	end
+
 	if ent:GetClass() == "player_loadsaved" and input:lower() == "reload" then
 		if self.EXMode then
 			PrintMessage(3, "uh oh, you fucked up")
@@ -2403,11 +2452,6 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 			gamemode.Call("FailMap", nil, "")
 			return true
 		end
-	end
-
-	-- useless
-	if ent:GetName() == "autosave" and (input:lower() == "save" or input:lower() == "savedangerous") then
-		return true
 	end
 
 	if string.lower(input) == "sethealth" then
@@ -2558,6 +2602,18 @@ local jeep = {
 }
 list.Set("Vehicles", "Jeep", jeep)
 
+-- No gun
+local jeep = {
+	Name = "Jeep NoGun",
+	Class = "prop_vehicle_jeep_old",
+	Model = "models/buggy.mdl",
+	KeyValues = {
+		TargetName = "jeep",
+		vehiclescript =	"scripts/vehicles/jeep_test.txt"
+	}
+}
+list.Set("Vehicles", "Jeep NoGun", jeep)
+
 -- Airboat
 local airboat = {
 	Name = "Airboat Gun",
@@ -2646,4 +2702,9 @@ concommand.Add("debug_gettracehitpos", function(pl)
 	pos = pos * 2
 	pl:PrintMessage(2, Format("Vector(%d, %d, %d)", pos.x, pos.y, pos.z))
 	pl:SendLua(Format("SetClipboardText(\"Vector(%d, %d, %d)\")", pos.x, pos.y, pos.z))
+end)
+
+saverestore.AddSaveHook("HL2CE_NoSinglePlayerSupport", function()
+	BroadcastLua([[chat.AddText(Color(255,0,0), "Warning! ", Color(99, 121, 247), "Hl2ce", Color(255,120,0), " does not support hl2 save system!")]])
+	BroadcastLua([[chat.AddText(Color(255,120,0), "Avoid using save system, otherwise you may run into unwanted problems.")]])
 end)

@@ -153,6 +153,7 @@ GAMESTATE_CHANGINGLEVEL = 8
 
 -- test
 SINGLEPLAYER_FAILMAP_STYLE = game.SinglePlayer()
+SHOW_MAP_COMPLETIONS = true
 
 
 GM.ShouldDebug = true

@@ -466,7 +466,7 @@ GM.PerksData = {
 
 	["3_prestige_improver"] = {
 		Name = "Prestige Improver III",
-		DescriptionEndless = "On prestige reset, start with 50 levels on each skill and keep 40% of your xp.\nMax prestige is no longer capped, however prestige gain from a single prestige is greatly nerfed if you are above 200+ prestige. Perks no longer cost Prestige points.\nGain more eternity based on current prestige amount. Eternity perks are automatically unlocked once you reach enough Eternity/Eternity Points.",
+		DescriptionEndless = "On prestige reset, start with 50 levels on each skill and keep 40% of your xp.\nMax prestige is no longer capped, however prestige gain from a single prestige is greatly nerfed if you are above 200+ prestige. Perks no longer cost Prestige points.\nEternity reset gives more Eternities and Eternity Points based on your current prestige.\nEternity perks are automatically unlocked once you reach enough Eternity/Eternity Points.",
 		Cost = 1,
 		PrestigeReq = 2,
 		PrestigeLevel = 3,

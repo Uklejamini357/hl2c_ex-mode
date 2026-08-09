@@ -22,6 +22,7 @@ local hl2ce_cl_nohuddifficulty = GetConVar("hl2ce_cl_nohuddifficulty")
 local hl2ce_cl_nodifficultytext = GetConVar("hl2ce_cl_nodifficultytext")
 local hl2ce_cl_noshowdifficultychange = GetConVar("hl2ce_cl_noshowdifficultychange")
 local hl2ce_cl_nocustomhud = GetConVar("hl2ce_cl_nocustomhud")
+local hl2ce_cl_nohud = GetConVar("hl2ce_cl_nohud")
 local hl2ce_cl_nokillfeed = GetConVar("hl2ce_cl_nokillfeed")
 local hl2ce_cl_nodmgnum = GetConVar("hl2ce_cl_nodmgnum")
 local hl2ce_cl_drawxpgaintext = GetConVar("hl2ce_cl_drawxpgaintext")
@@ -29,6 +30,23 @@ local hl2ce_cl_noplrdeathsound = GetConVar("hl2ce_cl_noplrdeathsound")
 local hl2ce_cl_showmaptimer = GetConVar("hl2ce_cl_showmaptimer")
 local hl2ce_cl_noepilepsy = GetConVar("hl2ce_cl_noepilepsy")
 local hl2ce_cl_noshowlosetext = GetConVar("hl2ce_cl_noshowlosetext")
+
+
+if file.Exists(GM.VaultFolder.."/gamemode/maps/"..game.GetMap()..".lua", "LUA") then
+	include("maps/"..game.GetMap()..".lua")
+end
+if file.IsDir(GM.FolderName.."/gamemode/mods", "LUA") then
+	local _files,_dirs = file.Find(GM.FolderName.."/gamemode/mods/*", "LUA")
+	for _,name in ipairs(_dirs) do
+		if file.Exists(GM.FolderName.."/gamemode/mods/"..name.."/"..game.GetMap()..".lua", "LUA") then
+			if file.Exists(GM.FolderName.."/gamemode/mods/"..name.."/base.lua", "LUA") then
+				include("mods/"..name.."/base.lua")
+			end
+
+			include("mods/"..name.."/"..game.GetMap()..".lua")
+		end
+	end
+end
 
 -- Create data folders
 if !file.IsDir(GM.VaultFolder, "DATA") then file.CreateDir(GM.VaultFolder) end
@@ -116,6 +134,7 @@ end)
 local bosshp = 0
 -- Called every frame to draw the hud
 function GM:HUDPaint()
+	if hl2ce_cl_nohud:GetBool() then return end
 	local pl = LocalPlayer()
 	if !GetConVar("cl_drawhud"):GetBool() || (self.ShowScoreboard && IsValid(pl) && (pl:Team() != TEAM_DEAD)) then return end
 
@@ -339,6 +358,13 @@ function GM:PostDrawHUD()
 end
 
 
+local nodrawnohud = {
+	["CHudHealth"] = true,
+	["CHudBattery"] = true,
+	["CHudAmmo"] = true,
+	["CHudSecondaryAmmo"] = true,
+	["CHudSuitPower"] = true,
+}
 -- Called every frame
 function GM:HUDShouldDraw(name)
 	local pl = LocalPlayer()
@@ -357,6 +383,10 @@ function GM:HUDShouldDraw(name)
 		end
 
 		if (name == "CHudHealth" or name == "CHudBattery") and not hl2ce_cl_nocustomhud:GetBool() then
+			return false
+		end
+
+		if nodrawnohud[name] and hl2ce_cl_nohud:GetBool() then
 			return false
 		end
 	end
@@ -470,18 +500,18 @@ function GM:PlayerReady()
 	local ply = LocalPlayer()
 
 	ply.XP = InfNumber(0)
-	ply.Level = InfNumber(0)
-	ply.StatPoints = InfNumber(0)
-	ply.Prestige = InfNumber(0)
-	ply.PrestigePoints = InfNumber(0)
-	ply.Eternities = InfNumber(0)
-	ply.EternityPoints = InfNumber(0)
+	ply.Level = 0
+	ply.StatPoints = 0
+	ply.Prestige = 0
+	ply.PrestigePoints = 0
+	ply.Eternities = 0
+	ply.EternityPoints = 0
 
 	-- Endless
-	ply.Celestiality = InfNumber(0)
-	ply.CelestialityPoints = InfNumber(0)
-	ply.Rebirths = InfNumber(0)
-	ply.RebirthPoints = InfNumber(0)
+	ply.Celestiality = 0
+	ply.CelestialityPoints = 0
+	-- ply.Rebirths = InfNumber(0)
+	-- ply.RebirthPoints = InfNumber(0)
 
 
 	ply.Moneys = InfNumber(0)
@@ -658,10 +688,6 @@ end
 -- 		ang = cmd:GetViewAngles()
 -- 	end
 -- end
-
-if file.Exists(GM.VaultFolder.."/gamemode/maps/"..game.GetMap()..".lua", "LUA") then
-	include("maps/"..game.GetMap()..".lua")
-end
 
 -- Called by show help
 function ShowHelp()

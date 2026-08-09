@@ -1,0 +1,3 @@
+NEXT_MAP = "d3_c17_01_d"
+
+TRIGGER_DELAYMAPLOAD = {Vector(-954, -1049, 912), Vector(-868, -965, 995)}

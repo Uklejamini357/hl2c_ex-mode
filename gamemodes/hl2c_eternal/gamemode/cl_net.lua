@@ -47,13 +47,45 @@ net.Receive("hl2ce_xpgain", function(length)
 end)
 
 net.Receive("hl2ce_finishedmap", function(length)
+    gamemode.Call("OnMapCompleted")
+    gamemode.Call("PostOnMapCompleted")
+
+    if !SHOW_MAP_COMPLETIONS then return end
+    local announce = net.ReadBit() == 1
+
+    if announce then
+        local time = net.ReadUInt(16)
+        local ply = net.ReadEntity()
+        local completed = net.ReadUInt(7)
+
+        local str = translate.Get("x_completed_map")
+        str = string.Replace(str, "%s", "[REPLACE]")
+        str = string.Replace(str, "%d", "[REPLACE]")
+        str = string.Replace(str, "%i", "[REPLACE]")
+
+        local tbl = string.Explode("[REPLACE]", str)
+        local replace = {ply:Nick(), string.ToMinutesSeconds(time), completed, team.NumPlayers(TEAM_COMPLETED_MAP) + team.NumPlayers(TEAM_ALIVE)}
+        local t = {}
+        for i=1,#tbl do
+            t[#t+1] = tbl[i]
+            t[#t+1] = Color(255,255,205)
+            t[#t+1] = replace[i]
+            if #tbl ~= i then
+                t[#t+1] = color_white
+            end
+        end
+
+        chat.AddText(unpack(t))
+
+        return
+    end
+
+
+
 	local xpgained = net.ReadInfNumber()
 	local bonusxp = net.ReadInfNumber()
 	local moneysgained = net.ReadInfNumber()
 
-
-    gamemode.Call("OnMapCompleted")
-    gamemode.Call("PostOnMapCompleted")
 
     local color_yellow = Color(255,255,190)
     chat.AddText(color_white, "Map summary:")

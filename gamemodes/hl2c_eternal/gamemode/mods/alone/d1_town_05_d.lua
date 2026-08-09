@@ -1,0 +1,4 @@
+NEXT_MAP = "d2_coast_01_d"
+
+TRIGGER_DELAYMAPLOAD = {Vector(-1723, 10939, 904), Vector(-1638, 10995, 1010)}
+

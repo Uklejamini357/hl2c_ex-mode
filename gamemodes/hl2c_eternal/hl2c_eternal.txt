@@ -3,7 +3,7 @@
 	"title"			"Half-Life 2 Campaign: Eternal"
 	"base"			"base"
 	"menusystem"	"1"
-	"workshopid"	"283549412"
+	"workshopid"	""
 
 	"settings"
 	{
@@ -41,8 +41,7 @@
 			"text"		"Allow usage of custom playermodels"
 			"help"		"Allow usage of custom playermodels. Set variable to -1 to entirely disable it."
 			"type"		"CheckBox"
-			"default"	"0"
-			"singleplayer"	"1"
+			"default"	"1"
 		}
 	
 		5
