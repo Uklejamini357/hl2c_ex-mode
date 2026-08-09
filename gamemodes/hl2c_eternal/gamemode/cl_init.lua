@@ -322,10 +322,11 @@ end
 function GM:HUDPaintBackground()
 	local pl = LocalPlayer()
 
+	local max = 150
 	if !self.PlayerDeadAlpha or pl:Alive() or pl:Health() > 0 or pl:GetObserverMode() ~= OBS_MODE_NONE then
 		self.PlayerDeadAlpha = 0
 	else
-		self.PlayerDeadAlpha = math.min(120, self.PlayerDeadAlpha+300*FrameTime())
+		self.PlayerDeadAlpha = math.min(max, self.PlayerDeadAlpha+FrameTime()*(max/0.4))
 	end
 
 	if self.PlayerDeadAlpha > 0 then
