@@ -105,82 +105,83 @@ net.Receive("hl2ce_boss", function(len)
 end)
 
 net.Receive("hl2ce_fail", function(len)
-    if GetConVar("hl2ce_cl_noshowlosetext"):GetBool() then return end
-
+    
     gamemode.Call("OnMapFailed")
-    local time = math.min(15, RESTART_MAP_TIME)
+    if not GetConVar("hl2ce_cl_noshowlosetext"):GetBool() then
+        local time = math.min(15, RESTART_MAP_TIME)
 
-    local s1 = translate.Get("you_lost")
-    local len = utf8.len(s1)
-    local sub = len > 50 and utf8.sub or string.sub
-    local font = "hl2ce_font_big"
-    local createtime = CurTime()
+        local s1 = translate.Get("you_lost")
+        local len = utf8.len(s1)
+        local sub = len > 50 and utf8.sub or string.sub
+        local font = "hl2ce_font_big"
+        local createtime = CurTime()
 
-    surface.SetFont(font)
-    local x,y = surface.GetTextSize(s1)
+        surface.SetFont(font)
+        local x,y = surface.GetTextSize(s1)
 
-    local failtext = vgui.Create("DLabel")
-    GAMEMODE.UITextFailed1 = failtext
-    failtext:SetFont("hl2ce_font_big")
-    failtext:SetTextColor(Color(255,0,0))
-    failtext:SetSize(x, y)
-    failtext:Center()
-    failtext.Think = function(self)
-        local str = sub(s1, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/5, 1.5)))))
-        if str == self:GetText() then return end
-        self:SetText(str)
-        surface.PlaySound("buttons/lightswitch2.wav")
-    end
-
-    failtext:AlphaTo(0, 1, time, function(_, self)
-        self:Remove()
-    end)
-
-    local s2 = translate.Get(net.ReadString())
-    if s2 == "" then
-        chat.AddText(Color(255,0,0), s1)
-        return
-    end
-
-    local len = utf8.len(s2)
-    local sub = len > 50 and utf8.sub or string.sub
-    local font = "hl2ce_font"
-    local createtime = CurTime()
-
-    surface.SetFont(font)
-    local x,y = surface.GetTextSize(s2)
-
-    local failtext = vgui.Create("DLabel")
-    GAMEMODE.UITextFailed2 = failtext
-    failtext:SetFont("hl2ce_font")
-    failtext:SetTextColor(Color(220,100,100))
-    failtext:SetSize(math.min(ScrW(), x), y*math.ceil(x/ScrW()))
-    failtext:SetAutoStretchVertical(true)
-    failtext:SetWrap(true)
-    failtext:Center()
-    failtext:CenterVertical(0.65)
-
-    -- how can i optimize this? well...
-    -- local 
-    failtext.Think = function(self)
-        if self.NoMoreUpdate then return end
-        local max = math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10))))
-        local str = sub(s2, 1, max)
-        if str == self:GetText() then return end
-        self:SetText(str)
-        surface.PlaySound("buttons/lightswitch2.wav")
-
-        if len == max then
-            self.NoMoreUpdate = true
+        local failtext = vgui.Create("DLabel")
+        GAMEMODE.UITextFailed1 = failtext
+        failtext:SetFont("hl2ce_font_big")
+        failtext:SetTextColor(Color(255,0,0))
+        failtext:SetSize(x, y)
+        failtext:Center()
+        failtext.Think = function(self)
+            local str = sub(s1, 1, math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/5, 1.5)))))
+            if str == self:GetText() then return end
+            self:SetText(str)
+            surface.PlaySound("buttons/lightswitch2.wav")
         end
+
+        failtext:AlphaTo(0, 1, time, function(_, self)
+            self:Remove()
+        end)
+
+        local s2 = translate.Get(net.ReadString())
+        if s2 == "" then
+            chat.AddText(Color(255,0,0), s1)
+            return
+        end
+
+        local len = utf8.len(s2)
+        local sub = len > 50 and utf8.sub or string.sub
+        local font = "hl2ce_font"
+        local createtime = CurTime()
+
+        surface.SetFont(font)
+        local x,y = surface.GetTextSize(s2)
+
+        local failtext = vgui.Create("DLabel")
+        GAMEMODE.UITextFailed2 = failtext
+        failtext:SetFont("hl2ce_font")
+        failtext:SetTextColor(Color(220,100,100))
+        failtext:SetSize(math.min(ScrW(), x), y*math.ceil(x/ScrW()))
+        failtext:SetAutoStretchVertical(true)
+        failtext:SetWrap(true)
+        failtext:Center()
+        failtext:CenterVertical(0.65)
+
+        -- how can i optimize this? well...
+        -- local 
+        failtext.Think = function(self)
+            if self.NoMoreUpdate then return end
+            local max = math.min(len, math.ceil((len*(CurTime()-createtime)/math.min(len/12, math.max((len/20)^0.9, 4.5), 10))))
+            local str = sub(s2, 1, max)
+            if str == self:GetText() then return end
+            self:SetText(str)
+            surface.PlaySound("buttons/lightswitch2.wav")
+
+            if len == max then
+                self.NoMoreUpdate = true
+            end
+        end
+
+        failtext:AlphaTo(0, 1, time, function(_, self)
+            self:Remove()
+        end)
+
+
+        chat.AddText(Color(255,0,0), s1, " - ", Color(200,50,50), s2)
     end
-
-    failtext:AlphaTo(0, 1, time, function(_, self)
-        self:Remove()
-    end)
-
-
-    chat.AddText(Color(255,0,0), s1, " - ", Color(200,50,50), s2)
 
 
     gamemode.Call("PostOnMapFailed")

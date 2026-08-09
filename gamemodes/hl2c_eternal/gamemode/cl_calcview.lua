@@ -1,7 +1,7 @@
 -- Dedicated to player view calculations
 
 -- Console variables
-local hl2c_cl_thirdperson = CreateClientConVar("hl2c_cl_thirdperson", 0, true, false, "Enable thirdperson")
+local hl2ce_cl_thirdperson = CreateClientConVar("hl2ce_cl_thirdperson", 0, true, false, "Enable thirdperson")
 local hl2ce_cl_fpdeath = CreateClientConVar("hl2ce_cl_fpdeath", 0, true, false, "Enable firstperson death")
 local hl2ce_cl_fpdeath_freeview = CreateClientConVar("hl2ce_cl_fpdeath_freeview", 0, true, false, "Enable free view with first person death")
 local hl2ce_cl_fpdeath_classic = CreateClientConVar("hl2ce_cl_fpdeath_classic", 0, true, false, "Classic HL2 death view")
@@ -43,9 +43,9 @@ function GM:CalcView(ply, origin, angles, fov, znear, zfar)
 	end
 
 	-- Client thirdperson
-	if ( hl2c_cl_thirdperson:GetBool() && ply:Alive() && !ply:InVehicle() && ( ply:GetViewEntity() == ply ) ) then
+	if ( hl2ce_cl_thirdperson:GetBool() && ply:Alive() && !ply:InVehicle() && ( ply:GetViewEntity() == ply ) ) then
 	
-		if ( hl2c_cl_thirdperson:GetInt() == 1 ) then
+		if ( hl2ce_cl_thirdperson:GetInt() == 1 ) then
 		
 			local tpEndPos = ( origin - ( angles:Forward() * 100 ) ) + Vector( 0, 0, 16 )
 			local tpAngles = ( ply:GetEyeTrace().HitPos - tpEndPos ):Angle()
@@ -54,7 +54,7 @@ function GM:CalcView(ply, origin, angles, fov, znear, zfar)
 			view.angles = tpAngles
 			view.drawviewer = true
 		
-		elseif ( hl2c_cl_thirdperson:GetInt() == 2 ) then
+		elseif ( hl2ce_cl_thirdperson:GetInt() == 2 ) then
 		
 			local tpEndPos = origin - ( angles:Forward() * 50 ) + ( angles:Right() * 25 )
 			local tpAngles = ( ply:GetEyeTrace().HitPos - tpEndPos ):Angle()
