@@ -216,6 +216,7 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	net.Start("hl2ce_playerkilled")
 	net.WriteEntity(ply)
 	net.WriteEntity(attacker)
+	net.WriteBit(bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0)
 	net.WriteString(attacker:GetClass())
 	net.Broadcast()
 	

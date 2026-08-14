@@ -198,10 +198,12 @@ end)
 net.Receive("hl2ce_playerkilled", function(len)
     local pl = net.ReadEntity()
     local attacker = net.ReadEntity()
+    local diedoffall = net.ReadBit()
     local me = LocalPlayer()
 
     if pl == me then
         GAMEMODE.LastDeath = CurTime()
+        GAMEMODE.LastDeathFall = diedoffall == 1
     end
 
     if !GetConVar("hl2ce_cl_noplrdeathsound"):GetBool() then

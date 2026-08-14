@@ -325,8 +325,16 @@ function GM:HUDPaintBackground()
 	local max = 150
 	if !self.PlayerDeadAlpha or pl:Alive() or pl:Health() > 0 or pl:GetObserverMode() ~= OBS_MODE_NONE then
 		self.PlayerDeadAlpha = 0
+		if self.LastDeath and self.LastDeath+3 < CurTime() then
+			self.LastDeathFall = nil
+		end
 	else
 		self.PlayerDeadAlpha = math.min(max, self.PlayerDeadAlpha+FrameTime()*(max/0.4))
+	end
+
+	if self.LastDeathFall and !pl:Alive() and pl:GetObserverMode() == OBS_MODE_NONE then
+		surface.SetDrawColor(0, 0, 0, 255)
+		surface.DrawRect(0, 0, ScrW(), ScrH())
 	end
 
 	if self.PlayerDeadAlpha > 0 then
