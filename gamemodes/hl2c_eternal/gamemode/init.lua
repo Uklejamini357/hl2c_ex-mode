@@ -1110,6 +1110,14 @@ function GM:MapEntitiesSpawned()
 
 	-- Call a map edit (used by map lua hooks)
 	hook.Run("MapEdit")
+
+	for _,fucking_cranes in ipairs(ents.FindByClass("prop_vehicle_crane")) do
+		fucking_cranes:Remove()
+	end
+
+	for _,fucking_magnets in ipairs(ents.FindByClass("phys_magnet")) do
+		fucking_magnets:Remove()
+	end
 end
 function GM:InitPostEntity()
 	RunConsoleCommand("sv_sticktoground", "0")

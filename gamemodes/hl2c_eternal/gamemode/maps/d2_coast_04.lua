@@ -32,6 +32,17 @@ function hl2cMapEdit()
 	if !game.SinglePlayer() then
 		ents.FindByName("antlion_spawner")[1]:Fire("AddOutput", "spawntarget jeep")
 	end
+
+	ents.FindByClass("prop_vehicle_crane")[1]:Remove() -- fuck the crane
+	ents.FindByClass("phys_magnet")[1]:Remove()
+
+	local ent = ents.FindByName("prop_catwalk")[1]
+	if ent then
+		local phys = ent:GetPhysicsObject()
+		if phys then
+			phys:SetVelocityInstantaneous(Vector(math.max(-1000, -56239865102398), 0, 0))
+		end
+	end
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
@@ -40,6 +51,10 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 function hl2cAcceptInput(ent, input)
 	if ent:GetName() == "push_car_superjump_01" and string.lower(input) == "disable" then
 		return true
+	end
+
+	if ent:GetName() == "dock_spawn" and input:lower() == "forcespawn" and not ents.FindByClass("prop_vehicle_crane")[1] then
+		PrintMessage(3, "what the fuck, WHERE IS THE CRANE?!?!?!?") -- will revert this when the crane stops causing crashes on fucking prop collision
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
