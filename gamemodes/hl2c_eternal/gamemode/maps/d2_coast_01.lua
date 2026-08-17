@@ -70,6 +70,13 @@ function hl2cAcceptInput(ent, input, caller)
 	local inputlower = input:lower()
 
 	if entname == "logic_startcraneseq" and inputlower == "trigger" then
+		local jeep = ents.FindByName("jeep")[1] -- if there really are no cranes, just allow vehicle spawning anyway.
+		if ALLOWED_VEHICLE ~= "Jeep" then
+			ALLOWED_VEHICLE = "Jeep"
+			PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
+		end
+		jeep:Remove() -- that jeep will never move without the crane anyway so remove it
+
 		if GAMEMODE.EXMode then
 			timer.Simple(2.1, function()
 				PrintMessage(3, "Chapter 7")
@@ -80,7 +87,7 @@ function hl2cAcceptInput(ent, input, caller)
 		end
 	end
 
-	if !game.SinglePlayer() and ALLOWED_SPAWNVEHICLE_TRIGGER and entname == "jeep_escape_relay" and inputlower == "trigger" then
+	if !game.SinglePlayer() and ALLOWED_SPAWNVEHICLE_TRIGGER and ALLOWED_VEHICLE ~= "Jeep" and entname == "jeep_escape_relay" and inputlower == "trigger" then
 		ALLOWED_VEHICLE = "Jeep"
 		PrintMessage(HUD_PRINTTALK, "You're now allowed to spawn the Jeep (F3).")
 	end
