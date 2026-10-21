@@ -23,7 +23,9 @@ hook.Add("EntityTakeDamage", "InfDifficulty", function(ent, dmginfo)
 			if moneys < 0 then
 				s = s.." (at debt of "..moneys.." moneys)"
 			end
-			BroadcastLua("surface.PlaySound('npc/stalker/go_alert2a.wav')")
+			if moneys < -75 then
+				BroadcastLua("surface.PlaySound('npc/stalker/go_alert2a.wav')")
+			end
 			PrintMessage(3, s)
 
 			if moneys < -100 then

@@ -325,16 +325,8 @@ function GM:HUDPaintBackground()
 	local max = 150
 	if !self.PlayerDeadAlpha or pl:Alive() or pl:Health() > 0 or pl:GetObserverMode() ~= OBS_MODE_NONE then
 		self.PlayerDeadAlpha = 0
-		if self.LastDeath and self.LastDeath+3 < CurTime() then
-			self.LastDeathFall = nil
-		end
 	else
 		self.PlayerDeadAlpha = math.min(max, self.PlayerDeadAlpha+FrameTime()*(max/0.4))
-	end
-
-	if self.LastDeathFall and !pl:Alive() and pl:GetObserverMode() == OBS_MODE_NONE then
-		surface.SetDrawColor(0, 0, 0, 255)
-		surface.DrawRect(0, 0, ScrW(), ScrH())
 	end
 
 	if self.PlayerDeadAlpha > 0 then
@@ -343,6 +335,20 @@ function GM:HUDPaintBackground()
 	end
 end
 
+
+function GM:PreDrawHUD()
+	local pl = LocalPlayer()
+	if (!self.PlayerDeadAlpha or pl:Alive() or pl:Health() > 0 or pl:GetObserverMode() ~= OBS_MODE_NONE) and self.LastDeath and self.LastDeath+3 < CurTime() then
+		self.LastDeathFall = nil
+	end
+
+	cam.Start2D()
+	if self.LastDeathFall and !pl:Alive() and pl:GetObserverMode() == OBS_MODE_NONE then
+		surface.SetDrawColor(0, 0, 0, 255)
+		surface.DrawRect(0, 0, ScrW(), ScrH())
+	end
+	cam.End2D()
+end
 
 function GM:PostDrawHUD()
 	cam.Start2D()
@@ -465,27 +471,27 @@ function GM:Initialize()
 
 
 	-- Language
-	language.Add( "worldspawn", "World" )
-	language.Add( "func_door_rotating", "Door" )
-	language.Add( "func_door", "Door" )
-	language.Add( "phys_magnet", "Magnet" )
-	language.Add( "trigger_hurt", "Trigger Hurt" )
+	language.Add( "combine_mine", "Mine" )
 	language.Add( "entityflame", "Fire" )
 	language.Add( "env_explosion", "Explosion" )
 	language.Add( "env_fire", "Fire" )
+	language.Add( "func_door_rotating", "Door" )
+	language.Add( "func_door", "Door" )
 	language.Add( "func_tracktrain", "Train" )
-	language.Add( "npc_launcher", "Headcrab Pod" )
 	language.Add( "func_tank", "Mounted Turret" )
-	language.Add( "npc_helicopter", "Helicopter" )
-	language.Add( "npc_bullseye", "Turret" )
-	language.Add( "prop_vehicle_apc", "APC" )
 	language.Add( "item_healthkit", "Health Kit" )
 	language.Add( "item_healthvial", "Health Vial" )
-	language.Add( "combine_mine", "Mine" )
+	language.Add( "npc_bullseye", "Turret" )
 	language.Add( "npc_grenade_frag", "Grenade" )
+	language.Add( "npc_helicopter", "Helicopter" )
+	language.Add( "npc_launcher", "Headcrab Pod" )
 	language.Add( "npc_metropolice", "Civil Protection" )
 	language.Add( "npc_combine_s", "Combine Soldier" )
 	language.Add( "npc_strider", "Strider" )
+	language.Add( "phys_magnet", "Magnet" )
+	language.Add( "prop_vehicle_apc", "APC" )
+	language.Add( "trigger_hurt", "Trigger Hurt" )
+	language.Add( "worldspawn", "World" )
 
 	-- Run this command for a more HL2 style radiosity
 	RunConsoleCommand( "r_radiosity", "4" )
@@ -494,6 +500,7 @@ end
 
 function GM:InitPostEntity()
 	local ply = LocalPlayer()
+	-- ply:ConCommand("sndplaydelay -"..math.Rand(0,0.2).." npc/stalker/go_alert2a.wav")
 
 	if !file.Exists(self.VaultFolder.."/client/shown_help.txt", "DATA") then
 		ShowHelp()

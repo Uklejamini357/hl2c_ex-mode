@@ -339,13 +339,10 @@ function hl2cOnNPCKilled(ent, attacker)
 					"Hold ze fuck up how is this possible?!",
 					"Fuck you gman you set this up!!!",
 					"Barney died... the world is in danger.",
-					"ARE YOU FUCKIN--",
 				}))
 			else
 				PrintMessage(3, table.Random({
-					"...yeah let's just skip this part",
-					"Did you softlocked? Congrats.",
-					"You just killed barney on your own.",
+					"what the hell"
 				}))
 
 				local door = ents.FindByName("storage_room_door")[1]
