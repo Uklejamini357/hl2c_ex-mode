@@ -219,6 +219,7 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	net.WriteBit(bit.band(dmgInfo:GetDamageType(), DMG_FALL) ~= 0)
 	net.WriteString(attacker:GetClass())
 	net.Broadcast()
+	-- BroadcastLua([[LocalPlayer():EmitSound("@npc/stalker/go_alert2a.wav", 0)]])
 	
 	local diff = self:GetDifficulty(true, true)
 	local normal_diff = infmath.ConvertInfNumberToNormalNumber(diff)
@@ -438,7 +439,11 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		if not ispoisonheadcrab then
 			damage = damage * eff_difficulty^0.7
 		elseif entisplayer and ent:HasPerkActive("1_antipoison") then
-			damage = damage - math.min(self.EndlessMode and 100 or 25, ent:Health()/2)
+			if ent:HasPerkActive("3_celestial") then
+				damage = damage - ent:Health()/2
+			else
+				damage = damage - math.min(self.EndlessMode and 100 or 25, ent:Health()/2)
+			end
 		end
 	end
 
@@ -521,10 +526,13 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		end
 
 		if entisplayer then
-			if !ent.SessionStats.DamageTaken then
-				ent.SessionStats.DamageTaken = 0
+			if ent.SessionStats.DamageTaken then
+				ent.SessionStats.DamageTaken = ent.SessionStats.DamageTaken + math.min(ent:Health(), damage)
+			else
+				ent.SessionStats.DamageTaken = math.min(ent:Health(), damage)
 			end
-			ent.SessionStats.DamageTaken = ent.SessionStats.DamageTaken + math.min(ent:Health(), damage)
+
+			ent.m_LastDmgVelocity = ent:GetVelocity()
 		end
 
 		local hp = ent:Health()
@@ -564,6 +572,10 @@ function GM:PostEntityTakeDamage(ent, dmginfo, wasdamagetaken)
 			ent:OldSetHealthEX(2.1e9)
 		end
 		ent:Inf_SetHealth(math.max(ent:OldHealthEX(), ent:Inf_Health()))
+	end
+
+	if ent:IsPlayer() and ent:HasPerkActive("3_ultra_armor") then
+		ent:SetVelocity((ent.m_LastDmgVelocity - ent:GetVelocity()) * (ent:HasPerkActive("3_turbocharged_armor") and 0.3 or 0.7))
 	end
 end
 
@@ -1255,14 +1267,18 @@ function GM:OnNPCKilled(npc, killer, weapon)
 						diffmul = diffmul * 10
 					end
 
-					if attacker:HasPerkActive("2_difficult_decision") and difficulty:log10() < math.log10(30) then
-						diffmul = diffmul * 5
-					end
-
 					diffmul = diffmul * attacker:GetEternityUpgradeEffectValue("difficultygain_upgrader")
+
+					if attacker:HasPerkActive("2_difficult_decision") then
+						if difficulty:log10() < math.log10(30) then
+							diffmul = diffmul * 5
+						else
+							diffmul = diffmul ^ 1.05
+						end
+					end
 					
 					if attacker:HasPerkActive("3_the_eterlasting_moment") then
-						diffmul = diffmul ^ 1.05
+						diffmul = diffmul ^ 1.15
 					end
 				else
 					if attacker:HasPerkActive("1_better_knowledge") then
@@ -1298,13 +1314,26 @@ function GM:OnNPCKilled(npc, killer, weapon)
 
 		if killer:IsPlayer() then
 			if killer:HasPerkActive("3_vampiric_killer") and killer:Health() < killer:GetMaxHealth()*1.5 then
-				killer:SetHealth(math.min(killer:GetMaxHealth()*1.5, killer:Health() + killer:GetMaxHealth()*0.05))
+				local oldhp = killer:Health()
+				local heal = killer:GetMaxHealth()*0.05
+				if killer:Health() < killer:GetMaxHealth() then
+					killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + heal))
+					heal = (killer:Health() - oldhp)*0.1
+				end
+				if killer:Health() >= killer:GetMaxHealth() then
+					heal = heal * 0.1
+					killer:SetHealth(math.min(killer:GetMaxHealth()*1.1, killer:Health() + heal))
+				end
 			elseif killer:HasPerkActive("1_vampiric_killer") and killer:Health() < killer:GetMaxHealth() then
 				if self.EndlessMode then
 					killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + math.min(50, killer:GetMaxHealth()*0.04)))
 				else
 					killer:SetHealth(math.min(killer:GetMaxHealth(), killer:Health() + 2))
 				end
+			end
+
+			if killer:HasPerkActive("3_armor_steal") then
+				killer:SetArmor(math.min(killer:GetMaxArmor(), killer:Armor() + killer:GetMaxArmor()*0.15))
 			end
 		end
 	end
@@ -1405,19 +1434,51 @@ function GM:PlayerCanPickupItem(ply, item)
 	if (ply:Team() != TEAM_ALIVE) then
 		return false
 	end
+	if ply.cantPickUpMed then return false end
+
 	local class = item:GetClass()
 	if class == "item_healthkit" then
 		if ply:HasPerkActive("3_medkit_enhancer") then
 			if ply:Health() < ply:GetMaxHealth() then
+				ply.cantPickUpMed = true
 				timer.Simple(0, function() -- using a timer bcoz directly trying to set health while calling the hook won't really work much well
 					-- but even with timer sethealth will still be called 1 tick later (Troublesome, no?)
-					if not ply:IsValid() or not ply:Alive() then return end
+					if not ply:IsValid() then return end
+					ply.cantPickUpMed = nil
+					if not ply:Alive() then return end
 					ply:SetHealth(math.min(ply:GetMaxHealth(), ply:Health() + 100 + ply:GetMaxHealth()*0.2))
 				end)
 				return true
 			end
 		end
 	elseif class == "item_healthvial" then
+		if ply:HasPerkActive("3_medkit_enhancer") then
+			if ply:Health() < ply:GetMaxHealth() then
+				ply.cantPickUpMed = true
+				timer.Simple(0, function() -- using a timer bcoz directly trying to set health while calling the hook won't really work much well
+					-- but even with timer sethealth will still be called 1 tick later (Troublesome, no?)
+					if not ply:IsValid() then return end
+					ply.cantPickUpMed = nil
+					if not ply:Alive() then return end
+					ply:SetHealth(math.min(ply:GetMaxHealth(), ply:Health() + 40 + ply:GetMaxHealth()*0.08))
+				end)
+				return true
+			end
+		end
+	elseif class == "item_battery" then
+		if ply:HasPerkActive("3_armor_steal") then
+			if ply:Armor() < ply:GetMaxArmor() then
+				ply.cantPickUpMed = true
+				timer.Simple(0, function() -- using a timer bcoz directly trying to set health while calling the hook won't really work much well
+					-- but even with timer sethealth will still be called 1 tick later (Troublesome, no?)
+					if not ply:IsValid() then return end
+					ply.cantPickUpMed = nil
+					if not ply:Alive() then return end
+					ply:SetArmor(math.min(ply:Armor() + 500 + ply:GetMaxArmor()*0.15, ply:GetMaxArmor()))
+				end)
+				return true
+			end
+		end
 	end
 
 	return true
@@ -2720,4 +2781,32 @@ end)
 saverestore.AddSaveHook("HL2CE_NoSinglePlayerSupport", function()
 	BroadcastLua([[chat.AddText(Color(255,0,0), "Warning! ", Color(99, 121, 247), "Hl2ce", Color(255,120,0), " does not support hl2 save system!")]])
 	BroadcastLua([[chat.AddText(Color(255,120,0), "Avoid using save system, otherwise you may run into unwanted problems.")]])
+end)
+
+hook.Add("PlayerSay", "waaaahhh", function(pl,text)
+	local match = false
+	local str = ""
+	for i=1,#text do
+		print(text[i])
+		if str == "" then
+			if text[i] == "W" then
+				str = str.."W"
+			else return
+			end
+		elseif str:sub(1,1) == "W" and str:sub(-1) == "A" and #str < 6 then
+			if text[i] == "A" then
+				str = str.."A"
+			else return
+			end
+		elseif str:sub(-1,-1) == "H" and text[i] ~= "!" then
+			return
+		elseif text[i] ~= "A" and (str:sub(-1,-1) == "A" or str:sub(-1,-1) == "H") then
+			if text[i] == "H" then
+				str = str.."H"
+			else return
+			end
+		end
+	end
+
+	BroadcastLua([[LocalPlayer():EmitSound("@npc/stalker/go_alert2a.wav", 0)]])
 end)

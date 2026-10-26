@@ -41,6 +41,8 @@ function GM:UpgradesMenu()
 
 	local function MakeUpgrades()
 		for k, v in pairs(self.UpgradesEternity) do
+			local percnum = v.Percent and 100 or 1
+
 			local perkpanel = vgui.Create("DPanel")
 			perkpanel:SetPos(5, 5)
 	        local size_x,size_y = w-50, 150
@@ -74,7 +76,7 @@ function GM:UpgradesMenu()
 			perkdesc:SetFont("hl2ce_hudfont_small")
 			perkdesc:SetPos(0, 35)
 			local desc = string.format(isfunction(v.Description) and v.Description(ply) or v.Description,
-			infmath.Round((ply:GetEternityUpgradeEffectValue(k, 1) - 1) * 100))
+			infmath.Round((ply:GetEternityUpgradeEffectValue(k, 1) - (v.Percent and 1 or 0)) * percnum))
 			perkdesc:SetText(desc)
 
 			perkdesc:SetToolTip(desc)
@@ -106,13 +108,19 @@ function GM:UpgradesMenu()
 
 			local perkeffect = vgui.Create("DLabel", perkpanel)
 			perkeffect:SetFont("hl2ce_hudfont_small")
-			perkeffect:SetText(Format("Current effect: %s%% (Next: %s%%)", infmath.Round(ply:GetEternityUpgradeEffectValue(k)*100), infmath.Round(ply:GetEternityUpgradeEffectValue(k, ply.EternityUpgradeValues[k]+1)*100)))
+			perkeffect:SetText(Format(v.Percent and "Current effect: %s%% (Next: %s%%)" or "Current effect: %s (Next: %s)", 
+				infmath.Round(ply:GetEternityUpgradeEffectValue(k)*percnum),
+				infmath.Round(ply:GetEternityUpgradeEffectValue(k, (ply.EternityUpgradeValues[k] or 0)+1)*percnum))
+			)
 	        perkeffect:SetPos(10, 90)
 			perkeffect:SetSize(size_x - 20, 15)
 			perkeffect:SetWrap(true)
 			perkeffect:SetColor(Color(155,255,255,255))
 			perkeffect.Think = function(panel)
-				local txt = Format("Current effect: %s%% (Next: %s%%)", infmath.Round(ply:GetEternityUpgradeEffectValue(k)*100), infmath.Round(ply:GetEternityUpgradeEffectValue(k, ply.EternityUpgradeValues[k]+1)*100))
+				local txt = Format(v.Percent and "Current effect: %s%% (Next: %s%%)" or "Current effect: %s (Next: %s)",
+					infmath.Round(ply:GetEternityUpgradeEffectValue(k)*percnum),
+					infmath.Round(ply:GetEternityUpgradeEffectValue(k, (ply.EternityUpgradeValues[k] or 0)+1)*percnum)
+				)
 				if panel:GetText() == txt then return end
 				panel:SetText(txt)	
 			end
@@ -163,7 +171,7 @@ function GM:UpgradesMenu()
 				net.SendToServer()
 			end
 
-			local boughttimes = ply.EternityUpgradeValues[k]
+			local boughttimes = ply.EternityUpgradeValues[k] or 0
 			local timesbought = vgui.Create("DLabel", perkpanel)
 			timesbought:SetFont("hl2ce_hudfont_small")
 			timesbought:SetText("Bought: "..boughttimes)
@@ -172,7 +180,7 @@ function GM:UpgradesMenu()
 			timesbought:SetWrap(true)
 			timesbought:SetColor(Color(255,155,255,255))
 			timesbought.Think = function(panel)
-				boughttimes = ply.EternityUpgradeValues[k]
+				boughttimes = ply.EternityUpgradeValues[k] or 0
 				local txt = "Bought: "..boughttimes
 				if panel:GetText() == txt then return end
 				panel:SetText(txt)	

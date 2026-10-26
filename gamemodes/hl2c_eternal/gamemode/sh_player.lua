@@ -118,6 +118,9 @@ function meta:GetPrestigeGainMul()
 	if self:HasPerkActive("3_prestige_improver") and infmath.ConvertInfNumberToNormalNumber(count+self.Prestige) >= 200 then
 		count = count / (1 + 0.005*infmath.max(0, (self.Prestige*2+count)/2))
 	end
+	if self:HasPerkActive("1_breaking_point") then
+		count = count * 1.5
+	end
 	count = infmath.floor(count)
 
 	return infmath.ConvertInfNumberToNormalNumber(count)
@@ -140,6 +143,14 @@ function meta:GetEternityGainMul()
 	]]
 end
 
+function meta:GetCelestialityGainMul()
+	if self:HasPerkActive("1_overprestiged") then
+		return 2
+	end
+
+	return 1
+end
+
 function meta:GetMaxLevel()
 	return self:HasCelestialityUnlocked() and 1000 or self:HasEternityUnlocked() and 250 or MAX_LEVEL
 end
@@ -149,12 +160,18 @@ function meta:GetMaxPrestige()
 end
 
 function meta:GetMaxEternity()
-	return self:HasCelestialityUnlocked() and 50 or MAX_ETERNITIES
+	return (self:HasPerkActive("1_break_limits") and 200 or self:HasCelestialityUnlocked() and 50 or MAX_ETERNITIES) +
+	self:GetEternityUpgradeEffectValue("eternitycap_upgrader")
 end
 
 function meta:GetMaxCelestiality()
 	return math.huge
 end
+
+-- damage knockback mul
+-- function meta:()
+-- 	return 
+-- end
 
 function meta:GetMaxSkillLevel(perk)
 	if GAMEMODE.SkillsDisabled then return 0 end
@@ -239,7 +256,7 @@ function meta:GetDamageMul(dmgInfo, ent)
 	local GM = GAMEMODE
 	local damagemul = self:GetMinDamageMul(dmgInfo, ent)
 
-	if attacker:HasPerkActive("1_critical_damage") and math.random(100) <= (GM.EndlessMode and 12 or 7) then
+	if attacker:HasPerkActive("3_eternal_enhancer") or attacker:HasPerkActive("1_critical_damage") and math.random(100) <= (GM.EndlessMode and 12 or 7) then
 		damagemul = damagemul * (GM.EndlessMode and 2.2 or 1.2)
 	end
 
@@ -338,7 +355,7 @@ function meta:GetMinDamageResistanceMul(dmgInfo)
 
 	if ent:HasPerkActive("1_super_armor") and ent:Armor() > 0 then
 		local limit = GM.EndlessMode and 0.45 or 0.05
-		damageresistancemul = damageresistancemul * (1 + (math.Clamp(limit*ent:Armor()/100, 0, limit)))
+		damageresistancemul = damageresistancemul * (1 + (math.Clamp(limit*(ent:HasPerkActive("3_eternal_enhancer") and ent:GetMaxArmor() or ent:Armor())/100, 0, limit)))
 	end
 
 	if ent:HasPerkActive("3_celestial") then
@@ -355,6 +372,10 @@ function meta:GetMinDamageResistanceMul(dmgInfo)
 
 	if ent:HasEternityUnlocked() then
 		damageresistancemul = damageresistancemul * ent:GetEternityUpgradeEffectValue("damageresistance_upgrader")
+	end
+
+	if ent:HasPerkActive("1_critical_resistance") then
+		damageresistancemul = damageresistancemul * math.max(1, GM:GetDifficulty():log(5))
 	end
 
 	if infmath.ConvertInfNumberToNormalNumber(ent.PrestigePoints) < 0 then

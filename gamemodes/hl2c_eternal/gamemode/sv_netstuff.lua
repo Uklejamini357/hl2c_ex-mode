@@ -119,6 +119,11 @@ net.Receive("hl2ce_unlockperk", function(len, ply)
     if !perk then return end
     if ply.UnlockedPerks[name] then return end
 
+    if perk.EternalEnhancer and !ply:HasPerkUnlocked("3_eternal_enhancer") then
+        ply:SendLua([[chat.AddText(Color(255,0,0), "You tried.")]])
+        return
+    end
+
     local cost = infmath.ConvertInfNumberToNormalNumber(perk.Cost)
     local prestigelvl = perk.PrestigeLevel
     local prestigereq = infmath.ConvertInfNumberToNormalNumber(perk.PrestigeReq)

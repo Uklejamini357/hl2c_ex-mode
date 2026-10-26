@@ -283,7 +283,47 @@ function GM:CMenu()
 			ContextMenu:Close()
 		end
 	end
+
+	-- if celestialityunlocked then
+	-- 	local upgrades = vgui.Create("DButton", ContextMenu)
+	-- 	upgrades:SetSize(buttonsize_x + 20, buttonsize_y)
+	-- 	upgrades:Center()
+	-- 	x,y = upgrades:GetPos()
+	-- 	upgrades:SetPos(x, y + 300)
+	-- 	upgrades:SetText(translate.Get("weaponslab"))
+	-- 	upgrades:SetToolTip("")
+	-- 	upgrades:SetTextColor(Color(255,255,255))
+	-- 	upgrades.Paint = function(panel)
+	-- 		surface.SetDrawColor(250, 50, 0, 255)
+	-- 		surface.DrawOutlinedRect(0, 0, panel:GetWide(), panel:GetTall())
+	-- 		draw.RoundedBox(2, 0, 0, panel:GetWide(), panel:GetTall(), Color(0, 0, 0, 130))
+	-- 	end
+	-- 	upgrades.DoClick = function()
+	-- 		gamemode.Call("UpgradesMenu")
+	-- 		ContextMenu:Close()
+	-- 	end
+	-- end
 	
+	-- if GAMEMODE:GetDifficulty():log10() >= 5 then -- 1 million%
+	-- 	local upgrades = vgui.Create("DButton", ContextMenu)
+	-- 	upgrades:SetSize(buttonsize_x + 20, buttonsize_y)
+	-- 	upgrades:Center()
+	-- 	x,y = upgrades:GetPos()
+	-- 	upgrades:SetPos(x, y + 400)
+	-- 	upgrades:SetText(translate.Get("difficulty_upgrades"))
+	-- 	upgrades:SetToolTip("The difficulty is becoming much stronger...\nAccessible after reaching 1M% difficulty.\n(WIP)")
+	-- 	upgrades:SetTextColor(Color(255,255,255))
+	-- 	upgrades.Paint = function(panel)
+	-- 		surface.SetDrawColor(250, 50, 0, 255)
+	-- 		surface.DrawOutlinedRect(0, 0, panel:GetWide(), panel:GetTall())
+	-- 		surface.SetDrawColor(250, 50, 0, 65+65*math.sin(SysTime()*1.2))
+	-- 		surface.DrawRect(1, 1, panel:GetWide()-1, panel:GetTall()-1)
+	-- 	end
+	-- 	upgrades.DoClick = function()
+	-- 		gamemode.Call("DifficultyUpgradesMenu")
+	-- 		ContextMenu:Close()
+	-- 	end
+	-- end
 
 
 
@@ -403,6 +443,7 @@ function GM:PerksMenu()
 	local function MakePerks(panel, prestige)
 		for k, v in SortedPairsByMemberValue(self.PerksData, "PrestigeReq") do
 			if prestige ~= v.PrestigeLevel then continue end
+			if v.EternalEnhancer and !ply:HasPerkUnlocked("3_eternal_enhancer") then continue end
 			local prestigereq = v.PrestigeReq --isinfnumber(v.PrestigeReq) and v.PrestigeReq or InfNumber(v.PrestigeReq)
 
 			local perkpanel = vgui.Create("DPanel", panel)
@@ -414,6 +455,10 @@ function GM:PerksMenu()
 				false, false, false, false)
 				surface.SetDrawColor(50, 50, 50, 255)
 				surface.DrawOutlinedRect(0, 0, panel:GetWide(), panel:GetTall())
+				if v.EternalEnhancer then
+					surface.SetDrawColor(0, 0, 250, 5+5*math.sin(SysTime()))
+					surface.DrawRect(1, 1, panel:GetWide()-1, panel:GetTall()-1)
+				end
 			end
 
 			local perkname = vgui.Create("DLabel", perkpanel)
@@ -434,6 +479,9 @@ function GM:PerksMenu()
 			perkdesc:SetFont("hl2ce_hudfont_small")
 			perkdesc:SetText(self.EndlessMode and v.DescriptionEndless or v.Description or "Doesn't do anything.")
 			perkdesc:SetToolTip(v.Name.."\n\nIn Non-Endless Mode:\n"..(v.Description or "Doesn't do anything.")..(v.DescriptionEndless and "\n\nIn Endless Mode:\n"..v.DescriptionEndless or ""))
+			if v.EternalEnhancer then
+				perkdesc:SetToolTip(perkdesc:GetTooltip().."\nUnlocked from Eternal Enhancer.")
+			end
 			perkdesc:SetMouseInputEnabled(true)
 			if v.AddDescription then
 				perkdesc:SetTextColor(Color(255,255,255))

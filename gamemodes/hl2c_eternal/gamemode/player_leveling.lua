@@ -16,6 +16,7 @@ end
 local meta = FindMetaTable("Player")
 
 function meta:GiveXP(xp, nomul)
+    -- do return 0 end
     local xpmul = IN(1)
 
     if !nomul then
@@ -38,12 +39,11 @@ function meta:GiveXP(xp, nomul)
         local prestigexpmul = 1
         prestigexpmul = prestigexpmul + infmath.min(self.Prestige*0.2, 100) + infmath.min(self.Eternities*1.2, 100) + infmath.min(self.Celestiality*5, 100)
 
-        if nomul then
-            xpmul = 1
-            prestigexpmul = 1
-        end
-
         xpmul = xpmul * prestigexpmul
+
+        if self:HasPerkActive("1_breaking_point") then
+            xpmul = xpmul ^ 1.15
+        end
     end
 
 
@@ -214,6 +214,8 @@ function meta:GainCelestiality()
     elseif self:CanCelestiality() then
         local prevlvl = self.Celestiality
         local prevcelestialityunlocked = self:HasCelestialityUnlocked()
+        local gainmul = self:GetCelestialityGainMul()
+
         self.XP = IN(0)
         self.XPUsedThisPrestige = IN(0)
         self.Level = 1
@@ -222,21 +224,23 @@ function meta:GainCelestiality()
         self.PrestigePoints = self:HasPerkActive("2_perk_points") and 12 or 0
         self.Eternities = 0
         self.EternityPoints = self:HasPerkActive("3_extremility") and 3 or 0
-        self.Celestiality = self.Celestiality + 1
-        self.CelestialityPoints = self.CelestialityPoints + 1
+        self.Celestiality = self.Celestiality + gainmul
+        self.CelestialityPoints = self.CelestialityPoints + gainmul
 
-        for id,_ in pairs(self.UnlockedPerks) do
-            local perk = GAMEMODE.PerksData[id]
-            if not perk then continue end
-            if perk.PrestigeLevel == 1 then
-                if self:HasPerkActive("3_prestige_improver") then continue end
-                if self:HasPerkActive("2_prestige_improver") then
-                    self.PrestigePoints = self.PrestigePoints - perk.Cost
-                else
+        if not self:HasPerkActive("3_eternal_enhancer") then
+            for id,_ in pairs(self.UnlockedPerks) do
+                local perk = GAMEMODE.PerksData[id]
+                if not perk then continue end
+                if perk.PrestigeLevel == 1 then
+                    if self:HasPerkActive("3_prestige_improver") then continue end
+                    if self:HasPerkActive("2_prestige_improver") then
+                        self.PrestigePoints = self.PrestigePoints - perk.Cost
+                    else
+                        self.UnlockedPerks[id] = nil
+                    end
+                elseif perk.PrestigeLevel == 2 then
                     self.UnlockedPerks[id] = nil
                 end
-            elseif perk.PrestigeLevel == 2 then
-                self.UnlockedPerks[id] = nil
             end
         end
 
