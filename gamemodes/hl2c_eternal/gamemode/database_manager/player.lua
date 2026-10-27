@@ -30,6 +30,13 @@ function GM:LoadPlayer(ply)
             end
 
             ply[variable] = val
+
+            if variable == "EternityUpgradeValues" then
+            	for upgrade,_ in pairs(self.UpgradesEternity) do
+            		if ply.EternityUpgradeValues[upgrade] then continue end
+                    ply.EternityUpgradeValues[upgrade] = 0
+            	end
+            end
         end
     else
         print("Created a new profile for "..ply:Nick() .." (UniqueID: "..ply:UniqueID()..")")

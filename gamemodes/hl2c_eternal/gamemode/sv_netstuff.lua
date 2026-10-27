@@ -85,6 +85,9 @@ net.Receive("hl2ce_upgperk", function(length, ply)
     local sks = ply.Skills
     local skill = GAMEMODE.SkillsInfo[perk]
 
+    if !skill then return end
+    if ply:HasPerkActive("2_full_skill") then ply:PrintMessage(3, "you dont need this anymore") return end
+
     local curpoints = ply.StatPoints
     local limit = ply:GetMaxSkillLevel(perk)
 
@@ -118,6 +121,11 @@ net.Receive("hl2ce_unlockperk", function(len, ply)
     local perk = GAMEMODE.PerksData[name]
     if !perk then return end
     if ply.UnlockedPerks[name] then return end
+
+    if perk.Hidden and perk.Hidden(ply) then 
+        ply:SendLua([[chat.AddText(Color(255,0,0), "absolutely no")]])
+        return
+    end
 
     if perk.EternalEnhancer and !ply:HasPerkUnlocked("3_eternal_enhancer") then
         ply:SendLua([[chat.AddText(Color(255,0,0), "You tried.")]])
@@ -172,6 +180,7 @@ net.Receive("hl2ce_buyupgrade", function(len, ply)
 
 	local upgrade = GAMEMODE.UpgradesEternity[upg]
 	if not upgrade then return end
+    if upgrade.Unlocked and not upgrade.Unlocked(ply) then return end
 
     local old = ply.EternityUpgradeValues[upg]
     local function BuyUpgrade(ply, upg)

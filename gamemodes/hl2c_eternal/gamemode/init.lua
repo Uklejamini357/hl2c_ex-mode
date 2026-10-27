@@ -1308,7 +1308,23 @@ function GM:OnNPCKilled(npc, killer, weapon)
 					moneygain = moneygain * 1.85
 				end
 
-				attacker:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*npcmoneymul*(infmath.min(attacker:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25)))
+				if attacker:HasPerkActive("2_wealthy_approach") then
+					moneygain = moneygain * 3.15
+				end
+
+				moneygain = moneygain * attacker:GetEternityUpgradeEffectValue("moneygain_upgrader")
+
+				if attacker:HasPerkActive("2_wealthy_approach") then
+					moneygain = moneygain ^ 1.2
+				end
+
+				if attacker:HasPerkActive("3_eternal_will") then
+					moneygain = moneygain ^ 1.5
+				end
+
+				attacker:GiveMoneysGain(infmath.Round(NPC_MONEYS_VALUES[npcclass]*npcmoneymul*
+					moneygain*(infmath.min(attacker:GetMaxDifficultyMoneyGainMul(), difficulty)^0.25))
+				)
 			end
 		end
 
@@ -2783,6 +2799,8 @@ saverestore.AddSaveHook("HL2CE_NoSinglePlayerSupport", function()
 	BroadcastLua([[chat.AddText(Color(255,120,0), "Avoid using save system, otherwise you may run into unwanted problems.")]])
 end)
 
+
+do return end
 hook.Add("PlayerSay", "waaaahhh", function(pl,text)
 	local match = false
 	local str = ""

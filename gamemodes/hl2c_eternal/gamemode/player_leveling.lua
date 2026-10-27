@@ -84,7 +84,7 @@ function meta:GainLevel()
         )
     end
 
-    if self:HasPerkActive("2_skills_improver") then
+    if self:HasPerkActive("2_skills_improver") and not self:HasPerkActive("2_full_skill") then
         local equalspuse = infmath.ConvertInfNumberToNormalNumber(infmath.floor(self.StatPoints / table.Count(GAMEMODE.SkillsInfo)))
         for id,count in pairs(self.Skills) do
             if count >= self:GetMaxSkillLevel(id) then continue end
@@ -122,8 +122,10 @@ function meta:GainPrestige()
         self.PrestigePoints = self.PrestigePoints + gainmul
         self:PrintMessage(HUD_PRINTTALK, Format("Prestige increased! (%s --> %s)", FormatNumber(prevlvl), FormatNumber(self.Prestige)))
 
-        for id,_ in pairs(GAMEMODE.SkillsInfo) do
-            self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
+        if !self:HasPerkActive("2_full_skill") then
+            for id,_ in pairs(GAMEMODE.SkillsInfo) do
+                self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
+            end
         end
 
         if not prevprestigeunlocked then
@@ -174,8 +176,10 @@ function meta:GainEternity()
             end
         end
 
-        for id,_ in pairs(GAMEMODE.SkillsInfo) do
-            self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
+        if !self:HasPerkActive("2_full_skill") then
+            for id,_ in pairs(GAMEMODE.SkillsInfo) do
+                self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
+            end
         end
 
         -- if self:HasEternityUnlocked() then
@@ -244,8 +248,10 @@ function meta:GainCelestiality()
             end
         end
 
-        for id,_ in pairs(GAMEMODE.SkillsInfo) do
-            self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
+        if !self:HasPerkActive("2_full_skill") then
+            for id,_ in pairs(GAMEMODE.SkillsInfo) do
+                self.Skills[id] = self:HasPerkActive("3_prestige_improver") and 50 or 0
+            end
         end
 
         -- if self:HasEternityUnlocked() then

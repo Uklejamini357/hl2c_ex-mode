@@ -444,6 +444,7 @@ function GM:PerksMenu()
 		for k, v in SortedPairsByMemberValue(self.PerksData, "PrestigeReq") do
 			if prestige ~= v.PrestigeLevel then continue end
 			if v.EternalEnhancer and !ply:HasPerkUnlocked("3_eternal_enhancer") then continue end
+		    if v.Hidden and v.Hidden(ply) then continue end
 			local prestigereq = v.PrestigeReq --isinfnumber(v.PrestigeReq) and v.PrestigeReq or InfNumber(v.PrestigeReq)
 
 			local perkpanel = vgui.Create("DPanel", panel)
@@ -692,6 +693,6 @@ function GM:MakePrestigePanel()
 	MakeText(self.PrestigePanel, "Must be able to prestige and reach "..MAX_ETERNITIES.." Eternities", "hl2ce_hudfont_small")
 	MakeText(self.PrestigePanel, "First celestiality:", "hl2ce_hudfont_small")
 	MakeText(self.PrestigePanel, "- Raises max level to 1000", "hl2ce_hudfont_small")
-	MakeText(self.PrestigePanel, "- Max skills level are raised to 350", "hl2ce_hudfont_small")
+	MakeText(self.PrestigePanel, "- Max skills level are raised to 200", "hl2ce_hudfont_small")
 
 end

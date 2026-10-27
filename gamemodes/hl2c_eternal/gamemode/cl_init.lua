@@ -968,14 +968,17 @@ function GM:ShowSkills()
 			local de = translate_Get(v.DescriptionEndless)
 
 			local formatted = name.."\n\n"..translate_Get("in_ne_mode").."\n"..d..(de and "\n\n"..translate_Get("in_e_mode").."\n"..de or "")
+			if pl:HasPerkActive("2_full_skill") then
+				formatted = formatted.."\nSkill level is based on unspent skill points, with the help of Full Skill perk."
+			end
 			local LabelDefense = vgui.Create("DLabel")
 			LabelDefense:SetPos(50, 50)
-			LabelDefense:SetText(name..": "..tostring(pl.Skills[k]))
+			LabelDefense:SetText(name..": "..tostring(pl:HasPerkActive("2_full_skill") and pl:GetSkillAmount(k) or pl.Skills[k]))
 			LabelDefense:SetTextColor(color_black)
 			LabelDefense:SetToolTip(formatted)
 			LabelDefense:SizeToContents()
 			LabelDefense.Think = function(this)
-				local txt = name..": "..tostring(pl.Skills[k])
+				local txt = name..": "..tostring(pl:HasPerkActive("2_full_skill") and pl:GetSkillAmount(k) or pl.Skills[k])
 				if txt == this:GetText() then return end
 				this:SetText(txt)
 				this:SizeToContents()
@@ -1003,6 +1006,10 @@ function GM:ShowSkills()
 					net.SendToServer()
 				end, nil, "Apply", "Cancel")
 			end
+			if pl:HasPerkActive("2_full_skill") then
+				Button:SetEnabled(false)
+			end
+
 			skillsForm:AddItem(Button)
 		end
 	end

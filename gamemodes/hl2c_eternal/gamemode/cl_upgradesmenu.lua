@@ -41,6 +41,7 @@ function GM:UpgradesMenu()
 
 	local function MakeUpgrades()
 		for k, v in pairs(self.UpgradesEternity) do
+			if v.Unlocked and not v.Unlocked(ply) then continue end
 			local percnum = v.Percent and 100 or 1
 
 			local perkpanel = vgui.Create("DPanel")

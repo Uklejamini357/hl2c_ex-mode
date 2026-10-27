@@ -47,8 +47,14 @@ end
 
 function meta:GetMaxDifficultyXPGainMul()
 	-- return math.huge
-	return self:HasCelestialityUnlocked() and 1000*(self.Celestiality^0.5) or
+	local count = self:HasCelestialityUnlocked() and 1000*(self.Celestiality^0.5) or
 	self:HasEternityUnlocked() and math.min(1e3, 250*infmath.ConvertInfNumberToNormalNumber(self.Eternities)^0.5) or self:HasPrestigeUnlocked() and 75 or 15
+
+	if self:HasPerkActive("1_break_limits") then
+		count = count * math.Clamp(GAMEMODE:GetDifficulty():log10(), 1, 10)
+	end
+
+	return count
 end
 
 function meta:GetMaxDifficultyMoneyGainMul()
@@ -58,6 +64,10 @@ end
 
 function meta:GetSkillAmount(stat)
 	if GAMEMODE.SkillsDisabled then return 0 end
+
+	if self:HasPerkActive("2_full_skill") then
+		return self:GetMaxSkillLevel(stat)
+	end
 
 	return math.Clamp(self.Skills[stat] or 0, 0, GAMEMODE.EndlessMode and 1e6 or 10)
 end
@@ -144,11 +154,17 @@ function meta:GetEternityGainMul()
 end
 
 function meta:GetCelestialityGainMul()
-	if self:HasPerkActive("1_overprestiged") then
-		return 2
+	local count = 1
+
+	if self:HasPerkActive("2_barrier_break") then
+		count = count * (math.sqrt(9+(4*y/5))-3)/4
 	end
 
-	return 1
+	if self:HasPerkActive("1_overprestiged") then
+		count = count * 2
+	end
+
+	return count
 end
 
 function meta:GetMaxLevel()
@@ -175,6 +191,14 @@ end
 
 function meta:GetMaxSkillLevel(perk)
 	if GAMEMODE.SkillsDisabled then return 0 end
+
+	if self:HasPerkActive("2_full_skill") then
+		if (self.StatPoints / 2) > 10000 then
+			return math.floor(math.min(10000, self.StatPoints / 2) + math.max(0, (self.StatPoints-20000)/3))
+		else
+			return math.max(200, math.floor(self.StatPoints / 2))
+		end
+	end
 
 	return self:HasCelestialityUnlocked() and 200 or self:HasEternityUnlocked() and (self:HasPerkActive("2_skills_improver") and 80 or 60) or self:HasPrestigeUnlocked() and 35 or 20
 end

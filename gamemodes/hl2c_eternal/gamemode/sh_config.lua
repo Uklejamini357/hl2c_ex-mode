@@ -349,7 +349,7 @@ GM.PerksData = {
 
 	["1_break_limits"] = {
 		Name = "Break Limits",
-		DescriptionEndless = "Eternity cap is increased to 200.",
+		DescriptionEndless = "Eternity cap is increased to 200. Max XP gain from difficuly is multiplied by log10(difficulty), at maximum of x10.",
 		Cost = 450,
 		PrestigeReq = 1000,
 		PrestigeLevel = 1,
@@ -370,8 +370,8 @@ GM.PerksData = {
 	["1_overprestiged"] = {
 		Name = "Overprestiged",
 		DescriptionEndless = "Boosts Celestialty gain rate by x2. Unlocks a new eternity upgrade.",
-		Cost = 2789,
-		PrestigeReq = 4000,
+		Cost = 4321,
+		PrestigeReq = 6789,
 		PrestigeLevel = 1,
 		EternalEnhancer = true,
 		EndlessOnly = true
@@ -463,10 +463,28 @@ GM.PerksData = {
 	-- Eternity+
 
 	["2_full_skill"] = {
-		Name = "Full skill (NYI)",
-		DescriptionEndless = "Skills level no longer resets between resets. Skills level is now equal to maximum reached Skills Max Level.\nSkills max level is based on starting skill points and unspent skill points. Softcaps after level 10K.",
-		Cost = 60,
-		PrestigeReq = 85,
+		Name = "Full skill",
+		DescriptionEndless = "Skills level no longer resets between resets. Skills level is now equal to maximum reached Skills Max Level.\nSkills max level is based on unspent skill points. Softcaps after level 10K.",
+		Cost = 45,
+		PrestigeReq = 150,
+		PrestigeLevel = 2,
+		EternalEnhancer = true
+	},
+
+	["2_wealthy_approach"] = {
+		Name = "Wealthy Approach",
+		DescriptionEndless = "3.15x to Moneys gain and ^1.2 to its multiplier",
+		Cost = 135,
+		PrestigeReq = 300,
+		PrestigeLevel = 2,
+		EternalEnhancer = true
+	},
+
+	["2_barrier_break"] = {
+		Name = "Barrier Break",
+		DescriptionEndless = "Celestiality gain is increased based on Eternities. Unlocks new Celestiality perks...",
+		Cost = 300,
+		PrestigeReq = 500,
 		PrestigeLevel = 2,
 		EternalEnhancer = true
 	},
@@ -589,7 +607,7 @@ GM.PerksData = {
 
 	["3_eternal_enhancer"] = {
 		Name = "Eternal Enhnacer",
-		DescriptionEndless = "Critical Damage perk is no longer luck based. Super Armor perk damage res. bonus is now dependent on max armor.\nCelestiality reset no longer resets pre-Celestiality perks.\nUnlock new pre-Celestiality perks. Prestige/Eternity points no longer go negative on Eternity/Celestiality reset.",
+		DescriptionEndless = "Critical Damage perk is no longer luck based. Super Armor perk damage res. bonus is now dependent on max armor.\nCelestiality reset no longer resets pre-Celestiality perks.\nUnlocks new pre-Celestiality perks. Prestige/Eternity points no longer go negative on Eternity/Celestiality reset.",
 		Cost = 7,
 		PrestigeReq = 20,
 		PrestigeLevel = 3
@@ -597,10 +615,46 @@ GM.PerksData = {
 
 	["3_highly_enhanced_organism"] = {
 		Name = "Highly-Enhanced Organism",
-		DescriptionEndless = "+10K health. Your health is multiplied based on the amount of perks you have unlocked.\n",
+		DescriptionEndless = "+10K health. Your health is multiplied based on the amount of perks you have unlocked.",
 		Cost = 15,
 		PrestigeReq = 35,
 		PrestigeLevel = 3
+	},
+
+
+	-- Final Celestialities
+
+	["3_unknowingly_eternal"] = {
+		Name = "Unknowingly eternal",
+		DescriptionEndless = "\"Eternity cap upgrader\" eternity upgrade effect is doubled.",
+		Cost = 55,
+		PrestigeReq = 130,
+		PrestigeLevel = 3,
+		Hidden = function(ply)
+			return not ply:HasPerkUnlocked("2_barrier_break")
+		end
+	},
+
+	["3_ultimatum"] = {
+		Name = "The Ultimatum",
+		DescriptionEndless = "Weaken resistance debuff by 15%. Base damage inflicts debuff to enemies, resulting in the same enemy taking more damage, the more base damage it takes.\nBase damage = damage dealt before it is altered by multiplications and powers, including difficulty. (NYI)",
+		Cost = 160,
+		PrestigeReq = 240,
+		PrestigeLevel = 3,
+		Hidden = function(ply)
+			return not ply:HasPerkUnlocked("2_barrier_break")
+		end
+	},
+
+	["3_the_end"] = {
+		Name = "The end",
+		DescriptionEndless = "Coming soon...",
+		Cost = 9999999,
+		PrestigeReq = 400,
+		PrestigeLevel = 3,
+		Hidden = function(ply)
+			return not ply:HasPerkUnlocked("2_barrier_break")
+		end
 	},
 
 
@@ -626,7 +680,8 @@ GM.PerksData = {
 		DescriptionEndless = "Your health and damage taken becomes logarithmed (min 0.01 damage taken)\nx100 to your health after logarithm (NYI)",
 		Cost = 1e100,
 		PrestigeReq = 1000000,
-		PrestigeLevel = 3
+		PrestigeLevel = 3,
+		Hidden = function() return true end
 	},
 
 }
@@ -698,6 +753,10 @@ GM.UpgradesEternity = {
 		Cost = function(ply, amt) return InfNumber(400) + InfNumber(80*amt*amt)^(1 + amt*0.01)^math.max(1, 0.5+amt/2e3) end,
 		EffectValue = function(ply, amt)
 			local val = 10*amt
+
+			if ply:HasPerkUnlocked("3_unknowingly_eternal") then
+				val = val * 2
+			end
 
 			return val
 		end,
