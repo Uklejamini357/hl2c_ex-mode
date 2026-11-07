@@ -28,10 +28,10 @@ end
 function ENT:AcceptInput(input, activator, caller, value)
 	if input == "cscanner_photograph" then
 		if caller.VariantType == 1 then
-			if caller:GetPos():DistToSqr(activator:GetPos()) < 90000 then
+			if caller:GetPos():DistToSqr(activator:GetPos()) < 250000 then
 				local d = DamageInfo()
 				d:SetDamage(10)
-				d:SetDamageType(DMG_SLASH)
+				d:SetDamageType(DMG_SONIC)
 				d:SetAttacker(caller)
 				d:SetInflictor(ents.FindByName("gmod_gamerules")[1] or caller)
 				d:SetWeapon(self)
