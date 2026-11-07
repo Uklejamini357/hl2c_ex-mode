@@ -1,6 +1,8 @@
 NEXT_MAP = "ep1_c17_06"
 
-TRIGGER_DELAYMAPLOAD = {Vector(9888, 9664, -736), Vector(9632, 9536, -512)} -- Skip this map.
+TRIGGER_DELAYMAPLOAD = {Vector(9888, 9664, -736), Vector(9632, 9536, -512), function(ent, pl)
+	return false
+end}
 
 -- TRIGGER_CHECKPOINT = {
 	-- {Vector(1088, 1974, -256), Vector(1216, 1942, -144), -90}

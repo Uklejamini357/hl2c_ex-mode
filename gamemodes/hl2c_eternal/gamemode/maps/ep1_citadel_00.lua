@@ -4,7 +4,7 @@ GM.XP_REWARD_ON_MAP_COMPLETION = 0
 RESET_PL_INFO = true
 
 TRIGGER_CHECKPOINT = {
-	{ Vector( -8922, 5856, -144 ), Vector( -9106, 5744, 8 ) },
+	-- { Vector( -8922, 5856, -144 ), Vector( -9106, 5744, 8 ) },
 	{ Vector( -6720, 5572, -124 ), Vector( -6890, 5512, 0 ) },
 	-- { Vector( 4318, 4288, -6344 ), Vector( 4064, 3936, -5944 ) }
 }
@@ -19,7 +19,14 @@ local allowunlock
 function hl2cPlayerSpawn(ply)
 	ply:Freeze(not GAMEMODE.MapVars.ShouldNotFreezePlayer)
 end
-hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
+hook.Add("PlayerSpawn", "hl2ce_PlayerSpawn", hl2cPlayerSpawn)
+
+function hl2cPlayerSpawnLoadout(ply)
+    if GAMEMODE/MapVars.PhyscannonGiven then
+    	ply:Give("weapon_physcannon")
+    end
+end
+hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawnLoadout)
 
 function hl2cPlayerPostThink(ply)
     if GAMEMODE.MapVars.ShouldNotFreezePlayer then return end
@@ -39,8 +46,17 @@ function hl2cAcceptInput(ent, input, activator)
         return true
     end
 
+    if ent:GetName() == "ghostanim_DogIntro" and string.lower(input) == "kill" then
+        for _,pl in ipairs(player.GetLiving()) do
+            pl:SetPos(Vector(-9014, 5800, 76))
+            pl:SetEyeAngles(Angle(0,0,0))
+            pl:DropToFloor()
+        end
+    end
+
     if ent:GetName() == "relay_givegravgun_1" and string.lower(input) == "trigger" then
         timer.Simple(1, function() -- maybe this will prevent alyx from constnatly repeating "TAKE DE GRAVITY GUN GORDON"
+            GAMEMODE/MapVars.PhyscannonGiven = true
             for _,ply in ipairs(player.GetAll()) do
                 ply:Give("weapon_physcannon")
             end
@@ -109,7 +125,7 @@ function hl2cAcceptInput(ent, input, activator)
                 PrintMessage(3, "Is this the end of the world?")
             end)
             timer.Simple(10, function()
-                PrintMessage(3, "[Alert] While EX mode still has NPC variant on, it will not affect maps experience a lot. It's work in progress. Apologies!")
+                PrintMessage(3, "[Alert] While EX mode still has NPC variant on, it will not affect maps experience a lot. It's a work in progress.")
             end)
             return true
         end

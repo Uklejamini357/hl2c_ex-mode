@@ -36,7 +36,13 @@ function hl2cAcceptInput(ent, input)
 		-- print("allowed fail map")
 	end
 
-	if ent == ents.FindByName("alyx")[1] and string.lower(input) == "sethealth" and allowfail and not changingLevel then
+	if ent:GetName() == "fade_out" and input:lower() == "fade" and not allowfail then
+		return true
+	end
+
+	if ent:GetName() == "alyx" and string.lower(input) == "sethealth" and allowfail and not changingLevel then
+		ent.allowDIE = true
+		ent:SetHealth(0)
 		gamemode.Call("FailMap", nil, "You let the lift break!")
 	end
 end

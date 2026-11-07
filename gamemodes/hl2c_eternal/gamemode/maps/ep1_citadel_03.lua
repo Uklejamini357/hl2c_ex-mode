@@ -14,6 +14,18 @@ INFO_PLAYER_SPAWN = {Vector(-714, 12184, 5368) , 0}
 
 if CLIENT then return end
 
+local function SpawnBall01()
+	local ent = ents.FindByName("relay_ball_spawner_04")[1]
+
+	if not ent then return end
+
+	ent:Fire("EnableRefire")
+	ent:Fire("Trigger")
+end
+timer.Create("a", 0.2, 0, function()
+	SpawnBall01()
+end)
+
 function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_physcannon")
 end

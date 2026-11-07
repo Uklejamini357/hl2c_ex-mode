@@ -40,6 +40,16 @@ local function OnSpawnNewEnt(oldent, newent)
 	newent:SetSchedule(oldent:GetCurrentSchedule())
 end
 
+local function CreateOutputHandler()
+	local ent = ents.Create("hl2ce_npcoutput_handler")
+	ent:Spawn()
+end
+hook.Add("MapEdit", "AddEXNPCOutputHandler", function()
+	if !GAMEMODE.EXMode then return end
+	CreateOutputHandler()
+end)
+
+
 -- Priority hook function
 function HL2cEX_NPCVariantSpawn(ent)
 	if !GAMEMODE.EXMode or GAMEMODE.HyperEXMode or !ent:IsNPC() then return end
@@ -104,6 +114,8 @@ function HL2cEX_NPCVariantSpawn(ent)
 		end
 	elseif ent:GetClass() == "npc_antlionguard" then -- Healer Antlion Guard that slowly heals nearby antlions!
 		ent.VariantType = math.random(1,5) --make antlion guard variant less common
+		
+		ent:Input("AddOutput", nil, nil, "OnSummon hl2ce_output_handler:ag_summonants:0::0")
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(0,255,0)
 			ent.ent_MaxHealthMul = 1.1
@@ -117,6 +129,8 @@ function HL2cEX_NPCVariantSpawn(ent)
 	elseif ent:GetClass() == "npc_cscanner" or ent:GetClass() == "npc_clawscanner" then
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
+			ent:Input("AddOutput", nil, nil, "OnPhotographPlayer hl2ce_output_handler:cscanner_photograph:0::0")
+			ent:Input("AddOutput", nil, nil, "OnPhotographNPC hl2ce_output_handler:cscanner_photograph:0::0")
 		end
 	elseif ent:GetClass() == "npc_barnacle" then
 		ent.VariantType = math.random(1,3) -- Barnacle has 3 variants
@@ -264,6 +278,10 @@ function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
 		dmginfo:ScaleDamage(1.2)
 	elseif attackerclass == "npc_antlionguard" and dmginfo:GetDamageType() ~= DMG_POISON then
 		dmginfo:ScaleDamage(2.25)
+	elseif ent:GetClass() == "npc_cscanner" or ent:GetClass() == "npc_clawscanner" then
+		-- if ent.VariantType == 1 then
+		-- 	ent:SetHealth()
+		-- end
 	elseif attackerclass == "npc_barnacle" then
 		if attacker.VariantType == 1 then
 			dmginfo:ScaleDamage(3)

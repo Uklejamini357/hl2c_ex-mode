@@ -128,13 +128,14 @@ end
 
 
 -- Creates a trigger delaymapload
-function GM:CreateTDML(min, max)
+function GM:CreateTDML(min, max, funcCheck)
 	tdmlPos = max - ((max - min) / 2)
 
 	local tdml = ents.Create("trigger_delaymapload")
 	tdml:SetPos(tdmlPos)
 	tdml.min = min
 	tdml.max = max
+	tdml.FuncCheck = funcCheck -- will check every tick for players inside the box
 	tdml:Spawn()
 end
 
@@ -372,23 +373,31 @@ hook.Add("EntityTakeDamage", "!!hl2ce_NoDMGNPCs", function(ent, dmginfo)
 		dmginfo:SetInflictor(attacker)
 	end
 
-	-- Godlike NPCs take no damage ever
-	if table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
-		dmginfo:SetDamage(0)
-		return true
-	end
-	
-	-- NPCs cannot be damaged by friends
-	if (ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
-		dmginfo:SetDamage(0)
-		return true
-	end
-	
 	-- invulnerable npc's :)
 	if ent.dontDIE then
 		dmginfo:SetDamage(0)
 		return true
 	end
+
+	-- basically antlionguard loves to get stuck on antlions, so just make an exception to antlion guard's against antlions
+	if ent:GetClass() == "npc_antlion" and attacker:GetClass() == "npc_antlionguard" then
+		ent:SetHealth(0)
+		dmginfo:SetDamage(0)
+		return false
+	end
+
+	-- Godlike NPCs take no damage ever
+	if table.HasValue(GODLIKE_NPCS, ent:GetClass()) and not MAP_FORCE_NO_FRIENDLIES and !ent.allowDIE then
+		dmginfo:SetDamage(0)
+		return true
+	end
+
+	-- NPCs cannot be damaged by friends
+	if ent ~= attacker and (ent:IsNPC() and ent:GetClass() != "npc_turret_ground" and IsValid(attacker) and ent:Disposition(attacker) == D_LI) and not MAP_FORCE_NO_FRIENDLIES then
+		dmginfo:SetDamage(0)
+		return true
+	end
+	
 end, HOOK_HIGH)
 
 -- Called when an entity has received damage
@@ -2540,6 +2549,13 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 		end
 	end
 
+	if ent:GetClass() == "env_entity_dissolver" and string.lower(input) == "dissolve" then
+		if activator:IsPlayer() then
+			activator:SetHealth(0)
+			activator:TakeDamage(0)
+		end
+	end
+
 	if string.lower(input) == "sethealth" then
 		if value == "0" and (ent:IsPlayer() or ent:IsNPC() or ent:IsNextBot()) then
 			ent:SetHealth(0)
@@ -2800,6 +2816,11 @@ saverestore.AddSaveHook("HL2CE_NoSinglePlayerSupport", function()
 end)
 
 
+concommand.Add("dev_geteyetracevector", function(pl)
+	local eye = pl:GetEyeTrace()
+	print(string.format("Vector(%d, %d, %d)", eye.HitPos.x, eye.HitPos.y, eye.HitPos.z))
+end)
+
 do return end
 hook.Add("PlayerSay", "waaaahhh", function(pl,text)
 	local match = false
@@ -2828,3 +2849,5 @@ hook.Add("PlayerSay", "waaaahhh", function(pl,text)
 
 	BroadcastLua([[LocalPlayer():EmitSound("@npc/stalker/go_alert2a.wav", 0)]])
 end)
+
+

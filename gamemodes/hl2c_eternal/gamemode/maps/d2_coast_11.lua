@@ -1,5 +1,9 @@
 NEXT_MAP = "d2_coast_12"
 
+TRIGGER_CHECKPOINT = {
+	{Vector(4263, 6900, 588), Vector(4574, 6439, 730)}
+}
+
 COAST_PREVENT_CAMP_DOOR = false
 
 if CLIENT then return end

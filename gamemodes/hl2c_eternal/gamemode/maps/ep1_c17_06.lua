@@ -41,17 +41,26 @@ function hl2cMapEdit()
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
+-- Initialize entities
+function hl2cOnNPCKilled(ent, dmginfo)
+    if ent:GetName() == "strider" then
+        ent:SetName("")
+
+        return true
+    end
+end
+hook.Add("OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled)
+
 local completed
 -- Accept input
-function hl2cAcceptInput(ent, input)
-    if ent:GetName() == "lcs_al_leavingOnTrain" and string.lower(input) == "start" then
-        BroadcastLua([[surface.PlaySound("music/vlvx_song3.mp3")]]) -- Hl2 overcharged moment?
-    end
-
-    if ent:GetName() == "relay_deliver_strider" and input:lower() == "enablerefire" then
-        net.Start("hl2ce_boss")
-        net.WriteEntity(ents.FindByName("strider")[1])
-        net.Broadcast()
+function hl2cAcceptInput(ent, input, activator, caller)
+    if ent:GetName() == "relay_deliver_strider" then
+        if input:lower() == "trigger" then
+        elseif input:lower() == "enablerefire" then
+            net.Start("hl2ce_boss")
+            net.WriteEntity(ents.FindByName("strider")[1])
+            net.Broadcast()
+        end
     end
 
     if ent:GetName() == "credits" and string.lower(input) == "rolloutrocredits" then
@@ -66,6 +75,18 @@ function hl2cAcceptInput(ent, input)
         end
 
         gamemode.Call("PostOnCampaignCompleted")
+    end
+
+    if GAMEMODE.EXMode then
+        if ent:GetName() == "music_ep_song16" and input:lower() == "playsound" then
+			BroadcastLua([[LocalPlayer():EmitSound("*#music/vlvx_song21.mp3", 0, 130)]])
+            return true
+        end
+
+        if ent:GetName() == "lcs_al_leavingOnTrain" and string.lower(input) == "start" then
+            BroadcastLua([[surface.PlaySound("music/vlvx_song3.mp3")]]) -- Hl2 overcharged moment?
+            return true
+        end
     end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)

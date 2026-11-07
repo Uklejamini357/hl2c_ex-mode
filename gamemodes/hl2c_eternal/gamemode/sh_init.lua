@@ -18,8 +18,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition (or is it... hl2c: infinity simulator?)
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{TREE(5)}inf" -- STOP!!!! (no)
-GM.DateVer = "27-10-2026"
+GM.Version = "0.inf{TREE(6)}inf" -- STOP!!!! (no)
+GM.DateVer = "07-11-2026"
 
 -- The near end of Celestiality...
 
