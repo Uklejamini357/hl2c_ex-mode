@@ -38,7 +38,7 @@ function hl2cAcceptInput(ent, input, activator, caller, value)
     end
 
 	if !game.SinglePlayer() and ent:GetClass() == "player_speedmod" and string.lower(input) == "modifyspeed" then
-		for _, ply in ipairs(player.GetAll()) do
+		for _, ply in player.Iterator() do
 			ply:SetLaggedMovementValue(tonumber(value))
 		end
 		return true

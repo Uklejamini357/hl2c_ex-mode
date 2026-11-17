@@ -319,14 +319,23 @@ function GM:HUDPaint()
 	hook.Run("DrawDeathNotice", 0.85, 0.04)
 end
 
+local deathScreenTurnRed
 function GM:HUDPaintBackground()
 	local pl = LocalPlayer()
 
-	local max = 150
-	if !self.PlayerDeadAlpha or pl:Alive() or pl:Health() > 0 or pl:GetObserverMode() ~= OBS_MODE_NONE then
+	if not self.LastDeath then return end
+
+	local max = 56 + math.Clamp(CurTime() - self.LastDeath, 0, 2.5)*16
+	if !self.PlayerDeadAlpha or not (deathScreenTurnRed and (deathScreenTurnRed == true or deathScreenTurnRed+0.2 >= SysTime())) or pl:GetObserverMode() ~= OBS_MODE_NONE then
 		self.PlayerDeadAlpha = 0
-	else
+	elseif !pl:Alive() and deathScreenTurnRed and (deathScreenTurnRed == true or deathScreenTurnRed+0.2 >= SysTime()) then
+		deathScreenTurnRed = true
 		self.PlayerDeadAlpha = math.min(max, self.PlayerDeadAlpha+FrameTime()*(max/0.4))
+	end
+
+	if deathScreenTurnRed == true and pl:Alive() then
+		deathScreenTurnRed = nil
+		self.PlayerDeadAlpha = 0
 	end
 
 	if self.PlayerDeadAlpha > 0 then
@@ -334,6 +343,13 @@ function GM:HUDPaintBackground()
 		surface.DrawRect(0, 0, ScrW(), ScrH())
 	end
 end
+
+gameevent.Listen("player_hurt")
+hook.Add("player_hurt", "redDeathScreen", function(data)
+	if data.userid == LocalPlayer():UserID() then
+		deathScreenTurnRed = SysTime()
+	end
+end)
 
 
 function GM:PreDrawHUD()

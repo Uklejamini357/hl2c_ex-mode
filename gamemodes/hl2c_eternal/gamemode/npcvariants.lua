@@ -129,9 +129,11 @@ function HL2cEX_NPCVariantSpawn(ent)
 	elseif ent:GetClass() == "npc_cscanner" or ent:GetClass() == "npc_clawscanner" then
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
-			ent:Input("AddOutput", nil, nil, "OnPhotographPlayer hl2ce_output_handler:cscanner_photograph:0::0")
-			ent:Input("AddOutput", nil, nil, "OnPhotographNPC hl2ce_output_handler:cscanner_photograph:0::0")
+		elseif ent.VariantType == 2 then
+			ent.ent_Color = Color(255,128,255)
 		end
+		ent:Input("AddOutput", nil, nil, "OnPhotographPlayer hl2ce_output_handler:cscanner_photograph:0::0")
+		ent:Input("AddOutput", nil, nil, "OnPhotographNPC hl2ce_output_handler:cscanner_photograph:0::0")
 	elseif ent:GetClass() == "npc_barnacle" then
 		ent.VariantType = math.random(1,3) -- Barnacle has 3 variants
 		if ent.VariantType == 1 then -- 1. Deadly variant - Deals triple damage, but can die faster

@@ -23,6 +23,7 @@ AddCSLuaFile("sh_ents.lua")
 AddCSLuaFile("sh_player.lua")
 AddCSLuaFile("sh_translate.lua")
 AddCSLuaFile("sh_pets.lua")
+AddCSLuaFile("sh_util.lua")
 
 -- Include the required lua files
 include("sh_init.lua")
@@ -444,7 +445,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 		damage = damage * math.max(1, ent:GetMaxHealth()*0.01) * eff_difficulty^0.2
 	end
 
-	if (entisplayer or entisnpc or ent:IsNextBot() and ent:IsFriendlyNPC()) and (atkisnpc or attacker:IsNextBot()) and not attacker:IsFriendlyNPC() then
+	if (entisplayer or entisnpc and ent:IsFriendlyNPC() or ent:IsNextBot()) and not ent.difficultyUnaffected and (atkisnpc and not attacker:IsFriendlyNPC() or attacker:IsNextBot()) and not attacker.difficultyUnaffected then
 		if not ispoisonheadcrab then
 			damage = damage * eff_difficulty^0.7
 		elseif entisplayer and ent:HasPerkActive("1_antipoison") then
@@ -499,7 +500,7 @@ function GM:EntityTakeDamage(ent, dmgInfo)
 
 	-- print(damage)
 
-	if ent ~= attacker and (entisnpc or ent:IsNextBot()) and (atkisnpc or attacker:IsNextBot()) and (not attacker:IsFriendlyNPC() and not ent:IsFriendlyNPC()) then
+	if ent ~= attacker and (entisnpc or ent:IsNextBot()) and (atkisnpc or attacker:IsNextBot()) and (not attacker:IsFriendlyNPC() and not ent:IsFriendlyNPC()) and not ent.difficultyUnaffected and not attacker.difficultyUnaffected then
 		local diff = difficulty^0.1
 		local diff2 = infmath.min(1e200, infmath.max(1, diff/1e10)^0.1)
 
@@ -2515,8 +2516,8 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 		return true
 	end
 
-	if ent:GetClass() == "func_areaportalwindow" and (input:lower() == "setfadestartdistance" or input:lower() == "setfadeenddistance") and tonumber(value) ~= 16384 then
-		ent:Fire(input, 16384, 0.01)
+	if ent:GetClass() == "func_areaportalwindow" and (input:lower() == "setfadestartdistance" or input:lower() == "setfadeenddistance") and value ~= "16384" then
+		ent:Fire(input, "16384", 0.01)
 		return true
 	end
 
@@ -2530,7 +2531,7 @@ function GM:AcceptInput(ent, input, activator, caller, value)
 			PrintMessage(3, "uh oh, you fucked up")
 		end
 
-		if !game.SinglePlayer() then
+		if !game.SinglePlayer() and not self:IsGameState(GAMESTATE_FAILED) then
 			return true
 		else
 			for _,ply in ipairs(player.GetLiving()) do
@@ -2849,5 +2850,3 @@ hook.Add("PlayerSay", "waaaahhh", function(pl,text)
 
 	BroadcastLua([[LocalPlayer():EmitSound("@npc/stalker/go_alert2a.wav", 0)]])
 end)
-
-

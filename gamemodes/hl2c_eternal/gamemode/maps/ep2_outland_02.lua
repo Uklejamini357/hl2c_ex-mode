@@ -54,6 +54,7 @@ function hl2cOnEntityCreated(ent)
 		if !IsValid(ent) then return end
 		if ent:GetName() == "vort" then
 			ent.allowDIE = true
+			ent.difficultyUnaffected = true
 		end
 	end)
 end
@@ -62,7 +63,8 @@ hook.Add("OnEntityCreated", "hl2cOnEntityCreated", hl2cOnEntityCreated)
 -- Initialize entities
 function hl2cEntityTakeDamage(ent, dmginfo)
 	if ent:IsNPC() and (ent:GetName() == "sheckley" or ent:GetName() == "griggs") then
-		return true
+		dmginfo:SetDamage(1) -- let them scream out of their lungs (they keep regen their hp though) 
+		return false
 	end
 end
 hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage)

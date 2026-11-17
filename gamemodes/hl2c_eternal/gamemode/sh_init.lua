@@ -9,6 +9,7 @@ include("sh_cvars.lua")
 include("sh_player.lua")
 include("sh_ents.lua")
 include("sh_pets.lua")
+include("sh_util.lua")
 
 
 -- Create console variables to make these config vars easier to access
@@ -18,10 +19,10 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition (or is it... hl2c: infinity simulator?)
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{TREE(6)}inf" -- STOP!!!! (no)
-GM.DateVer = "07-11-2026"
+GM.Version = "0.inf{TREE(7)}inf" -- ...
+GM.DateVer = "17-11-2026"
 
--- The near end of Celestiality...
+-- Some fix, map function (triggerable by admins)
 
 
 -- Constants
@@ -621,6 +622,18 @@ end
 
 function GM:GameStateIsRunning()
 	return self:IsGameState(GAMESTATE_RUNNING) or self:IsGameState(GAMESTATE_COMPLETED)
+end
+
+function GM:AddAdminMapFunction(name, func, options)
+	local tbl = {
+		Name = name,
+		Func = func,
+		Options = options
+	}
+
+	self.AdminMapFunctions[#self.AdminMapFunctions+1] = tbl
+
+	return tbl
 end
 
 /*

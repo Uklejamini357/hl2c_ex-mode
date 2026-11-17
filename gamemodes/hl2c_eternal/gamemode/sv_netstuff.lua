@@ -31,6 +31,7 @@ util.AddNetworkString("hl2ce_admin_teleport")
 util.AddNetworkString("hl2ce_admin_changemap")
 util.AddNetworkString("hl2ce_admin_completemaptest")
 util.AddNetworkString("hl2ce_admin_forcefailmap")
+util.AddNetworkString("hl2ce_admin_triggermapfunc")
 
 
 function GM:NetworkString_UpdateStats(ply)
@@ -315,6 +316,17 @@ net.Receive("hl2ce_admin_forcefailmap", function(len, ply)
     if !ply:IsAdmin() then return end
 
     gamemode.Call("FailMap", nil, net.ReadString())
+end)
+
+net.Receive("hl2ce_admin_triggermapfunc", function(len, ply)
+    if !ply:IsAdmin() then return end
+
+    local event = net.ReadUInt(8)
+    local tbl = GAMEMODE.AdminMapFunctions[event]
+
+    tbl.Func(ply)
+
+    ply:PrintMessage(3, "An event was called.")
 end)
 
 net.Receive("hl2ce_vote", function(len, ply)

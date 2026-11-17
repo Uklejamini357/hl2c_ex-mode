@@ -112,7 +112,7 @@ net.Receive("hl2ce_fail", function(len)
 
         local s1 = translate.Get("you_lost")
         local len = utf8.len(s1)
-        local sub = len > 50 and utf8.sub or string.sub
+        local sub = len > 50 and string.sub or utf8.sub
         local font = "hl2ce_font_big"
         local createtime = CurTime()
 
@@ -143,7 +143,7 @@ net.Receive("hl2ce_fail", function(len)
         end
 
         local len = utf8.len(s2)
-        local sub = len > 50 and utf8.sub or string.sub
+        local sub = len > 50 and string.sub or utf8.sub
         local font = "hl2ce_font"
         local createtime = CurTime()
 

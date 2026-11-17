@@ -34,9 +34,23 @@ function ENT:AcceptInput(input, activator, caller, value)
 				d:SetDamageType(DMG_SONIC)
 				d:SetAttacker(caller)
 				d:SetInflictor(ents.FindByName("gmod_gamerules")[1] or caller)
+				d:SetReportedPosition(caller:GetPos())
+				d:SetDamagePosition(activator:GetPos() + activator:OBBCenter())
 				d:SetWeapon(self)
 				activator:TakeDamageInfo(d)
-				
+			end
+		elseif caller.VariantType == 2 then
+			caller.hacksSpawned = (caller.hacksSpawned or 0) + 1
+			if caller.hacksSpawned <= 3 then
+				local ent = ents.Create("npc_manhack")
+				ent:SetPos(caller:GetPos() + caller:GetAngles():Forward()*8)
+				ent:SetAngles(caller:GetAngles())
+				ent.VariantType = 2
+				ent:Spawn()
+				local phys = ent:GetPhysicsObject()
+				if phys and IsValid(phys) then
+					phys:SetVelocityInstantaneous(caller:GetAngles():Forward()*1000)
+				end
 			end
 		end
 

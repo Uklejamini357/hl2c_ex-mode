@@ -127,6 +127,37 @@ local function InitializePanel(pnl, list)
 		net.SendToServer()
 	end
 
+	if #GAMEMODE.AdminMapFunctions > 0 then
+		local b = NewButton(pnl, "Trigger map functions")
+		list:AddItem(b)
+		b.DoClick = function()
+			pnl:MakeNewList(function(pnl, list)
+				for id,tbl in ipairs(GAMEMODE.AdminMapFunctions) do
+					local b = NewButton(nil, tbl.Name, function()
+						net.Start("hl2ce_admin_triggermapfunc")
+						net.WriteUInt(id, 8)
+						net.SendToServer()
+					end)
+
+					-- if tbl.Options then
+					-- 	b.DoRightClick = function()
+					-- 		pnl:MakeNewList(function(pnl, list)
+					-- 			for id,map in ipairs(tbl.Options) do
+					-- 				list:AddItem(NewButton(nil, map, function()
+					-- 					net.Start("hl2ce_admin_triggermapfunc")
+					-- 					net.WriteString(tbl.ID)
+					-- 					net.WriteString(map)
+					-- 					net.SendToServer()
+					-- 				end))
+					-- 			end
+					-- 		end)
+					-- 	end
+					-- end
+					list:AddItem(b)
+				end
+			end)
+		end
+	end
 end
 
 function GM:OpenAdminMenu()

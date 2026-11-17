@@ -20,5 +20,10 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
+    if ent:GetName() == "entrytunnel_portal_1_brush" and input:lower() == "enable" then
+        return true
+    end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+GM:AddLoadoutCreatePrevent("spawnitems_template")
