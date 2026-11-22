@@ -8,6 +8,14 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_357")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_ar2")
+	ply:Give("weapon_shotgun")
+	ply:Give("weapon_frag")
 end
 hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 

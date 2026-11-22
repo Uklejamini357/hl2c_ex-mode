@@ -93,6 +93,11 @@ function HL2cEX_NPCVariantSpawn(ent)
 			ent.ent_Color = Color(128,128,255)
 		end
 	-- elseif ent:GetClass() == "npc_manhack" then
+	elseif ent:GetClass() == "npc_rollermine" then
+		if ent.VariantType == 1 then -- Reverse-push variant: Damage force taken is reversed - max damage dealt reduced to 20. 
+			ent.ent_Color = Color(127,0,255)
+		elseif ent.VariantType == 2 then
+		end
 	elseif ent:GetClass() == "npc_zombie" then
 		if ent.VariantType == 1 then
 			ent.ent_Color = Color(255,128,128)
@@ -218,7 +223,7 @@ function HL2cEX_NPCVariantKilled(ent, attacker)
 end
 hook.Add("OnNPCKilled", "HL2cEX_NPCVariantsKilled", HL2cEX_NPCVariantKilled)
 
-function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
+function HL2cEX_NPCVariantInflictDamage(ent, dmginfo)
 	if !GAMEMODE.EXMode or GAMEMODE.HyperEXMode then return end
 	local dmg, attacker = dmginfo:GetDamage(), dmginfo:GetAttacker()
 	if !IsValid(attacker) then return end
@@ -245,6 +250,11 @@ function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
 			else
 				dmginfo:ScaleDamage(2.55)
 			end
+		end
+	elseif attackerclass == "npc_rollermine" then
+		if attacker.VariantType == 1 then
+			dmginfo:SetDamage(math.min(20, dmginfo:GetDamage()))
+		elseif attacker.VariantType == 2 then
 		end
 	elseif attackerclass == "npc_sniper" then
 		if attacker.VariantType == 1 then
@@ -295,7 +305,22 @@ function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
 	if ent:GetClass() == "npc_barnacle" then
 	end
 end
+hook.Add("EntityTakeDamage", "HL2cEX_NPCVariantInflictDamage", HL2cEX_NPCVariantInflictDamage)
+
+local function HL2cEX_NPCVariantTakeDamage(ent, dmginfo)
+	if !GAMEMODE.EXMode or GAMEMODE.HyperEXMode then return end
+	if !IsValid(ent) then return end
+
+	local dmg, attacker, inflictor = dmginfo:GetDamage(), dmginfo:GetAttacker(), dmginfo:GetInflictor()
+	local class = ent:GetClass()
+	if class == "npc_rollermine" then
+		if ent.VariantType == 1 then
+			dmginfo:SetDamageForce(-dmginfo:GetDamageForce())
+		end
+	end
+end
 hook.Add("EntityTakeDamage", "HL2cEX_NPCVariantTakeDamage", HL2cEX_NPCVariantTakeDamage)
+
 
 timer.Create("NPC_ANTLIONGUARD_AURA", 1, 0, AntlionGuardAURA)
 
@@ -404,6 +429,13 @@ function HL2cHyperEX_NPCVariantSpawn(ent)
 
 			ent.DifficultyGainMult = math.Rand(1.1, 1.2)
 			ent.XPGainMult = 1.3
+		end
+	elseif ent:GetClass() == "npc_rollermine" then
+		if ent.VariantType == 1 then -- Omega-Reversed variant: you won't like this one. any damage force taken is multiplied BY NEGATIVE 10K. Damage is uncapped.
+			ent.ent_Material = "models/debug/debugwhite"
+			-- ent.ent_Color -- gets its own color
+		elseif ent.VariantType == 2 then
+		elseif ent.VariantType == 3 then
 		end
 	elseif class == "npc_strider" then
 		if ent.VariantType == 1 then -- Advanced Variant - Constantly uses strider cannon, every 5-10 seconds. Always sprints and has aggressive behavior like in episodic.
@@ -580,6 +612,11 @@ local function HL2cHyperEX_NPCVariantKilled(ent, attacker)
 				ent:Remove()
 			end
 		end
+	elseif attackerclass == "npc_rollermine" then
+		-- if attacker.VariantType == 1 then
+		-- 	dmginfo:SetDamage(math.min(20, dmginfo:GetDamage()))
+		-- elseif attacker.VariantType == 2 then
+		-- end
 	elseif ent:GetClass() == "npc_metropolice" then
 		if ent.VariantType == 2 and math.random(1,100) < 45 then
 			FORCE_NPCVARIANT = 3
@@ -730,6 +767,10 @@ local function HL2cHyperEX_NPCVariantTakeDamage(ent, dmginfo)
 		if ent.VariantType == 1 and not (IsValid(inflictor) and inflictor:GetClass() == "weapon_striderbuster") then
 			dmginfo:ScaleDamage(0.7)
 		end
+	elseif class == "npc_rollermine" then
+		if ent.VariantType == 1 then
+			dmginfo:SetDamageForce(-dmginfo:GetDamageForce()*9999)
+		end
 	end
 end
 hook.Add("EntityTakeDamage", "HL2cHyperEX_NPCVariantTakeDamage", HL2cHyperEX_NPCVariantTakeDamage)
@@ -754,6 +795,14 @@ local function HL2cHyperEX_NPCVariantThink(ent, class)
 			if enemy and IsValid(enemy) and enemy ~= ent and (ent.m_NextCannonShoot or 0) < CurTime() then
 				StriderShootCannon(ent, enemy)
 			end
+		end
+	elseif ent:GetClass() == "npc_rollermine" then
+		if ent.VariantType == 1 then
+			local colCycle = (CurTime()/5)%1
+			local colr = colCycle < 0.15 and Color(255,0,0) or colCycle < 0.25 and Color(255,255,0) or colCycle < 0.3 and Color(255,0,255) or colCycle < 0.5 and Color(0,255,255) or colCycle < 0.75 and Color(0,0,255) or colCycle < 0.85 and Color(0,0,0) or Color(255,255,255)
+
+			if colr == ent:GetColor() then return end
+			ent:SetColor(colr)
 		end
 	end
 end

@@ -6,6 +6,15 @@ if CLIENT then return end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
+	ply:Give("weapon_crowbar")
+	ply:Give("weapon_physcannon")
+	ply:Give("weapon_pistol")
+	ply:Give("weapon_357")
+	ply:Give("weapon_smg1")
+	ply:Give("weapon_ar2")
+	ply:Give("weapon_shotgun")
+	ply:Give("weapon_crossbow")
+	ply:Give("weapon_frag")
 end
 hook.Add("PlayerSpawnLoadout", "hl2ce_PlayerLoadout", hl2cPlayerSpawn)
 
@@ -40,3 +49,5 @@ hook.Add("PlayerEnteredVehicle", "hl2cPlayerEnteredVehicle", function(ply, veh, 
 	if !alyx or ply:GetPos():Distance(alyx:GetPos()) >= 200 then return end
 	alyx:Fire("EnterVehicleImmediately", veh:GetName())
 end)
+
+GM:AddLoadoutCreatePrevent("new_game_items")

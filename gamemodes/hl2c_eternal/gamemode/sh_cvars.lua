@@ -122,6 +122,16 @@ cvars.AddChangeCallback("hl2ce_server_skills_disabled", function(convar, old, ne
 	GAMEMODE.SkillsDisabled = tobool(new)
 
 	BroadcastLua(string.format([[GAMEMODE.SkillsDisabled = %s]], GAMEMODE.SkillsDisabled))
+
+	for _,ply in player.Iterator() do
+		local lastmaxhp = ply:GetMaxHealth()
+		ply:SetMaxHealth(ply:GetOriginalMaxHealth())
+		ply:SetHealth(math.Clamp(ply:Health()/lastmaxhp, 0, 1)*ply:GetMaxHealth())
+
+		local lastmaxap = ply:GetMaxArmor()
+		ply:SetMaxArmor(ply:GetOriginalMaxArmor())
+		ply:SetArmor(math.Clamp(ply:Armor()/lastmaxap, 0, 1)*ply:GetMaxArmor())
+	end
 end, "hl2ce_server_skills_disabled")
 
 GM.PlayerMedkitOnSpawn = CreateConVar("hl2ce_server_player_medkit", 0, FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE, "Give medkits for players on spawn"):GetBool()

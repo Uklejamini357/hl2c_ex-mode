@@ -63,8 +63,17 @@ hook.Add("OnEntityCreated", "hl2cOnEntityCreated", hl2cOnEntityCreated)
 -- Initialize entities
 function hl2cEntityTakeDamage(ent, dmginfo)
 	if ent:IsNPC() and (ent:GetName() == "sheckley" or ent:GetName() == "griggs") then
-		dmginfo:SetDamage(1) -- let them scream out of their lungs (they keep regen their hp though) 
+		if GAMEMODE:IsGameState(GAMESTATE_FAILED) then
+			ent:SetHealth(0)
+			dmginfo:SetDamage(math.huge)
+		else
+			dmginfo:SetDamage(1) -- let them scream out of their lungs (they keep regen their hp though)
+		end
 		return false
+	end
+
+	if ent:GetName() == "vort" then
+		dmginfo:ScaleDamage(2)
 	end
 end
 hook.Add("EntityTakeDamage", "hl2cEntityTakeDamage", hl2cEntityTakeDamage)

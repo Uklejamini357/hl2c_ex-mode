@@ -224,8 +224,7 @@ net.Receive("hl2ce_playerkilled", function(len)
         pl:EmitSound(snd)
     end
 
-    
-    if !GetConVar("hl2ce_cl_noplrdeathmsg"):GetBool() then
+    if not GAMEMODE:IsGameState(GAMESTATE_FAILED) and !GetConVar("hl2ce_cl_noplrdeathmsg"):GetBool() then
         local cl = net.ReadString()
         if cl == "trigger_hurt" then
             chat.AddText(

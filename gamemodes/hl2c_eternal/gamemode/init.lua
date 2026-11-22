@@ -178,6 +178,7 @@ function GM:DoPlayerDeath(ply, attacker, dmgInfo)
 	if ply:FlashlightIsOn() then
 		ply:Flashlight(false)
 	end
+	ply:RemoveSuit()
 	ply:CreateRagdoll()
 	ply:SetTeam(TEAM_DEAD)
 	ply:AddDeaths(1)
@@ -347,6 +348,9 @@ function GM:OnEntityCreated(ent)
 		end
 		if ent.ent_Color then
 			ent:SetColor(ent.ent_Color)
+		end
+		if ent.ent_Material then
+			ent:SetMaterial(ent.ent_Material)
 		end
 	end)
 end

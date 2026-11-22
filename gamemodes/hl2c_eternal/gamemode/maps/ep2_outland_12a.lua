@@ -3,7 +3,19 @@ NEXT_MAP = "d1_trainstation_01"
 NEXT_MAP_PERCENT = 1
 NEXT_MAP_INSTANT_PERCENT = 101
 
-if CLIENT then return end
+if CLIENT then
+	hook.Add("HUDPaint", "blah", function()
+		if not GAMEMODE.MapVars.EndTime then return end
+		local col = Color(255,255,255)
+	
+		col.a = math.Clamp(CurTime()-GAMEMODE.MapVars.EndTime >= 10 and 1-(CurTime() - (GAMEMODE.MapVars.EndTime+10))/8 or (CurTime() - GAMEMODE.MapVars.EndTime)/3, 0, 1)*255
+		if col.a == 0 then return end
+
+		draw.SimpleText("END", "hl2ce_hudfont", ScrW()/2, ScrH()/2, col, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	end)
+
+	return
+end
 
 -- Player spawns
 function hl2cPlayerSpawn(ply)
@@ -19,6 +31,8 @@ hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
 
 function hl2cOnNPCKilled(ent, attacker)
 	if !GAMEMODE.EXMode then return end
+	do return end -- maybe no
+
 	if ent:GetName() == "advisor" then
 		GAMEMODE.MapVars.AdvisorsKilled = (GAMEMODE.MapVars.AdvisorsKilled or 0) + 1
 		if GAMEMODE.MapVars.AdvisorsKilled == 2 then
@@ -40,7 +54,7 @@ hook.Add("OnNPCKilled", "hl2cOnNPCKilled", hl2cOnNPCKilled)
 -- Accept input
 function hl2cAcceptInput(ent, input)
     if ent:GetName() == "credits" and string.lower(input) == "rolloutrocredits" then
-		if !self:GameStateIsRunning() then return end
+		if !GAMEMODE:GameStateIsRunning() then return end
         gamemode.Call("NextMap")
         gamemode.Call("OnCampaignCompleted")
 
@@ -63,31 +77,16 @@ function hl2cAcceptInput(ent, input)
 		end
 
 		if ent:GetName() == "fade_out_credits" and input:lower() == "fade" then
-			if GAMEMODE.MapVars.AdvisorsKilled == 2 then
-				PrintMessage(3, "You unlocked the secret ending!")
-				timer.Simple(1, function()
-					PrintMessage(3, "I don't know how you did it.. but...")
-				end)
-				timer.Simple(2, function()
-					PrintMessage(3, "Eli is still alive!")
-				end)
-			else
-				PrintMessage(3, "I'm afraid that this is the end of your journey...")
-				timer.Simple(1, function()
-					PrintMessage(3, "This one of probably one of the saddest endings in the gaming history.")
-				end)
-				timer.Simple(2, function()
-					PrintMessage(3, "Nearly all of us felt the same.")
-				end)
-				timer.Simple(3, function()
-					PrintMessage(3, "But in fact, it's just a video game.")
-				end)
-				timer.Simple(5, function()
-					BroadcastLua([[chat.AddText(Color(255,0,0), "The end.")]])
-				end)
+			BroadcastLua([[GAMEMODE.MapVars.EndTime = CurTime()]])
+
+			for _,pl in player.Iterator() do
+				pl:RemoveSuit()
+				pl:StripWeapons()
 			end
 		end
 
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+GM:AddLoadoutCreatePrevent("startitems_template")
