@@ -769,7 +769,7 @@ local function HL2cHyperEX_NPCVariantTakeDamage(ent, dmginfo)
 		end
 	elseif class == "npc_rollermine" then
 		if ent.VariantType == 1 then
-			dmginfo:SetDamageForce(-dmginfo:GetDamageForce()*9999)
+			dmginfo:SetDamageForce(-dmginfo:GetDamageForce()*math.min(1e6/dmginfo:GetDamageForce():Length()))
 		end
 	end
 end

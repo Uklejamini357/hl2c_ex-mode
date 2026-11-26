@@ -324,8 +324,15 @@ net.Receive("hl2ce_admin_triggermapfunc", function(len, ply)
     local event = net.ReadUInt(8)
     local tbl = GAMEMODE.AdminMapFunctions[event]
 
-    tbl.Func(ply)
-
+    
+    local option = net.ReadUInt(8)
+    if option == 0 then
+        tbl.Func(ply)
+    else
+        tbl.Func(ply, option)
+    end
+    
+    
     ply:PrintMessage(3, "An event was called.")
 end)
 

@@ -136,23 +136,25 @@ local function InitializePanel(pnl, list)
 					local b = NewButton(nil, tbl.Name, function()
 						net.Start("hl2ce_admin_triggermapfunc")
 						net.WriteUInt(id, 8)
+						net.WriteUInt(0, 8)
 						net.SendToServer()
 					end)
 
-					-- if tbl.Options then
-					-- 	b.DoRightClick = function()
-					-- 		pnl:MakeNewList(function(pnl, list)
-					-- 			for id,map in ipairs(tbl.Options) do
-					-- 				list:AddItem(NewButton(nil, map, function()
-					-- 					net.Start("hl2ce_admin_triggermapfunc")
-					-- 					net.WriteString(tbl.ID)
-					-- 					net.WriteString(map)
-					-- 					net.SendToServer()
-					-- 				end))
-					-- 			end
-					-- 		end)
-					-- 	end
-					-- end
+					if tbl.Options then
+						b:SetTextColor(Color(255,255,0))
+						b.DoRightClick = function()
+							pnl:MakeNewList(function(pnl, list)
+								for theid,opt in ipairs(tbl.Options) do
+									list:AddItem(NewButton(nil, opt, function()
+										net.Start("hl2ce_admin_triggermapfunc")
+										net.WriteUInt(id, 8)
+										net.WriteUInt(theid, 8)
+										net.SendToServer()
+									end))
+								end
+							end)
+						end
+					end
 					list:AddItem(b)
 				end
 			end)

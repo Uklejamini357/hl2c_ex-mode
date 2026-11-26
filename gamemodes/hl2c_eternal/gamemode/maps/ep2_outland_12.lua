@@ -1,5 +1,70 @@
 NEXT_MAP = "ep2_outland_12a"
 
+GM:AddAdminMapFunction("Spawn strider 1", function(pl, op)
+	ents.FindByName("strider_first_template")[1]:Fire("ForceSpawn")
+	-- ents.FindByName("strider_west_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end)
+
+GM:AddAdminMapFunction("Spawn strider 2", function(pl, op)
+	ents.FindByName("strider_2_north_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_north_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 3", function(pl, op)
+	ents.FindByName("strider_3_east_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_east_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 4", function(pl, op)
+	ents.FindByName("strider_4_west_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_west_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 5", function(pl, op)
+	ents.FindByName("strider_5_north_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_north_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 6", function(pl, op)
+	ents.FindByName("strider_6_east_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_east_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 7", function(pl, op)
+	ents.FindByName("strider_7_west_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_west_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 8", function(pl, op)
+	ents.FindByName("strider_8_east_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_east_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 9", function(pl, op)
+	ents.FindByName("strider_9_west_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_west_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 10", function(pl, op)
+	ents.FindByName("strider_10_north_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_north_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 11", function(pl, op)
+	ents.FindByName("strider_11_east_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_east_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 12", function(pl, op)
+	ents.FindByName("strider_12_north_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_north_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
+GM:AddAdminMapFunction("Spawn strider 13", function(pl, op)
+	ents.FindByName("strider_13_west_maker")[1]:Fire("Spawn")
+	ents.FindByName("strider_west_hunter_maker")[1]:Fire("SpawnMultiple", op)
+end, {1,2,3})
+
 if CLIENT then return end
 
 -- This map is planned to take up to nearly an hour to beat, in EX mode... why though?
@@ -26,7 +91,10 @@ if CLIENT then return end
 -- And to also include health/suit chargers near the base.
 -- This is to make things a little bit easier, just in case.
 
--- Player spawns
+-- Endless mode... will probably be a lot more complicated to do.
+
+
+
 -- Player spawns
 function hl2cPlayerSpawn(ply)
 	ply:Give("weapon_physcannon")
@@ -60,8 +128,49 @@ function hl2cMapEdit()
 	-- GAMEMODE.MagBombManager:SetKeyValue("Code", [[ACTIVATOR.DontCollideWithOtherMagbombs = true ACTIVATOR:CollisionRulesChanged()]])
 	GAMEMODE.MagBombManager:SetKeyValue("Code", [[ACTIVATOR:SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER)]])
 	GAMEMODE.MagBombManager:Spawn()
+
+
+	local tbl = {}
+	table.Add(tbl, ents.FindByName("strider_2_north_maker"))
+	table.Add(tbl, ents.FindByName("strider_3_east_maker"))
+	table.Add(tbl, ents.FindByName("strider_4_west_maker"))
+	table.Add(tbl, ents.FindByName("strider_5_north_maker"))
+	table.Add(tbl, ents.FindByName("strider_6_east_maker"))
+	table.Add(tbl, ents.FindByName("strider_7_west_maker"))
+	table.Add(tbl, ents.FindByName("strider_8_east_maker"))
+	table.Add(tbl, ents.FindByName("strider_9_west_maker"))
+	table.Add(tbl, ents.FindByName("strider_10_north_maker"))
+	table.Add(tbl, ents.FindByName("strider_11_east_maker"))
+	table.Add(tbl, ents.FindByName("strider_12_north_maker"))
+	table.Add(tbl, ents.FindByName("strider_13_west_maker"))
+
+	for _,ent in ipairs(tbl) do
+		ent:SetKeyValue("MaxLiveChildren", "100")
+		ent:SetKeyValue("MaxNPCCount", "100")
+	end
 end
 hook.Add("MapEdit", "hl2cMapEdit", hl2cMapEdit)
+
+hook.Add("OnEntityCreated", "hl2cOnEntityCreated", function(ent)
+	if ent:GetClass() == "npc_strider" then
+		GAMEMODE.MapVars.LastStrider = ent
+	elseif ent:GetClass() == "npc_hunter" then
+		local strider = GAMEMODE.MapVars.LastStrider
+		if IsValid(strider) then
+			-- if not strider.PrevName then
+			-- 	strider.PrevName = strider:GetName()
+			-- end
+
+			-- strider:SetName("last_strider")
+			ent:Fire("FollowStrider", nil, 0.2)
+
+			-- timer.Simple(0.1, function()
+			-- 	if !IsValid(strider) then return end
+			-- 	strider:SetName(strider.PrevName)
+			-- end)
+		end
+	end
+end)
 
 hook.Add("OnNPCKilled", "hl2cOnNPCKilled", function(ent)
 	if ent:GetName() == "mirt" then
@@ -85,7 +194,9 @@ end)
 
 -- Accept input
 function hl2cAcceptInput(ent, input)
-	if ent:GetName() == "base_destroy_relay" and input:lower() == "trigger" then
+	if ent:GetName() == "sawmill_briefing_approach_lcs" and input:lower() == "start" then
+		-- PrintMessage(3, "Checkpoint has been activated.")
+	elseif ent:GetName() == "base_destroy_relay" and input:lower() == "trigger" then
 		if GAMEMODE.EXMode then
 			gamemode.Call("FailMap", nil, [[It starts with one
 
@@ -115,3 +226,5 @@ But in the end, it doesn't even matter]])
 	end
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+GM:AddLoadoutCreatePrevent("startitems_template")

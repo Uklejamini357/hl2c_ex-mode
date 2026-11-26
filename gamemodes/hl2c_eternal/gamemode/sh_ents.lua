@@ -59,4 +59,13 @@ if SERVER then
 		self:OldSetMaxHealthEX(math.Clamp(value, -max, max))
 		self:Inf_SetMaxHealth(value)
 	end
+
+	function meta:TakeSpecialDamage(dmg, dmgtype, attacker, inflictor)
+		local damage = DamageInfo()
+		damage:SetDamage(dmg)
+		damage:SetDamageType(dmgtype or 0)
+		damage:SetAttacker(attacker or game.GetWorld())
+		damage:SetInflictor(inflictor or game.GetWorld())
+		self:TakeDamageInfo(damage)
+	end
 end

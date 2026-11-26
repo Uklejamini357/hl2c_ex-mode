@@ -19,3 +19,9 @@ function hl2cAcceptInput(ent, input)
 
 end
 hook.Add("AcceptInput", "hl2cAcceptInput", hl2cAcceptInput)
+
+GM:AddLoadoutCreatePrevent({
+    ["global_newgame_template_local_items"] = true,
+    ["global_newgame_template_ammo"] = true,
+    ["global_newgame_template_base_items"] = true
+})

@@ -19,8 +19,8 @@ local hl2ce_server_force_difficulty = CreateConVar("hl2ce_server_force_difficult
 GM.Name = "Half-Life 2 Campaign: Eternal" -- alt name: Half-Life 2 Campaign: China Edition (or is it... hl2c: infinity simulator?)
 GM.OriginalAuthor = "AMT (ported and improved by D4 the Perth Fox)"
 GM.Author = "Uklejamini"
-GM.Version = "0.inf{TREE(8)}inf" -- ...
-GM.DateVer = "22-11-2026"
+GM.Version = "0.inf{TREE(8.88)}inf" -- ep2_outland_12 experience soon to be unleashed
+GM.DateVer = "26-11-2026"
 
 -- Some fix, map function (triggerable by admins)
 
@@ -256,20 +256,46 @@ function GM:HardcoreEnabled()
 	return GetGlobalBool("hl2ce_hardcore", false)
 end
 
-function GM:EntityFireBullet(ent, bullet)
-	return true
+function GM:EntityFireBullets(ent, bullet)
 end
 
 function GM:PostEntityFireBullets(ent, data)
-	local atk = data.Attacker or ent
+	local atk = data.Attacker or ent -- sometimes, ent is NOT same as data.Attacker
 
-	if atk:IsPlayer() and (ent:GetClass() == "prop_vehicle_airboat" and atk:HasPerkActive("4_antimatter_bullets") or atk == ent and atk:HasPerkActive("3_exploding_bullets")) and IsFirstTimePredicted() and util.SharedRandom("HL2CE_ExplosiveBullets", 0, 1) < 0.1 then
-		local e = EffectData()
-		e:SetOrigin(data.Trace.HitPos)
-		util.Effect("Explosion", e)
+	-- weird how this one has data.Trace but other one doesn't...
+	if atk:IsPlayer() then
+		-- trying to make bullets somehow hit these magnussons 
+		if SERVER and IsValid(data.Trace.Entity) and data.Trace.Entity:GetClass() == "npc_strider" then
+			local tr = util.TraceLine({
+				start = data.Trace.HitPos,
+				endpos = data.Trace.HitPos + data.Trace.Normal*200,
+				filter = "npc_strider",
+			})
+			print(tr.Hit, data.Trace.Entity, tr.Entity)
 
-		if SERVER then
-			util.BlastDamage(ent, data.Attacker, data.Trace.HitPos, 100, 20 + data.Damage)
+			if tr.Hit then
+				if IsValid(tr.Entity) and tr.Entity:GetClass() == "weapon_striderbuster" then
+					timer.Simple(0, function() -- outside of predicted hook, but a little delay...
+						local dmg = DamageInfo()
+						dmg:SetDamage(data.Damage)
+						dmg:SetDamageType(DMG_BULLET)
+						dmg:SetAttacker(atk)
+						dmg:SetInflictor(atk:GetActiveWeapon())
+						dmg:SetWeapon(atk:GetActiveWeapon())
+						tr.Entity:TakeDamageInfo(dmg)
+					end)
+				end
+			end
+		end
+
+		if (ent:GetClass() == "prop_vehicle_airboat" and atk:HasPerkActive("4_antimatter_bullets") or atk == ent and atk:HasPerkActive("3_exploding_bullets")) and IsFirstTimePredicted() and util.SharedRandom("HL2CE_ExplosiveBullets", 0, 1) < 0.1 then
+			local e = EffectData()
+			e:SetOrigin(data.Trace.HitPos)
+			util.Effect("Explosion", e)
+
+			if SERVER then
+				util.BlastDamage(ent, data.Attacker, data.Trace.HitPos, 100, 20 + data.Damage)
+			end
 		end
 	end
 
@@ -624,12 +650,19 @@ function GM:GameStateIsRunning()
 	return self:IsGameState(GAMESTATE_RUNNING) or self:IsGameState(GAMESTATE_COMPLETED)
 end
 
+-- local t = {}
+-- local meta = {}
+-- meta.__index = t
+-- meta.__tostring = function(t) return "AdminMapFunc "..tostring(t) end
+
 function GM:AddAdminMapFunction(name, func, options)
 	local tbl = {
 		Name = name,
 		Func = func,
 		Options = options
 	}
+
+	-- tbl = setmetatable(tbl, meta)
 
 	self.AdminMapFunctions[#self.AdminMapFunctions+1] = tbl
 
